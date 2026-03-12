@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Paint Pro Estimator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
@@ -166,6 +167,7 @@ table.qt td { padding: 7px 10px; border-bottom: 1px solid #f8fafc; }
   <button onclick="showPage('numbers')" style="background:#f0fdf4;color:#166534">💰 My Numbers</button>
   <button onclick="showPage('log')" style="background:#eff6ff;color:#1e40af">📁 Job Log</button>
   <button onclick="showPage('wo')" style="background:#fff7ed;color:#c2410c">🔨 Work Order</button>
+  <button onclick="showPage('dash')" style="background:#fdf4ff;color:#7c3aed">📊 Dashboard</button>
 </nav>
 
 <!-- SETUP -->
@@ -533,8 +535,56 @@ Select all paint colors prior to start date</textarea>
       <button onclick="sendSubContract()" style="flex:1;min-width:120px;background:#7c3aed;color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">✍️ Send Contract</button>
     </div>
     <div id="wo-contract-status" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;font-weight:600"></div>
+    <div id="wo-photo-summary" style="display:none;margin-bottom:12px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">📷 Job Photos — Will Be Included in Email</div>
+      <div id="wo-photo-grid" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
     <div id="wo-preview" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;font-size:13px;white-space:pre-wrap;line-height:1.7;font-family:monospace"></div>
   </div>
+</div>
+
+<div class="page" id="page-dash">
+
+  <!-- Google Sheets Sync Setup -->
+  <div class="card" style="border-left:4px solid #7c3aed">
+    <div class="card-title" style="color:#7c3aed">📊 Business Dashboard</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px">
+        <label class="lbl">Google Sheets Script URL</label>
+        <input id="sheets-url" placeholder="https://script.google.com/macros/s/..." style="font-size:12px">
+      </div>
+      <button onclick="saveSheetUrl()" style="background:#7c3aed;color:white;border:none;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:16px">💾 Save URL</button>
+      <button onclick="syncAllToSheets()" style="background:#16a34a;color:white;border:none;padding:9px 18px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;margin-top:16px">🔄 Sync All Jobs</button>
+    </div>
+    <div id="sheets-status" style="display:none;margin-top:8px;font-size:12px;font-weight:600;padding:6px 10px;border-radius:6px"></div>
+    <div style="margin-top:8px;font-size:11px;color:#94a3b8">Don't have the script URL yet? <a href="https://docs.google.com/spreadsheets/create" target="_blank" style="color:#7c3aed">Create a Sheet</a> then ask me to set up the Apps Script.</div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div id="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px"></div>
+
+  <!-- GP Trend Chart -->
+  <div class="card">
+    <div class="card-title">📈 Revenue & GP Trend</div>
+    <canvas id="dash-chart" height="200"></canvas>
+    <div id="dash-chart-empty" style="text-align:center;padding:40px;color:#94a3b8;font-size:13px">Save jobs to Job Log to see trends</div>
+  </div>
+
+  <!-- Production Accuracy -->
+  <div class="card">
+    <div class="card-title">⏱ Production Accuracy — Bid vs Actual Hours</div>
+    <div id="dash-accuracy-empty" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">Enter actual hours on jobs below to track accuracy</div>
+    <div id="dash-accuracy"></div>
+  </div>
+
+  <!-- Jobs Table with Won/Lost + Actual Hours -->
+  <div class="card">
+    <div class="card-title">📋 All Jobs — Mark Outcome & Enter Actual Hours</div>
+    <div style="font-size:12px;color:#64748b;margin-bottom:12px">Mark each job Won or Lost. Enter actual hours when the job is complete to track your production accuracy.</div>
+    <div id="dash-jobs-empty" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">No saved jobs yet — save from My Numbers tab</div>
+    <div id="dash-jobs-table" style="overflow-x:auto"></div>
+  </div>
+
 </div>
 
 <div class="page" id="page-log">
@@ -721,12 +771,14 @@ function newJob() {
 
 function showPage(p) {
   document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-  var pages=['setup','rooms','quote','numbers','log','wo'];
+  var pages=['setup','rooms','quote','numbers','log','wo','dash'];
   document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
   document.getElementById('page-'+p).classList.add('active');
   if(p==='quote')   buildQuote();
   if(p==='rooms')   applyCondition();
   if(p==='numbers') buildNumbers();
+  if(p==='wo')      refreshWoPhotoSummary();
+  if(p==='dash')    buildDashboard();
 }
 
 function applyCondition() {
@@ -1078,10 +1130,21 @@ function renderRooms() {
             +'</select></div>'
         +'</div>'
       +'</div>'
+      +'<div style="padding:8px 14px 12px;border-top:1px solid #f1f5f9">'
+        +'<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">📷 Job Photos</div>'
+        +'<div id="photos-strip-'+room.id+'" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"></div>'
+        +'<label style="display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;border:1px dashed #94a3b8;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:12px;color:#475569;font-weight:600">'
+          +'<span>+ Add Photos</span>'
+          +'<input type="file" accept="image/*" multiple onchange="addRoomPhotos('+room.id+', this)" style="display:none">'
+        +'</label>'
+      +'</div>'
     +'</div>';
   });
   list.innerHTML=html;
-  rooms.forEach(function(r){applyDimensions(r.id);});
+  rooms.forEach(function(r){
+    applyDimensions(r.id);
+    renderPhotoStrip(r.id);
+  });
   recalcAll();
 }
 
@@ -1866,6 +1929,27 @@ async function sendSubContract() {
       return;
     }
 
+    // Look up GHL userId (staff user ID) for this location
+    var ghlUserId = null;
+    try {
+      var uRes = await fetch('https://services.leadconnectorhq.com/users/?locationId=' + GHL_LOCATION_ID, {
+        headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' }
+      });
+      var uData = await uRes.json();
+      var users = uData.users || uData.data || [];
+      if (users.length > 0) ghlUserId = users[0].id;
+    } catch(e) { console.warn('User lookup failed:', e); }
+
+    var sendPayload = {
+      locationId: GHL_LOCATION_ID,
+      templateId: GHL_CONTRACT_TEMPLATE_ID,
+      contactId: subContactId,
+      title: 'Sub Agreement - ' + (V('cl-name')||'Job') + ' - ' + subName,
+      senderName: 'Thomas Shantler',
+      senderEmail: 'office@gouldpaintingwny.com'
+    };
+    if (ghlUserId) sendPayload.userId = ghlUserId;
+
     var res = await fetch('https://services.leadconnectorhq.com/proposals/templates/send', {
       method: 'POST',
       headers: {
@@ -1873,12 +1957,7 @@ async function sendSubContract() {
         'Content-Type': 'application/json',
         'Version': '2021-07-28'
       },
-      body: JSON.stringify({
-        locationId: GHL_LOCATION_ID,
-        templateId: GHL_CONTRACT_TEMPLATE_ID,
-        contactId: subContactId,
-        userId: subContactId
-      })
+      body: JSON.stringify(sendPayload)
     });
 
     var data = await res.json().catch(function(){return{};});
@@ -1890,8 +1969,9 @@ async function sendSubContract() {
     } else {
       statusEl.style.background = '#fee2e2';
       statusEl.style.color = '#991b1b';
-      statusEl.textContent = 'Error: ' + (data.message || JSON.stringify(data).slice(0,200));
-      console.warn('Contract send error:', data);
+      var errMsg = data.message || data.error || JSON.stringify(data);
+      statusEl.innerHTML = 'Error: ' + errMsg.slice(0, 600) + '<br><small style="opacity:0.7">Full: ' + JSON.stringify(data).slice(0,400) + '</small>';
+      console.warn('Contract send error full:', JSON.stringify(data));
     }
   } catch(e) {
     statusEl.style.background = '#fee2e2';
@@ -1981,21 +2061,415 @@ function previewWorkOrder() {
   el.textContent = buildWorkOrderText();
 }
 
-function sendWorkOrderText() {
-  var phone = document.getElementById('wo-sub-phone').value.replace(/\D/g,'');
-  if(!phone) { alert('Enter sub phone number first.'); return; }
-  var msg = buildWorkOrderText();
-  window.open('sms:+1' + phone + '&body=' + encodeURIComponent(msg));
+function refreshWoPhotoSummary() {
+  var photos = getAllPhotos();
+  var wrap = document.getElementById('wo-photo-summary');
+  var grid = document.getElementById('wo-photo-grid');
+  if (!wrap || !grid) return;
+  if (photos.length === 0) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  grid.innerHTML = photos.map(function(p) {
+    return '<div style="text-align:center">'
+      + '<img src="'+p.dataUrl+'" style="width:80px;height:80px;object-fit:cover;border-radius:7px;border:1px solid #e2e8f0;display:block">'
+      + '<div style="font-size:10px;color:#94a3b8;margin-top:3px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.roomName+'</div>'
+      + '</div>';
+  }).join('');
 }
 
-function sendWorkOrderEmail() {
-  var email = document.getElementById('wo-sub-email').value.trim();
-  if(!email) { alert('Enter sub email first.'); return; }
-  var subName = document.getElementById('wo-sub-name').value || 'Sub';
+// ===================== PHOTOS =====================
+function addRoomPhotos(roomId, input) {
+  var room = rooms.find(function(r){ return r.id === roomId; });
+  if (!room) return;
+  if (!room.photos) room.photos = [];
+  var files = Array.from(input.files);
+  var remaining = 5 - room.photos.length;
+  if (remaining <= 0) { alert('Max 5 photos per room.'); return; }
+  files.slice(0, remaining).forEach(function(file) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      room.photos.push({ dataUrl: e.target.result, name: file.name });
+      renderPhotoStrip(roomId);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+}
+
+function renderPhotoStrip(roomId) {
+  var strip = document.getElementById('photos-strip-' + roomId);
+  if (!strip) return;
+  var room = rooms.find(function(r){ return r.id === roomId; });
+  if (!room || !room.photos || room.photos.length === 0) { strip.innerHTML = ''; return; }
+  strip.innerHTML = room.photos.map(function(p, i) {
+    return '<div style="position:relative;display:inline-block">'
+      + '<img src="'+p.dataUrl+'" style="width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid #e2e8f0">'
+      + '<button onclick="removeRoomPhoto('+roomId+','+i+')" style="position:absolute;top:-5px;right:-5px;background:#ef4444;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;padding:0">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+function removeRoomPhoto(roomId, idx) {
+  var room = rooms.find(function(r){ return r.id === roomId; });
+  if (room && room.photos) { room.photos.splice(idx, 1); renderPhotoStrip(roomId); }
+}
+
+function getAllPhotos() {
+  var all = [];
+  rooms.forEach(function(r) {
+    if (r.photos && r.photos.length > 0) {
+      r.photos.forEach(function(p) { all.push({ roomName: r.name, dataUrl: p.dataUrl }); });
+    }
+  });
+  return all;
+}
+
+function woStatus(msg, color) {
+  var el = document.getElementById('wo-contract-status');
+  el.style.display = 'block';
+  el.style.background = color === 'green' ? '#dcfce7' : color === 'red' ? '#fee2e2' : '#fef9c3';
+  el.style.color     = color === 'green' ? '#166534' : color === 'red' ? '#991b1b' : '#854d0e';
+  el.innerHTML = msg;
+}
+
+async function getOrCreateSubContact(subName, subEmail, subPhone) {
+  var headers = { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' };
+  // search by email
+  if (subEmail) {
+    var r = await fetch('https://services.leadconnectorhq.com/contacts/?locationId=' + GHL_LOCATION_ID + '&query=' + encodeURIComponent(subEmail), { headers: headers });
+    var d = await r.json();
+    if (d.contacts && d.contacts.length > 0) return d.contacts[0].id;
+  }
+  // search by phone
+  if (subPhone) {
+    var r2 = await fetch('https://services.leadconnectorhq.com/contacts/?locationId=' + GHL_LOCATION_ID + '&query=' + encodeURIComponent(subPhone), { headers: headers });
+    var d2 = await r2.json();
+    if (d2.contacts && d2.contacts.length > 0) return d2.contacts[0].id;
+  }
+  // create new contact
+  var parts = (subName||'Sub').split(' ');
+  var cr = await fetch('https://services.leadconnectorhq.com/contacts/', {
+    method: 'POST', headers: headers,
+    body: JSON.stringify({ locationId: GHL_LOCATION_ID, firstName: parts[0], lastName: parts.slice(1).join(' ')||'', email: subEmail||undefined, phone: subPhone ? '+1'+subPhone.replace(/\D/g,'') : undefined, tags: ['subcontractor'] })
+  });
+  var cd = await cr.json();
+  return cd.contact && cd.contact.id;
+}
+
+async function sendWorkOrderText() {
+  var phone = document.getElementById('wo-sub-phone').value.trim();
+  var subName  = document.getElementById('wo-sub-name').value.trim();
+  var subEmail = document.getElementById('wo-sub-email').value.trim();
+  if (!phone) { alert('Enter sub phone number first.'); return; }
+  woStatus('⏳ Creating SMS draft in GHL...', 'yellow');
+  try {
+    var msg = buildWorkOrderText();
+    var photos = getAllPhotos();
+    if (photos.length > 0) msg += '\n\n📷 ' + photos.length + ' job photo(s) — see email for photos.';
+    var contactId = await getOrCreateSubContact(subName, subEmail, phone);
+    if (!contactId) { woStatus('❌ Could not find or create GHL contact for sub.', 'red'); return; }
+    // create conversation then send draft SMS
+    var convRes = await fetch('https://services.leadconnectorhq.com/conversations/', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' },
+      body: JSON.stringify({ locationId: GHL_LOCATION_ID, contactId: contactId })
+    });
+    var convData = await convRes.json();
+    var convId = (convData.conversation && convData.conversation.id) || convData.id;
+    if (!convId) { woStatus('❌ Could not create GHL conversation. Error: ' + JSON.stringify(convData).slice(0,200), 'red'); return; }
+    // send as draft (type SMS)
+    var msgRes = await fetch('https://services.leadconnectorhq.com/conversations/messages', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' },
+      body: JSON.stringify({ type: 'SMS', conversationId: convId, contactId: contactId, body: msg, status: 'draft' })
+    });
+    var msgData = await msgRes.json();
+    if (msgRes.ok) {
+      var ghlLink = 'https://app.gohighlevel.com/v2/location/' + GHL_LOCATION_ID + '/conversations/' + convId;
+      woStatus('✅ SMS draft created in GHL! <a href="'+ghlLink+'" target="_blank" style="color:#166534;font-weight:800;text-decoration:underline">→ Open in GHL to review & send</a>', 'green');
+    } else {
+      woStatus('❌ GHL Error: ' + (msgData.message || JSON.stringify(msgData).slice(0,300)), 'red');
+    }
+  } catch(e) {
+    woStatus('❌ Error: ' + e.message, 'red');
+  }
+}
+
+async function sendWorkOrderEmail() {
+  var subEmail = document.getElementById('wo-sub-email').value.trim();
+  var subName  = document.getElementById('wo-sub-name').value.trim();
+  var subPhone = document.getElementById('wo-sub-phone').value.trim();
   var clientName = V('cl-name') || 'Job';
-  var subject = 'Work Order — ' + clientName + ' | Gould Painting WNY';
-  var body = buildWorkOrderText();
-  window.open('mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body));
+  if (!subEmail) { alert('Enter sub email first.'); return; }
+  woStatus('⏳ Creating email draft in GHL...', 'yellow');
+  try {
+    var subject = 'Work Order — ' + clientName + ' | Gould Painting WNY';
+    var woText  = buildWorkOrderText();
+    var photos  = getAllPhotos();
+    // build HTML email body with inline photos
+    var photoHtml = '';
+    if (photos.length > 0) {
+      photoHtml = '<br><hr style="margin:20px 0"><h3 style="color:#1a3a8a;font-size:14px">📷 Job Photos</h3>';
+      photoHtml += photos.map(function(p) {
+        return '<div style="margin-bottom:14px"><div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;margin-bottom:4px">'+p.roomName+'</div>'
+          + '<img src="'+p.dataUrl+'" style="max-width:500px;max-height:400px;border-radius:8px;border:1px solid #e2e8f0;display:block"></div>';
+      }).join('');
+    }
+    var htmlBody = '<div style="font-family:Arial,sans-serif;max-width:600px">'
+      + '<h2 style="color:#1a3a8a">Work Order — Gould Painting WNY</h2>'
+      + '<pre style="background:#f8fafc;padding:16px;border-radius:8px;font-size:13px;white-space:pre-wrap;line-height:1.6;border:1px solid #e2e8f0">'+woText.replace(/</g,'&lt;')+'</pre>'
+      + photoHtml
+      + '<br><p style="font-size:12px;color:#94a3b8">Sent via Paint Pro Estimator — Gould Painting WNY</p>'
+      + '</div>';
+
+    var contactId = await getOrCreateSubContact(subName, subEmail, subPhone);
+    if (!contactId) { woStatus('❌ Could not find or create GHL contact for sub.', 'red'); return; }
+    // get or create conversation
+    var convRes = await fetch('https://services.leadconnectorhq.com/conversations/', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' },
+      body: JSON.stringify({ locationId: GHL_LOCATION_ID, contactId: contactId })
+    });
+    var convData = await convRes.json();
+    var convId = (convData.conversation && convData.conversation.id) || convData.id;
+    if (!convId) { woStatus('❌ Could not create GHL conversation. Error: ' + JSON.stringify(convData).slice(0,200), 'red'); return; }
+    // send email draft
+    var msgRes = await fetch('https://services.leadconnectorhq.com/conversations/messages', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' },
+      body: JSON.stringify({ type: 'Email', conversationId: convId, contactId: contactId, subject: subject, html: htmlBody, status: 'draft' })
+    });
+    var msgData = await msgRes.json();
+    if (msgRes.ok) {
+      var ghlLink = 'https://app.gohighlevel.com/v2/location/' + GHL_LOCATION_ID + '/conversations/' + convId;
+      woStatus('✅ Email draft created in GHL' + (photos.length > 0 ? ' with ' + photos.length + ' photo(s)' : '') + '! <a href="'+ghlLink+'" target="_blank" style="color:#166534;font-weight:800;text-decoration:underline">→ Open in GHL to review & send</a>', 'green');
+    } else {
+      woStatus('❌ GHL Error (' + msgRes.status + '): ' + (msgData.message || JSON.stringify(msgData).slice(0,300)), 'red');
+    }
+  } catch(e) {
+    woStatus('❌ Error: ' + e.message, 'red');
+  }
+}
+
+// ===================== DASHBOARD =====================
+var dashChart = null;
+var SHEETS_URL_KEY = 'paintpro_sheets_url';
+
+function saveSheetUrl() {
+  var url = document.getElementById('sheets-url').value.trim();
+  if (!url) { alert('Paste your Google Apps Script URL first.'); return; }
+  localStorage.setItem(SHEETS_URL_KEY, url);
+  sheetStatus('✅ URL saved!', 'green');
+}
+
+function sheetStatus(msg, color) {
+  var el = document.getElementById('sheets-status');
+  el.style.display = 'block';
+  el.style.background = color === 'green' ? '#dcfce7' : color === 'red' ? '#fee2e2' : '#fef9c3';
+  el.style.color = color === 'green' ? '#166534' : color === 'red' ? '#991b1b' : '#854d0e';
+  el.textContent = msg;
+}
+
+async function syncAllToSheets() {
+  var url = localStorage.getItem(SHEETS_URL_KEY);
+  if (!url) { alert('Enter your Google Sheets Script URL first.'); return; }
+  sheetStatus('⏳ Syncing all jobs to Google Sheets...', 'yellow');
+  var log = await loadJobLog();
+  if (log.length === 0) { sheetStatus('No jobs to sync yet.', 'yellow'); return; }
+  var rows = log.map(function(e) { return buildSheetRow(e); });
+  try {
+    var res = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'syncAll', rows: rows })
+    });
+    var data = await res.json();
+    if (data.status === 'ok') sheetStatus('✅ ' + rows.length + ' jobs synced to Google Sheets!', 'green');
+    else sheetStatus('❌ Sheets error: ' + (data.message || JSON.stringify(data)), 'red');
+  } catch(e) {
+    sheetStatus('❌ Could not reach Google Sheets. Check your URL.', 'red');
+  }
+}
+
+async function syncOneToSheets(entry) {
+  var url = localStorage.getItem(SHEETS_URL_KEY);
+  if (!url) return; // silently skip if no URL set
+  try {
+    await fetch(url, { method: 'POST', body: JSON.stringify({ action: 'upsert', row: buildSheetRow(entry) }) });
+  } catch(e) { console.warn('Sheet sync failed:', e); }
+}
+
+function buildSheetRow(e) {
+  return {
+    id: e.id,
+    date: e.date,
+    client: e.client,
+    address: (e.address || '') + (e.city ? ', ' + e.city : ''),
+    job: e.job || '',
+    status: e.status || 'Open',
+    bidHours: e.hours,
+    actualHours: e.actualHours || '',
+    hoursVariance: e.actualHours ? Math.round((e.actualHours - e.hours) * 10) / 10 : '',
+    accuracyPct: e.actualHours && e.hours > 0 ? Math.round((e.hours / e.actualHours) * 100) : '',
+    revenue: e.quote,
+    materials: e.mats,
+    subPay: e.paySub,
+    gp: e.gp,
+    gpPct: e.gpPct,
+    margin: e.margin,
+    rooms: e.roomCalcs ? e.roomCalcs.length : '',
+    notes: e.dashNotes || ''
+  };
+}
+
+async function updateJobOutcome(id, field, value) {
+  var log = await loadJobLog();
+  var entry = log.find(function(e) { return e.id === id; });
+  if (!entry) return;
+  entry[field] = value;
+  localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
+  syncOneToSheets(entry);
+  buildDashboard();
+}
+
+async function buildDashboard() {
+  var log = await loadJobLog();
+  var url = localStorage.getItem(SHEETS_URL_KEY) || '';
+  if (url) document.getElementById('sheets-url').value = url;
+
+  if (log.length === 0) {
+    document.getElementById('dash-kpis').innerHTML = '';
+    document.getElementById('dash-jobs-empty').style.display = 'block';
+    document.getElementById('dash-jobs-table').innerHTML = '';
+    document.getElementById('dash-accuracy-empty').style.display = 'block';
+    document.getElementById('dash-accuracy').innerHTML = '';
+    document.getElementById('dash-chart-empty').style.display = 'block';
+    if (dashChart) { dashChart.destroy(); dashChart = null; }
+    return;
+  }
+
+  // ── Compute KPIs ──
+  var won    = log.filter(function(e){ return e.status === 'Won'; });
+  var lost   = log.filter(function(e){ return e.status === 'Lost'; });
+  var closed = won.length + lost.length;
+  var closeRate = closed > 0 ? Math.round(won.length / closed * 100) : null;
+  var totalRev  = won.reduce(function(s,e){ return s + (e.quote||0); }, 0);
+  var totalGP   = won.reduce(function(s,e){ return s + (e.gp||0); }, 0);
+  var totalSubPay = won.reduce(function(s,e){ return s + (e.paySub||0); }, 0);
+  var avgJob    = won.length > 0 ? totalRev / won.length : 0;
+  var avgGPPct  = won.length > 0 ? won.reduce(function(s,e){ return s + (e.gpPct||0); }, 0) / won.length : 0;
+  var jobsWithActual = log.filter(function(e){ return e.actualHours && e.hours; });
+  var avgAccuracy = jobsWithActual.length > 0
+    ? Math.round(jobsWithActual.reduce(function(s,e){ return s + (e.hours/e.actualHours*100); }, 0) / jobsWithActual.length)
+    : null;
+
+  // ── KPI Cards ──
+  var kpis = [
+    { label: 'Won Jobs', val: won.length, sub: lost.length + ' lost', color: '#16a34a', icon: '🏆' },
+    { label: 'Close Rate', val: closeRate !== null ? closeRate + '%' : '—', sub: closed + ' estimates closed', color: '#1a3a8a', icon: '🎯' },
+    { label: 'Total Revenue', val: '$' + Math.round(totalRev).toLocaleString(), sub: 'won jobs only', color: '#1a3a8a', icon: '💵' },
+    { label: 'Total GP', val: '$' + Math.round(totalGP).toLocaleString(), sub: Math.round(avgGPPct) + '% avg margin', color: '#16a34a', icon: '💰' },
+    { label: 'Sub Pay', val: '$' + Math.round(totalSubPay).toLocaleString(), sub: 'your labor cost', color: '#d97706', icon: '👷' },
+    { label: 'Avg Job Size', val: avgJob > 0 ? '$' + Math.round(avgJob).toLocaleString() : '—', sub: 'won jobs', color: '#7c3aed', icon: '📐' },
+    { label: 'Bid Accuracy', val: avgAccuracy !== null ? avgAccuracy + '%' : '—', sub: jobsWithActual.length + ' jobs tracked', color: avgAccuracy && avgAccuracy >= 90 ? '#16a34a' : '#d97706', icon: '⏱' },
+  ];
+  document.getElementById('dash-kpis').innerHTML = kpis.map(function(k) {
+    return '<div style="background:white;border-radius:10px;padding:14px 16px;border:1px solid #e2e8f0;border-top:3px solid '+k.color+';box-shadow:0 1px 4px rgba(0,0,0,0.06)">'
+      + '<div style="font-size:20px;margin-bottom:4px">'+k.icon+'</div>'
+      + '<div style="font-size:22px;font-weight:800;color:'+k.color+'">'+k.val+'</div>'
+      + '<div style="font-size:11px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px">'+k.label+'</div>'
+      + '<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+k.sub+'</div>'
+      + '</div>';
+  }).join('');
+
+  // ── Chart ──
+  var chartJobs = log.slice().reverse().slice(-20); // last 20, chronological
+  document.getElementById('dash-chart-empty').style.display = chartJobs.length === 0 ? 'block' : 'none';
+  if (chartJobs.length > 0) {
+    var labels = chartJobs.map(function(e){ return e.client + '\n' + e.date; });
+    var revData = chartJobs.map(function(e){ return e.quote || 0; });
+    var gpData  = chartJobs.map(function(e){ return e.gp || 0; });
+    var subData = chartJobs.map(function(e){ return e.paySub || 0; });
+    if (dashChart) dashChart.destroy();
+    var ctx = document.getElementById('dash-chart').getContext('2d');
+    dashChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Revenue', data: revData, backgroundColor: 'rgba(26,58,138,0.7)', borderRadius: 4 },
+          { label: 'Gross Profit', data: gpData, backgroundColor: 'rgba(22,163,74,0.7)', borderRadius: 4 },
+          { label: 'Sub Pay', data: subData, backgroundColor: 'rgba(217,119,6,0.5)', borderRadius: 4 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: function(c){ return c.dataset.label + ': $' + Math.round(c.raw).toLocaleString(); } } } },
+        scales: { y: { ticks: { callback: function(v){ return '$' + v.toLocaleString(); } } } }
+      }
+    });
+  }
+
+  // ── Production Accuracy ──
+  document.getElementById('dash-accuracy-empty').style.display = jobsWithActual.length === 0 ? 'block' : 'none';
+  if (jobsWithActual.length > 0) {
+    var accHtml = '<table style="width:100%;border-collapse:collapse;font-size:13px">'
+      + '<tr style="border-bottom:2px solid #e2e8f0"><th style="text-align:left;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Job</th>'
+      + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Bid Hrs</th>'
+      + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Actual Hrs</th>'
+      + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Variance</th>'
+      + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Accuracy</th></tr>';
+    jobsWithActual.forEach(function(e) {
+      var variance = Math.round((e.actualHours - e.hours) * 10) / 10;
+      var acc = Math.round(e.hours / e.actualHours * 100);
+      var vColor = variance > 2 ? '#ef4444' : variance < -2 ? '#16a34a' : '#1a202c';
+      var aColor = acc >= 95 ? '#16a34a' : acc >= 80 ? '#d97706' : '#ef4444';
+      accHtml += '<tr style="border-bottom:1px solid #f8fafc">'
+        + '<td style="padding:7px 8px;font-weight:600">'+e.client+'<div style="font-size:11px;color:#94a3b8;font-weight:400">'+e.date+'</div></td>'
+        + '<td style="text-align:right;padding:7px 8px">'+e.hours+'h</td>'
+        + '<td style="text-align:right;padding:7px 8px">'+e.actualHours+'h</td>'
+        + '<td style="text-align:right;padding:7px 8px;font-weight:700;color:'+vColor+'">'+(variance > 0 ? '+' : '')+variance+'h</td>'
+        + '<td style="text-align:right;padding:7px 8px;font-weight:800;color:'+aColor+'">'+acc+'%</td>'
+        + '</tr>';
+    });
+    accHtml += '</table>';
+    document.getElementById('dash-accuracy').innerHTML = accHtml;
+  }
+
+  // ── Jobs Table ──
+  document.getElementById('dash-jobs-empty').style.display = log.length === 0 ? 'block' : 'none';
+  var tHtml = '<table style="width:100%;border-collapse:collapse;font-size:13px;min-width:700px">'
+    + '<tr style="border-bottom:2px solid #e2e8f0">'
+    + '<th style="text-align:left;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Date / Client</th>'
+    + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Revenue</th>'
+    + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">GP</th>'
+    + '<th style="text-align:right;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Sub Pay</th>'
+    + '<th style="text-align:center;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Bid Hrs</th>'
+    + '<th style="text-align:center;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Actual Hrs</th>'
+    + '<th style="text-align:center;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Status</th>'
+    + '<th style="text-align:left;padding:6px 8px;font-size:11px;color:#94a3b8;text-transform:uppercase">Notes</th>'
+    + '</tr>';
+
+  log.forEach(function(e) {
+    var status = e.status || 'Open';
+    var statusColors = { Won: '#16a34a', Lost: '#ef4444', Open: '#d97706' };
+    var statusBg    = { Won: '#dcfce7', Lost: '#fee2e2', Open: '#fef9c3' };
+    tHtml += '<tr style="border-bottom:1px solid #f1f5f9">'
+      + '<td style="padding:8px 8px"><div style="font-weight:700">'+e.client+'</div><div style="font-size:11px;color:#94a3b8">'+e.date+(e.address?' · '+e.address:'')+'</div></td>'
+      + '<td style="text-align:right;padding:8px 8px;font-weight:700">$'+(e.quote||0).toLocaleString()+'</td>'
+      + '<td style="text-align:right;padding:8px 8px;font-weight:700;color:#16a34a">$'+(e.gp||0).toLocaleString()+' <span style="font-size:11px;color:#94a3b8">('+e.gpPct+'%)</span></td>'
+      + '<td style="text-align:right;padding:8px 8px;color:#d97706;font-weight:600">$'+(e.paySub||0).toLocaleString()+'</td>'
+      + '<td style="text-align:center;padding:8px 8px">'+e.hours+'h</td>'
+      + '<td style="text-align:center;padding:8px 4px"><input type="number" min="0" step="0.5" value="'+(e.actualHours||'')+'" placeholder="—" onchange="updateJobOutcome('+e.id+',\'actualHours\',parseFloat(this.value)||null)" style="width:60px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;text-align:center"></td>'
+      + '<td style="text-align:center;padding:8px 6px">'
+        + '<select onchange="updateJobOutcome('+e.id+',\'status\',this.value)" style="padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;font-weight:700;background:'+statusBg[status]+';color:'+statusColors[status]+'">'
+        + '<option value="Open"'+(status==='Open'?' selected':'')+'>Open</option>'
+        + '<option value="Won"'+(status==='Won'?' selected':'')+'>Won</option>'
+        + '<option value="Lost"'+(status==='Lost'?' selected':'')+'>Lost</option>'
+        + '</select></td>'
+      + '<td style="padding:8px 4px"><input type="text" value="'+(e.dashNotes||'')+'" placeholder="notes..." onchange="updateJobOutcome('+e.id+',\'dashNotes\',this.value)" style="width:100%;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px"></td>'
+      + '</tr>';
+  });
+  tHtml += '</table>';
+  document.getElementById('dash-jobs-table').innerHTML = tHtml;
 }
 
 window.onload = function() { updateMarginLabel(); updateHeader(); buildQuote(); };
@@ -2072,7 +2546,7 @@ async function saveToJobLog() {
   var log = await loadJobLog();
   log.unshift(entry);
   localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
-
+  syncOneToSheets(entry);
   var msg = document.getElementById('save-log-msg');
   if (msg) { msg.textContent = '\u2713 Saved! ' + entry.client + ' — ' + entry.date; msg.style.color='#16a34a'; }
   renderJobLog();
