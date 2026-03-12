@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paint Pro Estimator</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, sans-serif; background: #f0f4f8; color: #1a202c; }
+header { background: #1a3a8a; color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+header h1 { font-size: 20px; letter-spacing: 1px; }
+header span { font-size: 13px; opacity: 0.7; }
+nav { background: white; border-bottom: 2px solid #e2e8f0; display: flex; }
+nav button { flex: 1; padding: 12px; border: none; background: none; font-size: 14px; font-weight: 700; cursor: pointer; color: #64748b; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+nav button.active { color: #1a3a8a; border-bottom-color: #1a3a8a; }
+nav button:hover { background: #f8fafc; }
+.page { display: none; max-width: 920px; margin: 0 auto; padding: 20px 16px 100px; }
+.page.active { display: block; }
+.card { background: white; border-radius: 10px; padding: 18px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+.card-title { font-size: 12px; font-weight: 800; color: #1a3a8a; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.span2 { grid-column: span 2; }
+label.lbl { display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; color: #1a202c; background: white; outline: none; font-family: Arial, sans-serif; }
+input:focus, select:focus, textarea:focus { border-color: #1a3a8a; box-shadow: 0 0 0 2px rgba(26,58,138,0.1); }
+.btn-primary { background: #1a3a8a; color: white; border: none; padding: 13px 24px; border-radius: 8px; font-size: 14px; font-weight: 800; cursor: pointer; letter-spacing: 0.05em; width: 100%; margin-top: 8px; }
+.btn-primary:hover { background: #1e40af; }
+.btn-add { background: #1a3a8a; color: white; border: none; padding: 8px 16px; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.btn-add:hover { background: #1e40af; }
+.btn-add.gray { background: #475569; }
+.btn-danger { background: #fee2e2; color: #ef4444; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; flex-shrink: 0; }
+.btn-danger:hover { background: #fecaca; }
+
+/* Room card */
+.room-card { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 10px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.room-header { display: flex; align-items: center; padding: 12px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; gap: 10px; border-radius: 9px 9px 0 0; }
+input.room-name { font-weight: 700; font-size: 15px; border: none; outline: none; background: transparent; color: #1a202c; flex: 1; min-width: 80px; padding: 0; }
+.room-total { font-weight: 800; font-size: 18px; color: #1a3a8a; white-space: nowrap; }
+.room-body { padding: 12px 14px 4px; overflow-x: auto; }
+.room-notes-area { padding: 0 14px 14px; }
+.dim-bar { padding: 10px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.dim-calc-badge { font-size: 12px; font-weight: 700; color: #1a3a8a; background: #dbeafe; padding: 4px 10px; border-radius: 5px; white-space: nowrap; }
+
+/* Surface table */
+.surf-table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.surf-table th { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; padding: 4px 6px 8px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+.surf-table th.r { text-align: right; }
+.surf-table td { padding: 7px 6px; border-bottom: 1px solid #f8fafc; vertical-align: middle; }
+.surf-table tr:last-child td { border-bottom: none; }
+.surf-label { font-size: 13px; font-weight: 600; color: #374151; white-space: nowrap; }
+.surf-label.off { color: #cbd5e1; text-decoration: line-through; }
+.surf-price { font-size: 13px; font-weight: 700; color: #1a3a8a; text-align: right; white-space: nowrap; }
+.surf-price.off { color: #e2e8f0; }
+.meas-wrap { display: flex; align-items: center; gap: 4px; }
+.meas-wrap input { width: 72px; padding: 5px 7px; font-size: 13px; }
+.meas-unit { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+.coat-group { display: flex; gap: 3px; }
+.cbtn { padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 12px; font-weight: 700; cursor: pointer; background: white; color: #64748b; line-height: 1; }
+.cbtn.on { background: #1a3a8a; color: white; border-color: #1a3a8a; }
+.cbtn:disabled { opacity: 0.25; cursor: not-allowed; }
+input[type=checkbox].inc { width: 17px; height: 17px; accent-color: #1a3a8a; cursor: pointer; }
+
+/* Quote */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.stat-card { background: white; border-radius: 8px; padding: 14px; text-align: center; border: 1px solid #e2e8f0; }
+.stat-icon { font-size: 24px; }
+.stat-label { font-size: 10px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+.stat-val { font-size: 17px; font-weight: 800; color: #1a3a8a; margin-top: 4px; }
+.empty-state { text-align: center; padding: 50px 20px; border: 2px dashed #e2e8f0; border-radius: 12px; color: #94a3b8; }
+.total-final { display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #1a3a8a; padding-top: 12px; margin-top: 8px; }
+.total-final span:first-child { font-size: 18px; font-weight: 900; }
+.total-final span:last-child { font-size: 28px; font-weight: 900; color: #1a3a8a; }
+/* ── Print Quote ─────────────────────────────────── */
+.print-quote { background: white; border-radius: 10px; padding: 40px 44px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; margin-bottom: 14px; font-family: Arial, sans-serif; font-size: 13px; color: #1a202c; line-height: 1.5; }
+.pq-hr { border: none; border-top: 2px solid #c8a84b; margin: 0 0 10px; }
+.pq-hr-thin { border: none; border-top: 1px solid #e2e8f0; margin: 12px 0; }
+.pq-doc-meta { text-align: right; font-size: 12px; color: #475569; margin-bottom: 4px; }
+.pq-section-label { font-size: 11px; font-weight: 800; color: #1a202c; text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 0 4px; }
+.pq-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 12px 0 16px; }
+.pq-party-name { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+.pq-party-detail { font-size: 12px; color: #475569; line-height: 1.7; }
+.pq-price-table { width: 100%; border-collapse: collapse; margin: 8px 0 4px; font-size: 13px; }
+.pq-price-table td { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+.pq-price-table td:last-child { text-align: right; }
+.pq-price-table tr.bold td { font-weight: 700; border-bottom: 2px solid #1a202c; }
+.pq-price-table tr.total td { font-weight: 900; font-size: 15px; border-top: 2px solid #1a202c; border-bottom: none; padding-top: 8px; }
+.pq-price-table tr.deposit td { font-size: 13px; color: #475569; border-bottom: none; }
+.pq-rooms-section { margin: 8px 0 12px; }
+.pq-room-row { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 1px solid #f1f5f9; }
+.pq-room-row:last-child { border-bottom: none; }
+.pq-room-row-name { font-weight: 700; font-size: 13px; }
+.pq-room-row-desc { font-size: 12px; color: #475569; margin-top: 2px; }
+.pq-room-row-price { font-weight: 700; white-space: nowrap; padding-left: 16px; }
+.pq-room-table { width: 100%; border-collapse: collapse; margin: 4px 0 0; }
+.pq-room-table td { font-size: 12px; padding: 3px 0 3px 14px; color: #374151; border-bottom: 1px solid #f8fafc; }
+.pq-room-table td:last-child { text-align: right; font-weight: 600; padding-right: 0; white-space: nowrap; }
+.pq-notes-list { margin: 4px 0 8px; padding: 0; }
+.pq-notes-list li { font-size: 12px; color: #1a202c; font-weight: 700; margin-bottom: 4px; list-style: none; padding-left: 0; }
+.pq-setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 8px 0 12px; }
+.pq-setup-col-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.pq-setup-col-body { font-size: 12px; color: #374151; line-height: 1.8; }
+.pq-scope-text { font-size: 12px; color: #374151; line-height: 1.8; margin: 4px 0 12px; }
+.pq-sig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 24px; }
+.pq-sig-line { border-bottom: 1.5px solid #94a3b8; height: 44px; margin-bottom: 5px; }
+.pq-sig-label { font-size: 11px; color: #64748b; }
+table.qt { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0 10px; }
+table.qt th { background: #f1f5f9; padding: 7px 10px; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; text-align: left; }
+table.qt th.r, table.qt td.r { text-align: right; }
+table.qt td { padding: 7px 10px; border-bottom: 1px solid #f8fafc; }
+.rsec { font-size: 12px; font-weight: 800; color: #1a3a8a; letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 0 3px; border-bottom: 1px solid #dbeafe; margin: 8px 0 2px; }
+.sig-row { display: flex; gap: 32px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+.sig-box { flex: 1; }
+.sig-line { border-bottom: 1px solid #cbd5e1; height: 36px; margin-bottom: 4px; }
+.sig-lbl { font-size: 11px; color: #94a3b8; font-weight: 600; }
+#float-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #1a3a8a; color: white; padding: 12px 24px; display: none; justify-content: space-between; align-items: center; z-index: 200; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); }
+#float-bar.show { display: flex; }
+#float-total { font-size: 24px; font-weight: 900; }
+#float-info { font-size: 13px; opacity: 0.75; }
+
+/* Condition badge */
+.cond-badge { display: inline-block; padding: 3px 10px; border-radius: 5px; font-size: 11px; font-weight: 700; margin-left: 8px; }
+.cond-new  { background: #dcfce7; color: #166534; }
+.cond-good { background: #dbeafe; color: #1e40af; }
+.cond-avg  { background: #fef3c7; color: #92400e; }
+.cond-rough{ background: #fee2e2; color: #991b1b; }
+
+.opt-btn { padding: 7px 14px; font-size: 12px; font-weight: 700; border: 2px solid #e2e8f0; background: white; color: #64748b; border-radius: 6px; cursor: pointer; transition: all 0.15s; }
+.opt-btn.active { border-color: #6366f1; background: #eef2ff; color: #4338ca; }
+
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .grid3 { grid-template-columns: 1fr 1fr; }
+}
+@media print {
+  header, nav, #float-bar, .no-print { display: none !important; }
+  body { background: white; }
+  .page { display: block !important; padding: 0; }
+  .page:not(#page-quote) { display: none !important; }
+  .print-quote { box-shadow: none; border: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🖌 PAINT PRO ESTIMATOR</h1>
+  <span id="header-company">Your Company</span>
+</header>
+<nav>
+  <button class="active" onclick="showPage('setup')">⚙ Setup</button>
+  <button onclick="showPage('rooms')">🏠 Rooms</button>
+  <button onclick="showPage('quote')">📋 Quote</button>
+  <button onclick="showPage('numbers')" style="background:#f0fdf4;color:#166534">💰 My Numbers</button>
+  <button onclick="showPage('log')" style="background:#eff6ff;color:#1e40af">📁 Job Log</button>
+</nav>
+
+<!-- SETUP -->
+<div class="page active" id="page-setup">
+  <div class="card">
+    <div class="card-title">Your Company</div>
+    <div class="grid2">
+      <div class="span2"><label class="lbl">Company Name</label><input id="co-name" oninput="updateHeader()" placeholder="Gould Painting Co."></div>
+      <div><label class="lbl">Phone</label><input id="co-phone" placeholder="(716) 555-0000"></div>
+      <div><label class="lbl">Email</label><input id="co-email" placeholder="you@email.com"></div>
+      <div><label class="lbl">License #</label><input id="co-license" placeholder="Lic # 12345"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Client Info</div>
+    <div class="grid2">
+      <div><label class="lbl">Client Name</label><input id="cl-name" placeholder="John Smith"></div>
+      <div><label class="lbl">Phone</label><input id="cl-phone" placeholder="(716) 555-0000"></div>
+      <div><label class="lbl">Job Address</label><input id="cl-address" placeholder="123 Main St"></div>
+      <div><label class="lbl">City, State</label><input id="cl-city" placeholder="Buffalo, NY"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Job Info</div>
+    <div class="grid2">
+      <div><label class="lbl">Job Title</label><input id="job-title" placeholder="Full Interior Repaint"></div>
+      <div><label class="lbl">Quote Valid (days)</label><input id="job-valid" type="number" value="30"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Production Rates &amp; Labor Rate</div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px">Hours = measurement ÷ rate × coats (2nd &amp; 3rd coat at 70%). Price = (hours × labor rate + materials) ÷ (1 − margin%)</p>
+    <div class="grid3">
+      <div><label class="lbl">Labor Rate ($/hr)</label><input type="number" step="1" id="r-laborrate" value="45" oninput="recalcAll()"></div>
+      <div><label class="lbl">Walls (sq ft/hr)</label><input type="number" step="5" id="r-walls" value="200" oninput="recalcAll()"></div>
+      <div><label class="lbl">Ceiling (sq ft/hr)</label><input type="number" step="5" id="r-ceiling" value="150" oninput="recalcAll()"></div>
+      <div><label class="lbl">Baseboards (lf/hr)</label><input type="number" step="5" id="r-base" value="50" oninput="recalcAll()"></div>
+      <div><label class="lbl">Door Trim (lf/hr)</label><input type="number" step="5" id="r-dtrim" value="50" oninput="recalcAll()"></div>
+      <div><label class="lbl">Crown Molding (lf/hr)</label><input type="number" step="5" id="r-crown" value="40" oninput="recalcAll()"></div>
+      <div><label class="lbl">Doors (min/door)</label><input type="number" step="5" id="r-doors" value="45" oninput="recalcAll()"></div>
+    </div>
+    <div style="margin-top:14px;padding:10px 14px;background:#f0fdf4;border-radius:7px;border:1px solid #bbf7d0">
+      <div style="font-size:11px;font-weight:700;color:#166534;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">Coat Multipliers</div>
+      <div style="font-size:13px;color:#374151">1st coat: <b>1.0×</b> &nbsp;·&nbsp; 2nd coat: <b>0.70×</b> &nbsp;·&nbsp; 3rd coat: <b>0.70×</b></div>
+      <div style="font-size:11px;color:#64748b;margin-top:3px">2-coat = 1.70× hours &nbsp;·&nbsp; 3-coat = 2.40× hours</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Paint Costs — For Materials Calculation</div>
+    <p style="font-size:12px;color:#64748b;margin-bottom:12px">Used to calculate actual materials cost on the My Numbers sheet. Not shown on client quote.</p>
+    <div class="grid3">
+      <div><label class="lbl">Wall/Ceiling Paint ($/gal)</label><input type="number" step="1" id="p-wall" value="45" oninput="recalcAll()"></div>
+      <div><label class="lbl">Trim Paint ($/gal)</label><input type="number" step="1" id="p-trim" value="50" oninput="recalcAll()"></div>
+      <div><label class="lbl">Primer ($/gal)</label><input type="number" step="1" id="p-primer" value="35" oninput="recalcAll()"></div>
+    </div>
+    <div style="margin-top:10px;padding:8px 12px;background:#f8fafc;border-radius:6px;font-size:11px;color:#64748b">
+      Coverage: Walls/ceiling = 350 sq ft/gal &nbsp;·&nbsp; Trim = 200 lin ft/gal &nbsp;·&nbsp; Doors = 1 qt/door/coat
+    </div>
+  </div>
+    <div>
+      <label class="lbl">Tax: <span id="tax-val" style="color:#1a3a8a">0%</span></label>
+      <input type="range" id="r-tax" min="0" max="15" step="0.25" value="0" oninput="document.getElementById('tax-val').textContent=parseFloat(this.value).toFixed(2)+'%';recalcAll()" style="accent-color:#1a3a8a;width:100%">
+    </div>
+    <div style="margin-top:14px">
+      <label class="lbl">Profit Margin: <span id="margin-val" style="color:#16a34a">50%</span> &nbsp;<span id="margin-desc" style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8;font-size:11px"></span></label>
+      <input type="range" id="r-margin" min="20" max="70" step="1" value="50" oninput="updateMarginLabel();recalcAll()" style="accent-color:#16a34a;width:100%">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:2px"><span>20% (low)</span><span>50% (standard)</span><span>70% (premium)</span></div>
+    </div>
+
+  <button class="btn-primary" onclick="showPage('rooms')">NEXT: ADD ROOMS →</button>
+</div>
+
+<!-- ROOMS -->
+<div class="page" id="page-rooms">
+
+  <!-- Job Condition -->
+  <div class="card" style="border-left:4px solid #f59e0b">
+    <div class="card-title" style="color:#b45309;margin-bottom:10px">🏠 Job Condition</div>
+    <div class="grid2">
+      <div>
+        <label class="lbl">Surface Condition</label>
+        <select id="mod-condition" onchange="applyCondition()">
+          <option value="0.85">New Construction — clean, no prep</option>
+          <option value="1.0" selected>Good — minor touch-ups only</option>
+          <option value="1.2">Average — some patching &amp; sanding</option>
+          <option value="1.45">Rough — heavy prep, lots of repairs</option>
+        </select>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <div id="condition-summary" style="width:100%;padding:10px 14px;background:#dbeafe;border-radius:6px;font-size:13px;color:#1e40af;font-weight:600;line-height:1.5"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="margin-bottom:8px">Add a Room</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">
+      <button class="btn-add" onclick="addRoom('Bedroom')">+ Bedroom</button>
+      <button class="btn-add" onclick="addRoom('Master Bedroom')">+ Master Bedroom</button>
+      <button class="btn-add" onclick="addRoom('Living Room')">+ Living Room</button>
+      <button class="btn-add" onclick="addRoom('Kitchen')">+ Kitchen</button>
+      <button class="btn-add" onclick="addRoom('Bathroom')">+ Bathroom</button>
+      <button class="btn-add" onclick="addRoom('Hallway')">+ Hallway</button>
+      <button class="btn-add" onclick="addRoom('Dining Room')">+ Dining Room</button>
+      <button class="btn-add" onclick="addRoom('Office')">+ Office</button>
+      <button class="btn-add" onclick="addRoom('Basement')">+ Basement</button>
+      <button class="btn-add gray" onclick="addRoom('Custom Room')">+ Custom</button>
+    </div>
+    <p style="font-size:11px;color:#94a3b8;margin-top:10px">✓ Check to include a surface &nbsp;|&nbsp; Enter L × W × H for walls &amp; ceiling &nbsp;|&nbsp; Pick coats</p>
+  </div>
+
+  <div id="rooms-list">
+    <div class="empty-state">
+      <div style="font-size:48px;margin-bottom:10px">🖌</div>
+      <div style="font-weight:700;font-size:16px">No rooms yet</div>
+      <div style="font-size:13px;margin-top:4px">Click a room type above to get started</div>
+    </div>
+  </div>
+
+  <!-- Line Items -->
+  <div class="card" style="border-left:4px solid #8b5cf6">
+    <div class="card-title" style="color:#6d28d9;margin-bottom:10px">➕ Additional Line Items</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+      <button class="btn-add" style="background:#8b5cf6" onclick="addLineItem({desc:'Wallpaper removal',qty:1,unit:'room',rate:250})">+ Wallpaper Removal</button>
+      <button class="btn-add" style="background:#8b5cf6" onclick="addLineItem({desc:'Texture &amp; drywall repair',qty:1,unit:'ea',rate:150})">+ Texture/Patch</button>
+      <button class="btn-add" style="background:#8b5cf6" onclick="addLineItem({desc:'Stain/varnish work',qty:1,unit:'hr',rate:65})">+ Staining</button>
+      <button class="btn-add" style="background:#8b5cf6" onclick="addLineItem({desc:'Travel &amp; setup fee',qty:1,unit:'ea',rate:75})">+ Travel Fee</button>
+      <button class="btn-add" style="background:#dc2626" onclick="addLineItem({desc:'Discount',qty:1,unit:'ea',rate:-50})">− Discount</button>
+      <button class="btn-add gray" onclick="addLineItem({desc:'',qty:1,unit:'ea',rate:0})">+ Custom</button>
+    </div>
+    <div id="line-items-list"><p style="font-size:12px;color:#94a3b8;padding:8px 0">No extras yet. Use the buttons above to add.</p></div>
+  </div>
+</div>
+
+<!-- QUOTE -->
+<div class="page" id="page-quote">
+
+  <div class="card" style="border-left:4px solid #6366f1">
+    <div class="card-title" style="color:#4338ca;margin-bottom:12px">📋 Presentation Options</div>
+    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
+      <div>
+        <label class="lbl" style="margin-bottom:6px">Line Pricing</label>
+        <div style="display:flex;gap:8px">
+          <button id="opt-pricing-yes" class="opt-btn active" onclick="setPricingOpt('yes')">Show Per Room</button>
+          <button id="opt-pricing-no"  class="opt-btn"        onclick="setPricingOpt('no')">Total Only</button>
+        </div>
+      </div>
+      <div>
+        <label class="lbl" style="margin-bottom:6px">Room Style</label>
+        <div style="display:flex;gap:8px">
+          <button id="opt-desc-natural" class="opt-btn active" onclick="setDescOpt('natural')">Natural Language</button>
+          <button id="opt-desc-table"   class="opt-btn"        onclick="setDescOpt('table')">Line Item Table</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="margin-bottom:14px">📝 Proposal Content</div>
+
+    <div class="grid2" style="margin-bottom:12px">
+      <div><label class="lbl">Job Number <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8">(optional)</span></label>
+        <input id="job-number" placeholder="e.g. JOB-2026-001" oninput="buildQuote()"></div>
+      <div><label class="lbl">Quote Valid (days)</label>
+        <input id="job-valid" type="number" value="30" oninput="buildQuote()"></div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="lbl">Project Title</label>
+      <input id="job-title" placeholder="e.g. Full Interior Repaint — Smith Residence" oninput="buildQuote()">
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="lbl">Scope of Work <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8">(paragraph shown at top of proposal)</span></label>
+      <textarea id="job-scope" rows="3" oninput="buildQuote()" placeholder="e.g. Gould Painting will furnish all labor, materials, and equipment necessary to complete the following painting work. All surfaces will be properly prepared prior to painting. Work areas will be protected and fully cleaned upon completion."></textarea>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="lbl">Special Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8">(numbered list — one per line)</span></label>
+      <textarea id="job-special-notes" rows="4" oninput="buildQuote()" placeholder="Will repair all nail holes and cracks prior to painting.&#10;Will cover all furniture and floors with plastic/tarp.&#10;Customer to move furniture 3 ft from walls before start date.&#10;Customer to select all colors prior to start date."></textarea>
+    </div>
+
+    <div class="grid2" style="margin-bottom:12px">
+      <div>
+        <label class="lbl">Customer Responsibilities</label>
+        <textarea id="job-customer-resp" rows="3" oninput="buildQuote()" placeholder="Allow clear access to work areas&#10;Remove all wall decorations and pictures&#10;Move small and fragile items"></textarea>
+      </div>
+      <div>
+        <label class="lbl">What We Cover &amp; Protect</label>
+        <textarea id="job-cover" rows="3" oninput="buildQuote()" placeholder="All furniture with plastic/tarp&#10;All floors with drop cloths&#10;Fixtures and hardware"></textarea>
+      </div>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="lbl">Included Areas / Items</label>
+      <textarea id="job-included" rows="2" oninput="buildQuote()" placeholder="e.g. All prep, caulking, priming where needed, two finish coats, cleanup, and touch-up walk-through."></textarea>
+    </div>
+
+    <div style="margin-bottom:12px">
+      <label class="lbl">Excluded Areas / Items</label>
+      <textarea id="job-excluded" rows="2" oninput="buildQuote()" placeholder="e.g. Doors, windows, ceilings in bathrooms, any room not listed above."></textarea>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label class="lbl">Payment Terms</label>
+        <select id="job-payment" onchange="buildQuote()">
+          <option value="50/50">50% deposit, balance on completion</option>
+          <option value="40/60">40% deposit, 60% on completion</option>
+          <option value="33/33/33">⅓ deposit, ⅓ midway, ⅓ on completion</option>
+          <option value="due-completion">Full payment due on completion</option>
+          <option value="custom">Custom (see notes below)</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Warranty</label>
+        <select id="job-warranty" onchange="buildQuote()">
+          <option value="1-year">1 year workmanship warranty</option>
+          <option value="2-year">2 year workmanship warranty</option>
+          <option value="none">No warranty stated</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-top:12px">
+      <label class="lbl">Additional Notes</label>
+      <textarea id="job-notes" rows="2" oninput="buildQuote()" placeholder="e.g. Start date pending deposit. Colors to be selected by client prior to start."></textarea>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="stats-grid"></div>
+  <div id="quote-breakdown"></div>
+  <div class="card" id="totals-card"></div>
+  <div class="print-quote" id="print-quote"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px" class="no-print">
+    <button class="btn-primary" onclick="window.print()" style="margin-top:0">🖨 PRINT / SAVE AS PDF</button>
+    <button class="btn-primary" onclick="openGHLModal()" style="margin-top:0;background:#0f9d58">📤 SEND VIA GOHL</button>
+  </div>
+
+  <!-- GHL Modal -->
+  <div id="ghl-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:12px;padding:28px;width:420px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div style="font-weight:900;font-size:17px;color:#1a202c">📤 Send via GoHighLevel</div>
+        <button onclick="document.getElementById('ghl-modal').style.display='none'" style="border:none;background:none;font-size:20px;cursor:pointer;color:#94a3b8">✕</button>
+      </div>
+      <div id="ghl-status" style="display:none;margin-bottom:16px;padding:12px;border-radius:8px;font-size:13px;font-weight:600"></div>
+      <div style="margin-bottom:14px">
+        <label class="lbl">Client Email <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8">(used to find/create contact in GHL)</span></label>
+        <input id="ghl-email" placeholder="client@email.com" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="lbl">Client Name</label>
+        <input id="ghl-name" placeholder="First Last" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="lbl">Client Phone</label>
+        <input id="ghl-phone" placeholder="+17165551234" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px">
+      </div>
+      <div style="margin-bottom:20px">
+        <label class="lbl">Email Subject</label>
+        <input id="ghl-subject" placeholder="Your Painting Estimate from Gould Painting" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px">
+      </div>
+      <button id="ghl-send-btn" onclick="sendToGHL()" style="width:100%;background:#0f9d58;color:white;border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.03em">Send Estimate via GHL</button>
+      <div style="font-size:11px;color:#94a3b8;text-align:center;margin-top:10px">Creates a GHL estimate and sends it to the client</div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0;text-align:center">
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:8px">— or if running as a local file —</div>
+        <button onclick="openGHLFallback()" style="width:100%;background:white;color:#0f9d58;border:2px solid #0f9d58;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">🔗 Open GHL New Invoice (pre-filled)</button>
+        <div style="font-size:11px;color:#94a3b8;margin-top:6px">Opens GHL in a new tab — you click Send there</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MY NUMBERS (internal only) -->
+<div class="page" id="page-numbers">
+  <div class="card" style="border-left:4px solid #22c55e;background:#f0fdf4">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <div class="card-title" style="color:#166534;margin:0">💰 My Numbers — Internal Only</div>
+      <span style="font-size:11px;color:#16a34a;font-weight:600;background:#dcfce7;padding:2px 8px;border-radius:4px">NOT on client quote</span>
+    </div>
+    <p style="font-size:12px;color:#166534;margin-top:6px">50% = Labor + Materials &nbsp;·&nbsp; 50% = Your Gross Profit. Materials calculated from actual sq ft / lin ft.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="margin-bottom:14px">Job Summary</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px" id="num-summary-grid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="margin-bottom:12px">Room by Room</div>
+    <table class="qt" id="num-room-table">
+      <thead><tr>
+        <th>Room</th>
+        <th class="r" style="color:#94a3b8">Hours</th>
+        <th class="r">Quote Price</th>
+        <th class="r" style="color:#f97316">Materials</th>
+        <th class="r" style="color:#ef4444">Pay Sub</th>
+        <th class="r" style="color:#16a34a">Your GP</th>
+      </tr></thead>
+      <tbody id="num-room-rows"></tbody>
+    </table>
+  </div>
+
+  <div class="card" style="background:#f0fdf4;border-color:#22c55e;text-align:center;padding:16px">
+    <button onclick="saveToJobLog()" style="background:#16a34a;color:white;border:none;padding:10px 28px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;width:100%">💾 Save to Job Log</button>
+    <div id="save-log-msg" style="font-size:12px;color:#16a34a;margin-top:6px;min-height:16px"></div>
+  </div>
+
+  <div class="card" style="background:#fef9c3;border-color:#fde047">
+    <div style="font-size:12px;color:#854d0e;font-weight:600">📋 How to use this</div>
+    <div style="font-size:13px;color:#713f12;margin-top:6px;line-height:1.6">
+      When the job is sold, buy your materials first, then show your sub the scope and offer them the <b>Pay Sub</b> amount.
+      Whatever they come in under is extra GP for you. Your target is always 50% GP.
+    </div>
+  </div>
+</div>
+  <div id="float-info">0 rooms</div>
+  <div id="float-total">$0.00</div>
+</div>
+
+<!-- JOB LOG PAGE -->
+<div class="page" id="page-log">
+  <div class="card" style="border-left:4px solid #1e40af;background:#eff6ff">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="card-title" style="color:#1e40af;margin:0">📁 Job Log — Saved Estimates</div>
+        <p style="font-size:12px;color:#1e40af;margin-top:4px">Internal record of every estimate you've saved. Never shown to clients.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportToCSV()" style="background:#1e40af;color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">⬇ Export CSV</button>
+        <button onclick="clearJobLog()" style="background:#fee2e2;color:#991b1b;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">🗑 Clear All</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="log-empty" style="text-align:center;padding:40px;color:#94a3b8">
+    <div style="font-size:32px;margin-bottom:8px">📋</div>
+    <div style="font-weight:600">No saved jobs yet</div>
+    <div style="font-size:13px;margin-top:4px">Go to My Numbers and click "Save to Job Log"</div>
+  </div>
+
+  <div id="log-table-wrap" style="display:none">
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="qt" style="font-size:13px">
+        <thead><tr style="background:#f8fafc">
+          <th style="text-align:left;padding:10px 12px">Date</th>
+          <th style="text-align:left;padding:10px 12px">Client</th>
+          <th style="text-align:left;padding:10px 12px">Job</th>
+          <th class="r" style="padding:10px 12px">Hours</th>
+          <th class="r" style="padding:10px 12px">Quote</th>
+          <th class="r" style="padding:10px 12px;color:#f97316">Materials</th>
+          <th class="r" style="padding:10px 12px;color:#ef4444">Pay Sub</th>
+          <th class="r" style="padding:10px 12px;color:#16a34a">GP $</th>
+          <th class="r" style="padding:10px 12px;color:#16a34a">GP %</th>
+          <th style="padding:10px 12px"></th>
+        </tr></thead>
+        <tbody id="log-rows"></tbody>
+        <tfoot id="log-totals"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+
+var WALL_COV = 350;
+var TRIM_COV = 400;
+
+var SURFS = [
+  { key:'walls',   label:'Walls',           unit:'sqft', rk:'r-walls'   },
+  { key:'ceiling', label:'Ceiling',          unit:'sqft', rk:'r-ceiling' },
+  { key:'base',    label:'Baseboards',       unit:'lnft', rk:'r-base'    },
+  { key:'dtrim',   label:'Door Trim/Casing', unit:'lnft', rk:'r-dtrim'   },
+  { key:'crown',   label:'Crown Molding',    unit:'lnft', rk:'r-crown'   },
+  { key:'doors',   label:'Doors',            unit:'doors',rk:'r-doors'   },
+];
+var ULABEL = { sqft:'sq ft', lnft:'lin ft', doors:'doors' };
+
+var quoteShowPricing = 'yes';
+var quoteDescStyle   = 'natural';
+
+function setPricingOpt(v) {
+  quoteShowPricing = v;
+  document.getElementById('opt-pricing-yes').classList.toggle('active', v==='yes');
+  document.getElementById('opt-pricing-no').classList.toggle('active',  v==='no');
+  buildQuote();
+}
+function setDescOpt(v) {
+  quoteDescStyle = v;
+  document.getElementById('opt-desc-natural').classList.toggle('active', v==='natural');
+  document.getElementById('opt-desc-table').classList.toggle('active',   v==='table');
+  buildQuote();
+}
+
+function joinList(arr) {
+  if(arr.length===1) return arr[0];
+  if(arr.length===2) return arr[0]+' and '+arr[1];
+  return arr.slice(0,-1).join(', ')+', and '+arr[arr.length-1];
+}
+
+function naturalRoomDesc(room) {
+  var surf=room.surfs;
+  var coatStr=function(n){return n===1?'1 coat':n===2?'2 coats':'3 coats';};
+  var wallParts=[];
+  if(surf.walls.included   && surf.walls.measurement>0)   wallParts.push('walls');
+  if(surf.ceiling.included && surf.ceiling.measurement>0) wallParts.push('ceiling');
+  var trimParts=[];
+  if(surf.base.included  && surf.base.measurement>0)  trimParts.push('baseboards');
+  if(surf.dtrim.included && surf.dtrim.measurement>0) trimParts.push('door trim');
+  if(surf.crown.included && surf.crown.measurement>0) trimParts.push('crown molding');
+  var doorPart=surf.doors.included&&surf.doors.measurement>0
+    ?surf.doors.measurement+' door'+(surf.doors.measurement>1?'s':''):null;
+  var allParts=[];
+  if(wallParts.length){
+    var wc=surf.walls.included&&surf.walls.measurement>0?surf.walls.coats:surf.ceiling.coats;
+    allParts.push(joinList(wallParts)+' ('+coatStr(wc)+')');
+  }
+  if(trimParts.length){
+    var tc=surf.base.included&&surf.base.measurement>0?surf.base.coats:
+           surf.dtrim.included&&surf.dtrim.measurement>0?surf.dtrim.coats:surf.crown.coats;
+    allParts.push(joinList(trimParts)+' ('+coatStr(tc)+')');
+  }
+  if(doorPart) allParts.push(doorPart+' ('+coatStr(surf.doors.coats)+')');
+  if(!allParts.length) return '';
+  return 'Prep and paint '+joinList(allParts)+'.';
+}
+
+var DEFS = {
+  'Bedroom':        { L:13, W:12, H:8, base:48,  dtrim:32, crown:0,  doors:1 },
+  'Master Bedroom': { L:15, W:14, H:8, base:60,  dtrim:40, crown:60, doors:1 },
+  'Living Room':    { L:18, W:16, H:8, base:80,  dtrim:48, crown:80, doors:1 },
+  'Kitchen':        { L:13, W:11, H:8, base:40,  dtrim:32, crown:40, doors:1 },
+  'Bathroom':       { L:9,  W:7,  H:8, base:24,  dtrim:24, crown:0,  doors:1 },
+  'Hallway':        { L:14, W:5,  H:8, base:32,  dtrim:16, crown:0,  doors:0 },
+  'Dining Room':    { L:14, W:13, H:8, base:60,  dtrim:32, crown:60, doors:1 },
+  'Office':         { L:13, W:11, H:8, base:48,  dtrim:32, crown:0,  doors:1 },
+  'Basement':       { L:25, W:20, H:8, base:100, dtrim:32, crown:0,  doors:1 },
+  'Custom Room':    { L:13, W:12, H:8, base:48,  dtrim:32, crown:0,  doors:1 },
+};
+var DEF_OFF = {
+  'Bathroom': ['crown'],
+  'Hallway':  ['crown','doors'],
+  'Basement': ['crown'],
+};
+
+var rooms = [], rc = 0, conditionMult = 1.0;
+var lineItems = [], lic = 0;
+
+function R(id) { var e=document.getElementById(id); return e?parseFloat(e.value)||0:0; }
+function V(id) { var e=document.getElementById(id); return e?(e.value||''):''; }
+function fmt(n) { return '$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtH(h) { return h.toFixed(1)+' hr'+(parseFloat(h.toFixed(1))!==1?'s':''); }
+function updateHeader() { document.getElementById('header-company').textContent=V('co-name')||'Your Company'; }
+
+function coatMult(n) { return n===1?1.0:n===2?1.70:2.40; }
+
+function getMarkup() {
+  var margin = R('r-margin') || 50;
+  // margin = GP / price => price = cost / (1 - margin/100)
+  return 1 / (1 - margin / 100);
+}
+
+function updateMarginLabel() {
+  var m = R('r-margin') || 50;
+  document.getElementById('margin-val').textContent = m + '%';
+  var markup = (1 / (1 - m/100));
+  var desc = m < 40 ? 'competitive' : m < 55 ? 'standard' : 'premium';
+  document.getElementById('margin-desc').textContent = '(cost × ' + markup.toFixed(2) + 'x — ' + desc + ')';
+}
+
+function showPage(p) {
+  document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
+  var pages=['setup','rooms','quote','numbers','log'];
+  document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
+  document.getElementById('page-'+p).classList.add('active');
+  if(p==='quote')   buildQuote();
+  if(p==='rooms')   applyCondition();
+  if(p==='numbers') buildNumbers();
+}
+
+function applyCondition() {
+  var el=document.getElementById('mod-condition');
+  conditionMult=parseFloat(el?el.value:1.0);
+  var idx=el?el.selectedIndex:1;
+  var labels=[
+    {text:'New Construction',desc:'Hours -15% (clean surfaces)',bg:'#dcfce7',color:'#166534'},
+    {text:'Good Condition',  desc:'Baseline hours',             bg:'#dbeafe',color:'#1e40af'},
+    {text:'Average Condition',desc:'Hours +20% (extra prep)',   bg:'#fef3c7',color:'#92400e'},
+    {text:'Rough Condition', desc:'Hours +45% (heavy repairs)', bg:'#fee2e2',color:'#991b1b'},
+  ];
+  var info=labels[idx]||labels[1];
+  var s=document.getElementById('condition-summary');
+  if(s){s.innerHTML='<b>'+info.text+'</b><br><span style="font-weight:500;font-size:12px">'+info.desc+'</span>';s.style.background=info.bg;s.style.color=info.color;}
+  recalcAll();
+}
+
+function addRoom(type) {
+  var id=++rc;
+  var d=DEFS[type]||DEFS['Custom Room'];
+  var offList=DEF_OFF[type]||[];
+  var surfs={};
+  SURFS.forEach(function(s){
+    var meas=(s.key==='walls'||s.key==='ceiling')?0:(d[s.key]||0);
+    surfs[s.key]={included:offList.indexOf(s.key)===-1,measurement:meas,coats:2};
+  });
+  rooms.push({id:id,name:type,surfs:surfs,notes:'',L:d.L||12,W:d.W||12,H:d.H||8});
+  applyDimensions(id,rooms[rooms.length-1]);
+  renderRooms();
+  recalcAll();
+}
+
+function removeRoom(id) {
+  rooms=rooms.filter(function(r){return r.id!==id;});
+  renderRooms();
+  recalcAll();
+}
+
+function applyDimensions(id,room) {
+  room=room||rooms.filter(function(r){return r.id===id;})[0];
+  if(!room) return;
+  var L=room.L||0,W=room.W||0,H=room.H||8;
+  room.surfs.walls.measurement=Math.round(2*(L+W)*H);
+  room.surfs.ceiling.measurement=Math.round(L*W);
+  var wEl=document.getElementById('meas-'+id+'-walls');
+  var cEl=document.getElementById('meas-'+id+'-ceiling');
+  if(wEl) wEl.value=room.surfs.walls.measurement;
+  if(cEl) cEl.value=room.surfs.ceiling.measurement;
+  var badge=document.getElementById('dim-badge-'+id);
+  if(badge) badge.textContent='Walls: '+room.surfs.walls.measurement+' sq ft  |  Ceiling: '+room.surfs.ceiling.measurement+' sq ft';
+}
+
+function syncRoom(id) {
+  var room=rooms.filter(function(r){return r.id===id;})[0];
+  if(!room) return;
+  var ne=document.getElementById('rn-'+id);     if(ne) room.name=ne.value;
+  var no=document.getElementById('rnotes-'+id); if(no) room.notes=no.value;
+  var lEl=document.getElementById('dim-L-'+id); if(lEl) room.L=parseFloat(lEl.value)||0;
+  var wEl=document.getElementById('dim-W-'+id); if(wEl) room.W=parseFloat(wEl.value)||0;
+  var hEl=document.getElementById('dim-H-'+id); if(hEl) room.H=parseFloat(hEl.value)||8;
+  applyDimensions(id,room);
+  SURFS.forEach(function(s){
+    var ie=document.getElementById('inc-'+id+'-'+s.key);
+    var me=document.getElementById('meas-'+id+'-'+s.key);
+    if(ie) room.surfs[s.key].included=ie.checked;
+    if(me&&s.key!=='walls'&&s.key!=='ceiling') room.surfs[s.key].measurement=parseFloat(me.value)||0;
+    var on=room.surfs[s.key].included;
+    if(me) me.disabled=!on;
+    [1,2,3].forEach(function(n){var b=document.getElementById('cb-'+id+'-'+s.key+'-'+n);if(b) b.disabled=!on;});
+    var lbl=document.getElementById('lbl-'+id+'-'+s.key);
+    var pr=document.getElementById('pr-'+id+'-'+s.key);
+    if(lbl) lbl.className='surf-label'+(on?'':' off');
+    if(pr)  pr.className='surf-price'+(on?'':' off');
+  });
+  recalcAll();
+  updateRoomTotal(id);
+}
+
+function setCoat(roomId,sk,n) {
+  var room=rooms.filter(function(r){return r.id===roomId;})[0];
+  if(!room) return;
+  room.surfs[sk].coats=n;
+  [1,2,3].forEach(function(c){var b=document.getElementById('cb-'+roomId+'-'+sk+'-'+c);if(b) b.classList.toggle('on',c===n);});
+  recalcAll();
+  updateRoomTotal(roomId);
+}
+
+function addLineItem(preset) {
+  var id=++lic;
+  var p=preset||{desc:'',qty:1,unit:'ea',rate:0};
+  lineItems.push({id:id,desc:p.desc,qty:p.qty,unit:p.unit,rate:p.rate});
+  renderLineItems();
+  recalcAll();
+}
+
+function removeLineItem(id) {
+  lineItems=lineItems.filter(function(li){return li.id!==id;});
+  renderLineItems();
+  recalcAll();
+}
+
+function syncLineItem(id) {
+  var li=lineItems.filter(function(x){return x.id===id;})[0];
+  if(!li) return;
+  var d=document.getElementById('li-desc-'+id);
+  var q=document.getElementById('li-qty-'+id);
+  var u=document.getElementById('li-unit-'+id);
+  var r=document.getElementById('li-rate-'+id);
+  if(d) li.desc=d.value;
+  if(q) li.qty=parseFloat(q.value)||1;
+  if(u) li.unit=u.value;
+  if(r) li.rate=parseFloat(r.value)||0;
+  var tel=document.getElementById('li-total-'+id);
+  if(tel) tel.textContent=fmt(li.qty*li.rate);
+  recalcAll();
+}
+
+var PRESETS=[
+  {label:'+ Wallpaper Removal',desc:'Wallpaper removal',qty:1,unit:'room',rate:250},
+  {label:'+ Texture/Patch',    desc:'Texture & drywall repair',qty:1,unit:'ea',rate:150},
+  {label:'+ Staining',         desc:'Stain/varnish work',qty:1,unit:'hr',rate:65},
+  {label:'+ Travel Fee',       desc:'Travel & setup',qty:1,unit:'ea',rate:75},
+  {label:'+ Discount',         desc:'Discount',qty:1,unit:'ea',rate:-50},
+  {label:'+ Custom',           desc:'',qty:1,unit:'ea',rate:0},
+];
+
+function renderLineItems() {
+  var el=document.getElementById('line-items-list');
+  if(!el) return;
+  if(!lineItems.length){
+    el.innerHTML='<p style="font-size:12px;color:#94a3b8;padding:8px 0">No extras yet. Use the buttons above to add.</p>';
+    recalcAll();
+    return;
+  }
+  var html='<table style="width:100%;border-collapse:collapse;margin-top:8px">'
+    +'<thead><tr>'
+    +'<th style="text-align:left;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:4px 6px;border-bottom:2px solid #e2e8f0">Description</th>'
+    +'<th style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:4px 6px;border-bottom:2px solid #e2e8f0;width:60px;text-align:center">Qty</th>'
+    +'<th style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:4px 6px;border-bottom:2px solid #e2e8f0;width:65px">Unit</th>'
+    +'<th style="text-align:right;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:4px 6px;border-bottom:2px solid #e2e8f0;width:80px">Rate ($)</th>'
+    +'<th style="text-align:right;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:4px 6px;border-bottom:2px solid #e2e8f0;width:80px">Total</th>'
+    +'<th style="width:32px;border-bottom:2px solid #e2e8f0"></th>'
+    +'</tr></thead><tbody>';
+  lineItems.forEach(function(li){
+    var t=li.qty*li.rate;
+    html+='<tr>'
+      +'<td style="padding:5px 6px"><input id="li-desc-'+li.id+'" value="'+li.desc+'" oninput="syncLineItem('+li.id+')" placeholder="Description" style="width:100%;padding:5px 7px;font-size:13px;border:1px solid #cbd5e1;border-radius:5px;outline:none"></td>'
+      +'<td style="padding:5px 6px"><input id="li-qty-'+li.id+'" type="number" value="'+li.qty+'" oninput="syncLineItem('+li.id+')" style="width:100%;padding:5px 7px;font-size:13px;border:1px solid #cbd5e1;border-radius:5px;text-align:center;outline:none"></td>'
+      +'<td style="padding:5px 6px"><input id="li-unit-'+li.id+'" value="'+li.unit+'" oninput="syncLineItem('+li.id+')" style="width:100%;padding:5px 7px;font-size:13px;border:1px solid #cbd5e1;border-radius:5px;outline:none"></td>'
+      +'<td style="padding:5px 6px"><input id="li-rate-'+li.id+'" type="number" value="'+li.rate+'" oninput="syncLineItem('+li.id+')" style="width:100%;padding:5px 7px;font-size:13px;border:1px solid #cbd5e1;border-radius:5px;text-align:right;outline:none"></td>'
+      +'<td style="padding:5px 6px;text-align:right;font-weight:700;font-size:13px;white-space:nowrap;color:'+(t<0?'#ef4444':'#1a3a8a')+'" id="li-total-'+li.id+'">'+fmt(t)+'</td>'
+      +'<td style="padding:5px 6px"><button onclick="removeLineItem('+li.id+')" style="background:#fee2e2;color:#ef4444;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px">&times;</button></td>'
+      +'</tr>';
+  });
+  html+='</tbody></table>';
+  el.innerHTML=html;
+}
+
+function calcHours(surf,s) {
+  if(!surf.included||surf.measurement<=0) return 0;
+  var rate=R(s.rk);
+  if(!rate) return 0;
+  var base;
+  if(s.unit==='doors') base=surf.measurement*(rate/60);
+  else                 base=surf.measurement/rate;
+  return base*coatMult(surf.coats)*conditionMult;
+}
+
+function calcMaterials(surf,s) {
+  if(!surf.included||surf.measurement<=0) return {cost:0,gals:0,wallGals:0,trimGals:0};
+  var gals;
+  if(s.unit==='sqft')      gals=(surf.measurement*surf.coats)/WALL_COV;
+  else if(s.unit==='lnft') gals=(surf.measurement*surf.coats)/TRIM_COV;
+  else                     gals=0; // doors covered by trim gallon already
+  var isWall=(s.key==='walls'||s.key==='ceiling');
+  // Return raw (unrounded) gals — we round at the room level
+  return {cost:0, gals:gals, wallGals:isWall?gals:0, trimGals:isWall?0:gals};
+}
+
+function calcSurf(surf,s) {
+  if(!surf.included||surf.measurement<=0) return {hours:0,labor:0,materials:0,gals:0,wallGals:0,trimGals:0,price:0};
+  var hours=calcHours(surf,s);
+  var labor=hours*R('r-laborrate');
+  var mat=calcMaterials(surf,s);
+  // Surface price uses raw gals for display — room total corrects with ceil (see calcRoom)
+  var isWall=(s.key==='walls'||s.key==='ceiling');
+  var ppg=isWall?R('p-wall'):R('p-trim');
+  return {hours:hours,labor:labor,rawGals:mat.gals,wallGals:mat.wallGals,trimGals:mat.trimGals};
+}
+
+function calcRoom(room) {
+  var bd={},totalHours=0,totalLabor=0,totalWallGals=0,totalTrimGals=0;
+  var surfData={};
+  SURFS.forEach(function(s){
+    var c=calcSurf(room.surfs[s.key],s);
+    surfData[s.key]=c;
+    totalHours+=c.hours; totalLabor+=c.labor;
+    totalWallGals+=c.wallGals; totalTrimGals+=c.trimGals;
+  });
+  // Round once per room
+  var wp=R('p-wall'), tp=R('p-trim');
+  var wallGalsRounded=Math.ceil(totalWallGals);
+  var trimGalsRounded=Math.ceil(totalTrimGals);
+  var totalMat=wallGalsRounded*wp + trimGalsRounded*tp;
+  var markup=getMarkup();
+  var totalPrice=(totalLabor+totalMat)*markup;
+
+  // Distribute rounded mat cost to surfaces proportionally for display
+  var rawWallTotal=totalWallGals||1, rawTrimTotal=totalTrimGals||1;
+  var wallMatRounded=wallGalsRounded*wp, trimMatRounded=trimGalsRounded*tp;
+  SURFS.forEach(function(s){
+    var c=surfData[s.key];
+    var isWall=(s.key==='walls'||s.key==='ceiling');
+    var surfMat;
+    if(isWall) surfMat = totalWallGals>0 ? (c.wallGals/rawWallTotal)*wallMatRounded : 0;
+    else       surfMat = totalTrimGals>0 ? (c.trimGals/rawTrimTotal)*trimMatRounded : 0;
+    var price=(c.labor+surfMat)*markup;
+    bd[s.key]={hours:c.hours,labor:c.labor,materials:surfMat,gals:Math.ceil(c.rawGals),wallGals:c.wallGals,trimGals:c.trimGals,price:price};
+  });
+
+  return {total:totalPrice,hours:totalHours,labor:totalLabor,materials:totalMat,gals:wallGalsRounded+trimGalsRounded,wallGals:wallGalsRounded,trimGals:trimGalsRounded,bd:bd};
+}
+
+function lineItemsTotal() { return lineItems.reduce(function(s,li){return s+li.qty*li.rate;},0); }
+
+function updateRoomTotal(id) {
+  var room=rooms.filter(function(r){return r.id===id;})[0];
+  if(!room) return;
+  var c=calcRoom(room);
+  var el=document.getElementById('rt-'+id); if(el) el.textContent=fmt(c.total);
+  SURFS.forEach(function(s){
+    var pel=document.getElementById('pr-'+id+'-'+s.key); if(pel) pel.textContent=fmt(c.bd[s.key].price);
+    var hel=document.getElementById('hr-'+id+'-'+s.key); if(hel) hel.textContent=c.bd[s.key].hours>0?fmtH(c.bd[s.key].hours):'';
+  });
+}
+
+function recalcAll() {
+  var calcs=rooms.map(function(r){return calcRoom(r);});
+  var roomSub=calcs.reduce(function(s,c){return s+c.total;},0);
+  var liTotal=lineItemsTotal();
+  var sub=roomSub+liTotal;
+  var tx=sub*(R('r-tax')/100);
+  var total=sub+tx;
+  var totalHrs=calcs.reduce(function(s,c){return s+c.hours;},0);
+  rooms.forEach(function(r,i){
+    var el=document.getElementById('rt-'+r.id); if(el) el.textContent=fmt(calcs[i].total);
+    SURFS.forEach(function(s){
+      var pel=document.getElementById('pr-'+r.id+'-'+s.key); if(pel) pel.textContent=fmt(calcs[i].bd[s.key].price);
+      var hel=document.getElementById('hr-'+r.id+'-'+s.key); if(hel) hel.textContent=calcs[i].bd[s.key].hours>0?fmtH(calcs[i].bd[s.key].hours):'';
+    });
+  });
+  var bar=document.getElementById('float-bar');
+  if(rooms.length>0||lineItems.length>0){
+    bar.classList.add('show');
+    document.getElementById('float-info').textContent=fmtH(totalHrs)+'  |  '+rooms.length+' room'+(rooms.length!==1?'s':'');
+    document.getElementById('float-total').textContent=fmt(total);
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function renderRooms() {
+  var list=document.getElementById('rooms-list');
+  if(!rooms.length){
+    list.innerHTML='<div class="empty-state"><div style="font-size:48px;margin-bottom:10px">&#x1F58C;</div><div style="font-weight:700;font-size:16px">No rooms yet</div><div style="font-size:13px;margin-top:4px">Click a room type above to get started</div></div>';
+    return;
+  }
+  var html='';
+  rooms.forEach(function(room){
+    var rows='';
+    SURFS.forEach(function(s){
+      var surf=room.surfs[s.key];
+      var on=surf.included;
+      var isDim=(s.key==='walls'||s.key==='ceiling');
+      var measCell=isDim
+        ? '<span style="font-size:12px;color:#94a3b8;font-style:italic">auto</span><input type="hidden" id="meas-'+room.id+'-'+s.key+'" value="'+surf.measurement+'">'
+        : '<div class="meas-wrap"><input type="number" id="meas-'+room.id+'-'+s.key+'" value="'+surf.measurement+'" '+(on?'':'disabled')+' oninput="syncRoom('+room.id+')" style="width:68px;padding:5px 7px;font-size:13px"><span class="meas-unit">'+ULABEL[s.unit]+'</span></div>';
+      var cbtns='';
+      [1,2,3].forEach(function(n){cbtns+='<button id="cb-'+room.id+'-'+s.key+'-'+n+'" class="cbtn'+(surf.coats===n?' on':'')+'" '+(on?'':'disabled')+' onclick="setCoat('+room.id+',\''+s.key+'\','+n+')">'+n+'</button>';});
+      rows+='<tr>'
+        +'<td style="width:28px"><input type="checkbox" class="inc" id="inc-'+room.id+'-'+s.key+'" '+(on?'checked':'')+' onchange="syncRoom('+room.id+')"></td>'
+        +'<td><span id="lbl-'+room.id+'-'+s.key+'" class="surf-label'+(on?'':' off')+'">'+s.label+'</span></td>'
+        +'<td>'+measCell+'</td>'
+        +'<td><div class="coat-group">'+cbtns+'</div></td>'
+        +'<td style="font-size:11px;color:#94a3b8;text-align:right;white-space:nowrap;padding-right:4px" id="hr-'+room.id+'-'+s.key+'"></td>'
+        +'<td><span id="pr-'+room.id+'-'+s.key+'" class="surf-price'+(on?'':' off')+'">$0.00</span></td>'
+        +'</tr>';
+    });
+    html+='<div class="room-card" id="rcard-'+room.id+'">'
+      +'<div class="room-header">'
+        +'<input class="room-name" id="rn-'+room.id+'" value="'+room.name+'" oninput="syncRoom('+room.id+')">'
+        +'<span class="room-total" id="rt-'+room.id+'">$0.00</span>'
+        +'<button class="btn-danger" onclick="removeRoom('+room.id+')">&#x2715; Remove</button>'
+      +'</div>'
+      +'<div class="dim-bar">'
+        +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'
+          +'<span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em">Room:</span>'
+          +'<input type="number" id="dim-L-'+room.id+'" value="'+room.L+'" oninput="syncRoom('+room.id+')" style="width:54px;padding:5px 7px;font-size:13px">'
+          +'<span style="font-size:12px;color:#94a3b8">L &times;</span>'
+          +'<input type="number" id="dim-W-'+room.id+'" value="'+room.W+'" oninput="syncRoom('+room.id+')" style="width:54px;padding:5px 7px;font-size:13px">'
+          +'<span style="font-size:12px;color:#94a3b8">W &times;</span>'
+          +'<input type="number" id="dim-H-'+room.id+'" value="'+room.H+'" oninput="syncRoom('+room.id+')" style="width:50px;padding:5px 7px;font-size:13px">'
+          +'<span style="font-size:12px;color:#94a3b8">H (ft)</span>'
+        +'</div>'
+        +'<div id="dim-badge-'+room.id+'" class="dim-calc-badge">Walls: -- sq ft  |  Ceiling: -- sq ft</div>'
+      +'</div>'
+      +'<div class="room-body"><table class="surf-table">'
+        +'<thead><tr><th></th><th>Surface</th><th>Measurement</th><th>Coats <span style="font-weight:400;font-size:10px;color:#cbd5e1">1&middot;2&middot;3</span></th><th class="r" style="color:#94a3b8;font-size:10px">Hours</th><th class="r">Price</th></tr></thead>'
+        +'<tbody>'+rows+'</tbody>'
+      +'</table></div>'
+      +'<div class="room-notes-area">'
+        +'<label class="lbl" style="margin-bottom:4px">Room Notes <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8">(optional)</span></label>'
+        +'<textarea id="rnotes-'+room.id+'" rows="2" oninput="syncRoom('+room.id+')" style="font-size:13px;resize:vertical" placeholder="e.g. Two accent walls...">'+room.notes+'</textarea>'
+      +'</div>'
+    +'</div>';
+  });
+  list.innerHTML=html;
+  rooms.forEach(function(r){applyDimensions(r.id);});
+  recalcAll();
+}
+
+function buildQuote() {
+  var calcs=rooms.map(function(r){return {room:r,calc:calcRoom(r)};});
+  var roomSub=calcs.reduce(function(s,x){return s+x.calc.total;},0);
+  var liTotal=lineItemsTotal();
+  var sub=roomSub+liTotal;
+  var txPct=R('r-tax');
+  var txAmt=sub*(txPct/100);
+  var total=sub+txAmt;
+  var totalHrs=calcs.reduce(function(s,x){return s+x.calc.hours;},0);
+  var totalWallGals=calcs.reduce(function(s,x){return s+x.calc.wallGals;},0);
+  var totalTrimGals=calcs.reduce(function(s,x){return s+x.calc.trimGals;},0);
+
+  var statsHtml='';
+  [[fmtH(totalHrs),'Est. Hours','&#x23F1;'],[rooms.length+' room'+(rooms.length!==1?'s':''),'Rooms','&#x1F3E0;'],[totalWallGals+' gal wall / '+totalTrimGals+' gal trim','Paint Needed','&#x1FAA3;'],[fmt(total),'Total','&#x1F4B0;']].forEach(function(item){
+    statsHtml+='<div class="stat-card"><div class="stat-icon">'+item[2]+'</div><div class="stat-label">'+item[1]+'</div><div class="stat-val">'+item[0]+'</div></div>';
+  });
+  document.getElementById('stats-grid').innerHTML=statsHtml;
+
+
+  // ── Internal breakdown (for on-screen cards, not print) ──────────
+  var bHtml='';
+  calcs.forEach(function(item){
+    var room=item.room,calc=item.calc;
+    if(calc.total===0) return;
+    var active=SURFS.filter(function(s){return room.surfs[s.key].included&&room.surfs[s.key].measurement>0;});
+    var trows='';
+    active.forEach(function(s){
+      var surf=room.surfs[s.key],c=calc.bd[s.key];
+      var cl=surf.coats===1?'1 coat':surf.coats===2?'2 coats':'3 coats';
+      trows+='<tr><td style="font-weight:600">'+s.label+'</td><td class="r" style="color:#64748b">'+surf.measurement+' '+ULABEL[s.unit]+'</td><td class="r" style="color:#64748b">'+cl+'</td><td class="r" style="color:#94a3b8;font-size:12px">'+fmtH(c.hours)+'</td><td class="r" style="font-weight:700;color:#1a3a8a">'+fmt(c.price)+'</td></tr>';
+    });
+    bHtml+='<div class="card">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+        +'<div class="card-title" style="margin:0">'+room.name+'</div>'
+        +'<div style="text-align:right"><div style="font-size:11px;color:#94a3b8">'+fmtH(calc.hours)+'</div><div style="font-weight:800;color:#1a3a8a;font-size:16px">'+fmt(calc.total)+'</div></div>'
+      +'</div>'
+      +'<table class="qt"><thead><tr><th>Surface</th><th class="r">Meas.</th><th class="r">Coats</th><th class="r">Hours</th><th class="r">Price</th></tr></thead><tbody>'+trows+'</tbody></table>'
+      +(room.notes?'<div style="font-size:12px;color:#64748b;margin-top:6px;padding-top:6px;border-top:1px solid #f1f5f9">'+room.notes+'</div>':'')
+    +'</div>';
+  });
+  if(lineItems.length){
+    var liRows='';
+    lineItems.forEach(function(li){var t=li.qty*li.rate;liRows+='<tr><td style="font-weight:600">'+li.desc+'</td><td class="r" style="color:#64748b">'+li.qty+' '+li.unit+'</td><td class="r" style="color:#64748b">'+fmt(li.rate)+'</td><td class="r" style="font-weight:700;color:'+(t<0?'#ef4444':'#1a3a8a')+'">'+fmt(t)+'</td></tr>';});
+    bHtml+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div class="card-title" style="margin:0">Additional Items</div><span style="font-weight:800;color:#1a3a8a;font-size:16px">'+fmt(liTotal)+'</span></div><table class="qt"><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Total</th></tr></thead><tbody>'+liRows+'</tbody></table></div>';
+  }
+  document.getElementById('quote-breakdown').innerHTML=bHtml;
+
+  var tHtml='<div style="display:flex;justify-content:space-between;font-size:14px;color:#64748b;margin-bottom:6px"><span>Rooms</span><span>'+fmt(roomSub)+'</span></div>';
+  if(liTotal!==0) tHtml+='<div style="display:flex;justify-content:space-between;font-size:14px;color:#64748b;margin-bottom:6px"><span>Additional Items</span><span>'+fmt(liTotal)+'</span></div>';
+  if(txPct>0) tHtml+='<div style="display:flex;justify-content:space-between;font-size:14px;color:#64748b;margin-bottom:6px"><span>Tax ('+txPct+'%)</span><span>+ '+fmt(txAmt)+'</span></div>';
+  tHtml+='<div class="total-final"><span>TOTAL ESTIMATE</span><span>'+fmt(total)+'</span></div>';
+  document.getElementById('totals-card').innerHTML=tHtml;
+
+  // ── Professional Print Proposal ───────────────────────────────────
+  var coN=V('co-name')||'Your Company', coP=V('co-phone'), coE=V('co-email'), coL=V('co-license');
+  var clN=V('cl-name'), clA=V('cl-address'), clC=V('cl-city'), clP=V('cl-phone');
+  var jNum=V('job-number'), jT=V('job-title')||'Interior Painting Proposal', jV=V('job-valid')||'30';
+  var jScope=V('job-scope'), jIncluded=V('job-included'), jExcluded=V('job-excluded'), jNotes=V('job-notes');
+  var jSpecialNotes=V('job-special-notes'), jCustResp=V('job-customer-resp'), jCoverProtect=V('job-cover');
+  var jPayment=V('job-payment')||'50/50', jWarranty=V('job-warranty')||'1-year';
+  var today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  var showPrices=quoteShowPricing==='yes';
+
+  var paymentLabels={
+    '50/50':'A deposit of 50% is due before work begins. Remaining balance due upon completion.',
+    '33/33/33':'One-third deposit due to schedule. One-third at project midpoint. Final third due upon completion.',
+    'due-completion':'Payment in full due upon project completion.',
+    'net-30':'Payment due within 30 days of project completion.',
+    'custom':'See additional notes for payment terms.'
+  };
+  var warrantyLabels={
+    '1-year':'All workmanship is warranted for 1 year from the date of completion.',
+    '2-year':'All workmanship is warranted for 2 years from the date of completion.',
+    'none':'', 'custom':'See additional notes for warranty details.'
+  };
+
+  var roomNamesList=[];
+  var roomsHtml='';
+  calcs.forEach(function(item){
+    var room=item.room, calc=item.calc;
+    if(calc.total===0) return;
+    roomNamesList.push(room.name);
+    if(quoteDescStyle==='natural'){
+      var desc=naturalRoomDesc(room);
+      roomsHtml+='<tr style="border-bottom:1px solid #f1f5f9">'
+        +'<td style="padding:10px 12px;vertical-align:top">'
+          +'<div style="font-weight:700;color:#1e293b;font-size:13px">'+room.name+'</div>'
+          +'<div style="font-size:12px;color:#475569;margin-top:3px;line-height:1.6">'+desc+'</div>'
+          +(room.notes?'<div style="font-size:11px;color:#94a3b8;font-style:italic;margin-top:3px">'+room.notes+'</div>':'')
+        +'</td>'
+        +(showPrices?'<td style="padding:10px 12px;text-align:right;font-weight:700;font-size:13px;white-space:nowrap;vertical-align:top;color:#1a3a8a">'+fmt(calc.total)+'</td>':'')
+      +'</tr>';
+    } else {
+      var active=SURFS.filter(function(s){return room.surfs[s.key].included&&room.surfs[s.key].measurement>0;});
+      var firstRow=true;
+      active.forEach(function(s){
+        var surf=room.surfs[s.key],c=calc.bd[s.key];
+        var ct=surf.coats===1?'1 coat':surf.coats===2?'2 coats':'3 coats';
+        roomsHtml+='<tr style="border-bottom:1px solid #f8fafc">'
+          +'<td style="padding:'+(firstRow?'10px 12px 4px':'3px 12px 3px 24px')+';vertical-align:top">'
+            +(firstRow?'<div style="font-weight:700;color:#1e293b;font-size:13px;margin-bottom:4px">'+room.name+'</div>':'')
+            +'<div style="font-size:12px;color:#475569">'+s.label+' \u2014 '+surf.measurement+' '+ULABEL[s.unit]+', '+ct+'</div>'
+          +'</td>'
+          +(showPrices?'<td style="padding:'+(firstRow?'10px':'3px')+' 12px;text-align:right;font-weight:700;font-size:13px;vertical-align:top;color:#1a3a8a">'+(firstRow?fmt(calc.total):'')+'</td>':'')
+        +'</tr>';
+        firstRow=false;
+      });
+      if(room.notes) roomsHtml+='<tr><td colspan="2" style="padding:2px 12px 8px 24px;font-size:11px;color:#94a3b8;font-style:italic">'+room.notes+'</td></tr>';
+    }
+  });
+
+  var liHtml='';
+  if(lineItems.length){
+    liHtml+='<tr><td colspan="2" style="padding:8px 12px 4px;font-size:11px;font-weight:800;color:#1a3a8a;text-transform:uppercase;letter-spacing:0.08em;background:#f8fafc;border-top:1px solid #e2e8f0">Additional Items</td></tr>';
+    lineItems.forEach(function(li){
+      var t=li.qty*li.rate;
+      liHtml+='<tr style="border-bottom:1px solid #f8fafc">'
+        +'<td style="padding:7px 12px;font-size:12px;color:#374151">'+li.desc+(li.qty!==1?' ('+li.qty+' '+li.unit+')':'')+'</td>'
+        +(showPrices?'<td style="padding:7px 12px;text-align:right;font-weight:700;font-size:12px;color:'+(t<0?'#ef4444':'#1a3a8a')+'">'+fmt(t)+'</td>':'')
+      +'</tr>';
+    });
+  }
+
+  var deposit=jPayment==='33/33/33'?total/3:jPayment==='due-completion'||jPayment==='net-30'?0:total*0.5;
+  var balance=total-deposit;
+
+  var specialNotes=[];
+  calcs.forEach(function(x){if(x.room.notes&&x.calc.total>0) specialNotes.push('<b>'+x.room.name+':</b> '+x.room.notes);});
+  if(jNotes) specialNotes.push(jNotes);
+
+  var sec=function(title){ return '<div style="font-size:11px;font-weight:800;color:#1a3a8a;text-transform:uppercase;letter-spacing:0.12em;padding-bottom:5px;border-bottom:2px solid #1a3a8a;margin-bottom:10px">'+title+'</div>'; };
+
+  document.getElementById('print-quote').innerHTML=
+
+  // ── Header ─────────────────────────────────────────────
+  '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:18px;margin-bottom:22px;border-bottom:3px solid #1a3a8a">'
+    +'<div>'
+      +'<div style="font-size:26px;font-weight:900;color:#1a3a8a;letter-spacing:-0.5px;font-family:Arial,sans-serif">'+coN+'</div>'
+      +'<div style="font-size:12px;color:#64748b;margin-top:5px;line-height:1.8;font-family:Arial,sans-serif">'
+        +(coP?coP:'')+(coE?' &nbsp;&middot;&nbsp; '+coE:'')+(coL?'<br>License #'+coL:'')
+      +'</div>'
+    +'</div>'
+    +'<div style="text-align:right;font-family:Arial,sans-serif">'
+      +'<div style="font-size:18px;font-weight:900;color:#1a3a8a;text-transform:uppercase;letter-spacing:1.5px">Interior Proposal</div>'
+      +(jNum?'<div style="font-size:12px;color:#64748b;margin-top:2px">Job #: '+jNum+'</div>':'')
+      +'<div style="font-size:12px;color:#64748b;margin-top:5px;line-height:1.8">Date: '+today+'<br>Valid for '+jV+' days</div>'
+    +'</div>'
+  +'</div>'
+
+  // ── Prepared For / Prepared By ─────────────────────────
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #e2e8f0">'
+    +'<div>'+sec('Prepared For')
+      +'<div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:4px">'+(clN||'&mdash;')+'</div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.8">'+(clA?clA+'<br>':'')+(clC?clC+'<br>':'')+(clP||'')+'</div>'
+    +'</div>'
+    +'<div>'+sec('Prepared By')
+      +'<div style="font-weight:700;font-size:14px;color:#1e293b;margin-bottom:4px">'+coN+'</div>'
+      +'<div style="font-size:12px;color:#475569;line-height:1.8">'+(coP?coP+'<br>':'')+(coE?coE+'<br>':'')+(coL?'Lic # '+coL:'')+'</div>'
+    +'</div>'
+  +'</div>'
+
+  // ── Price Summary ──────────────────────────────────────
+  +'<div style="margin-bottom:24px">'+sec('Price Summary')
+    +'<table style="width:100%;border-collapse:collapse;font-size:13px;font-family:Arial,sans-serif">'
+      +'<tr><td style="padding:5px 0;color:#374151">Base Price</td><td style="text-align:right;padding:5px 0">'+fmt(sub)+'</td></tr>'
+      +(liTotal<0?'<tr><td style="padding:4px 0;color:#374151">Discount</td><td style="text-align:right;padding:4px 0;color:#ef4444">'+fmt(liTotal)+'</td></tr>':'')
+      +(liTotal>0?'<tr><td style="padding:4px 0;color:#374151">Additional Items</td><td style="text-align:right;padding:4px 0">'+fmt(liTotal)+'</td></tr>':'')
+      +(txPct>0?'<tr><td style="padding:4px 0;color:#374151">Tax ('+txPct+'%)</td><td style="text-align:right;padding:4px 0">'+fmt(txAmt)+'</td></tr>':'')
+      +'<tr style="border-top:2px solid #1a3a8a"><td style="padding:9px 0 5px;font-weight:900;font-size:15px">Total</td><td style="text-align:right;padding:9px 0 5px;font-weight:900;font-size:15px;color:#1a3a8a">'+fmt(total)+'</td></tr>'
+      +(deposit>0?'<tr><td style="padding:4px 0;color:#64748b">Deposit Due</td><td style="text-align:right;padding:4px 0;color:#64748b">'+fmt(deposit)+'</td></tr>':'')
+      +(deposit>0?'<tr><td style="padding:4px 0;color:#64748b">Balance</td><td style="text-align:right;padding:4px 0;color:#64748b">'+fmt(balance)+'</td></tr>':'')
+    +'</table>'
+  +'</div>'
+
+  // ── Project Summary ────────────────────────────────────
+  +'<div style="margin-bottom:24px">'+sec('Project Summary')
+    +(roomNamesList.length?'<div style="font-size:12px;color:#374151;margin-bottom:10px;line-height:1.7"><b>Included in price above:</b> '+roomNamesList.join(', ')+'</div>':'')
+    +(function(){var src=jSpecialNotes||specialNotes.join('\n');if(!src) return '';var lines=src.split('\n').filter(function(l){return l.trim();});return lines.length?'<div style="font-size:12px;color:#374151;margin-bottom:10px;line-height:1.9"><b>Special Notes:</b><br>'+lines.map(function(l,i){return '<b>'+(i+1)+'.</b> '+l.trim();}).join('<br>')+'</div>':'';}())
+    +(jScope?'<div style="font-size:12px;color:#374151;line-height:1.8;margin-bottom:8px"><b>Scope of Work:</b><br>'+jScope+'</div>':'')
+    +(jExcluded?'<div style="font-size:12px;color:#374151;line-height:1.8"><b>Excluded:</b> '+jExcluded+'</div>':'')
+  +'</div>'
+
+  // ── Work Details ───────────────────────────────────────
+  +'<div style="margin-bottom:24px">'+sec('Work Details')
+    +'<table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif">'
+      +'<thead><tr style="background:#f8fafc">'
+        +'<th style="text-align:left;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid #e2e8f0">Room / Description</th>'
+        +(showPrices?'<th style="text-align:right;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;padding:7px 12px;border-bottom:1px solid #e2e8f0;width:90px">Price</th>':'')
+      +'</tr></thead>'
+      +'<tbody>'+roomsHtml+liHtml+'</tbody>'
+      +(showPrices?
+        '<tfoot>'
+        +(rooms.filter(function(r){return calcRoom(r).total>0;}).length>1||lineItems.length?'<tr style="border-top:1px solid #e2e8f0"><td style="padding:6px 12px;font-size:12px;color:#64748b">Subtotal</td><td style="padding:6px 12px;text-align:right;font-size:12px;color:#64748b">'+fmt(roomSub+(liTotal>0?liTotal:0))+'</td></tr>':'')
+        +(txPct>0?'<tr><td style="padding:4px 12px;font-size:12px;color:#64748b">Tax ('+txPct+'%)</td><td style="padding:4px 12px;text-align:right;font-size:12px;color:#64748b">'+fmt(txAmt)+'</td></tr>':'')
+        +'<tr style="border-top:2px solid #1a3a8a"><td style="padding:9px 12px;font-weight:900;font-size:14px">Total</td><td style="padding:9px 12px;text-align:right;font-weight:900;font-size:14px;color:#1a3a8a">'+fmt(total)+'</td></tr>'
+        +'</tfoot>'
+      :'')
+    +'</table>'
+  +'</div>'
+
+  // ── Setup / Responsibilities ───────────────────────────
+  +'<div style="margin-bottom:24px">'+sec('Set-Up')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px;font-family:Arial,sans-serif">'
+      +'<div>'
+        +'<div style="font-weight:700;color:#374151;margin-bottom:6px;text-transform:uppercase;font-size:11px;letter-spacing:0.06em">Customer To:</div>'
+        +'<div style="color:#475569;line-height:1.9">'+(jCustResp?jCustResp.split('\n').filter(function(l){return l.trim();}).join('<br>'):'Allow clear access to all work areas<br>Remove all pictures &amp; wall decorations<br>Remove small and fragile objects<br>Move furniture to center of room prior to start<br>Remove blinds and window coverings')+'</div>'
+      +'</div>'
+      +'<div>'
+        +'<div style="font-weight:700;color:#374151;margin-bottom:6px;text-transform:uppercase;font-size:11px;letter-spacing:0.06em">'+coN+' Will Cover &amp; Protect:</div>'
+        +'<div style="color:#475569;line-height:1.9">'+(jCoverProtect?jCoverProtect.split('\n').filter(function(l){return l.trim();}).join('<br>'):'All floors with drop cloths &amp; plastic<br>Furniture remaining in rooms<br>Fixtures, hardware &amp; cabinets<br>All surfaces not being painted')+'</div>'
+      +'</div>'
+    +'</div>'
+  +'</div>'
+
+  // ── What's Included ────────────────────────────────────
+  +(jIncluded?
+    '<div style="margin-bottom:24px">'+sec("What's Included")
+      +'<div style="font-size:12px;color:#374151;line-height:1.8;font-family:Arial,sans-serif">'+jIncluded+'</div>'
+    +'</div>'
+  :'')
+
+  // ── Terms ──────────────────────────────────────────────
+  +'<div style="margin-bottom:28px">'+sec('Terms & Conditions')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;font-size:12px;color:#374151;line-height:1.8;font-family:Arial,sans-serif">'
+      +'<div><b>Payment:</b> '+paymentLabels[jPayment]+'</div>'
+      +(warrantyLabels[jWarranty]?'<div><b>Warranty:</b> '+warrantyLabels[jWarranty]+'</div>':'')
+      +'<div><b>Colors:</b> Client selects all colors prior to start. Color changes after work begins may incur additional charges.</div>'
+      +'<div><b>Unforeseen Conditions:</b> Should conditions arise not determinable by visual inspection, additional charges may apply with prior client approval.</div>'
+    +'</div>'
+  +'</div>'
+
+  // ── Signatures ─────────────────────────────────────────
+  +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;padding-top:20px;border-top:2px solid #e2e8f0">'
+    +'<div>'
+      +'<div style="height:48px;border-bottom:1.5px solid #64748b;margin-bottom:6px"></div>'
+      +'<div style="font-size:11px;color:#64748b;font-family:Arial,sans-serif">Client Signature &amp; Date</div>'
+    +'</div>'
+    +'<div>'
+      +'<div style="height:48px;border-bottom:1.5px solid #64748b;margin-bottom:6px"></div>'
+      +'<div style="font-size:11px;color:#64748b;font-family:Arial,sans-serif">'+coN+' \u2014 Authorized Signature &amp; Date</div>'
+    +'</div>'
+  +'</div>';
+}
+
+function buildNumbers() {
+  var calcs=rooms.map(function(r){return {room:r,calc:calcRoom(r)};});
+  var roomSub=calcs.reduce(function(s,x){return s+x.calc.total;},0);
+  var liTotal=lineItemsTotal();
+  var sub=roomSub+liTotal;
+  var txPct=R('r-tax');
+  var grandTotal=sub*(1+txPct/100);
+  var totalHrs=calcs.reduce(function(s,x){return s+x.calc.hours;},0);
+  var totalMat=calcs.reduce(function(s,x){return s+x.calc.materials;},0);
+  var totalLabor=calcs.reduce(function(s,x){return s+x.calc.labor;},0);
+  var totalWallGals=calcs.reduce(function(s,x){return s+x.calc.wallGals;},0);
+  var totalTrimGals=calcs.reduce(function(s,x){return s+x.calc.trimGals;},0);
+  var totalCost=totalLabor+totalMat;
+  var marginPct=R('r-margin')||50;
+  var gp=sub*(marginPct/100);
+  var txAmt=sub*(txPct/100);
+
+  document.getElementById('num-summary-grid').innerHTML=
+    // Row 1: Total quote spanning full width
+    '<div style="grid-column:span 3;text-align:center;padding:16px;background:#f8fafc;border-radius:8px;border:2px solid #1a3a8a">'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">Total Quote</div>'
+      +'<div style="font-size:32px;font-weight:900;color:#1a3a8a">'+fmt(grandTotal)+'</div>'
+      +'<div style="font-size:11px;color:#94a3b8;margin-top:4px">'+fmtH(totalHrs)+'&nbsp;&nbsp;|&nbsp;&nbsp;'+totalWallGals+' gal wall&nbsp;&nbsp;|&nbsp;&nbsp;'+totalTrimGals+' gal trim'+(txPct>0?'&nbsp;&nbsp;|&nbsp;&nbsp;incl. '+fmt(txAmt)+' tax (pass-through)':'')+'</div>'
+    +'</div>'
+    // Row 2: 50% Cost | 50% GP
+    +'<div style="grid-column:span 2;padding:16px;background:#fef2f2;border-radius:8px;border:2px solid #fca5a5">'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Your Cost &mdash; '+(100-marginPct)+'%</div>'
+      +'<div style="font-size:30px;font-weight:900;color:#dc2626">'+fmt(totalCost)+'</div>'
+      +'<div style="display:flex;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid #fecaca">'
+        +'<div>'
+          +'<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Pay Sub</div>'
+          +'<div style="font-size:18px;font-weight:800;color:#ef4444">'+fmt(totalLabor)+'</div>'
+          +'<div style="font-size:11px;color:#94a3b8">'+fmtH(totalHrs)+' @ $'+R('r-laborrate')+'/hr</div>'
+        +'</div>'
+        +'<div style="border-left:1px solid #fecaca;padding-left:16px">'
+          +'<div style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Materials</div>'
+          +'<div style="font-size:18px;font-weight:800;color:#f97316">'+fmt(totalMat)+'</div>'
+          +'<div style="font-size:11px;color:#94a3b8">'+totalWallGals+' gal wall + '+totalTrimGals+' gal trim</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="padding:16px;background:#f0fdf4;border-radius:8px;border:2px solid #86efac;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">'
+      +'<div style="font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">Your GP &mdash; '+marginPct+'%</div>'
+      +'<div style="font-size:30px;font-weight:900;color:#16a34a">'+fmt(gp)+'</div>'
+    +'</div>';
+
+  var rowsHtml='';
+  calcs.forEach(function(item){
+    var room=item.room,calc=item.calc;
+    if(calc.total===0) return;
+    rowsHtml+='<tr>'
+      +'<td style="font-weight:600">'+room.name+'</td>'
+      +'<td class="r" style="color:#94a3b8;font-size:12px">'+fmtH(calc.hours)+'</td>'
+      +'<td class="r" style="font-weight:700;color:#1a3a8a">'+fmt(calc.total)+'</td>'
+      +'<td class="r" style="color:#f97316;font-weight:600">'+fmt(calc.materials)+'</td>'
+      +'<td class="r" style="color:#ef4444;font-weight:600">'+fmt(calc.labor)+'</td>'
+      +'<td class="r" style="font-weight:700;color:#16a34a">'+fmt(calc.total*0.50)+'</td>'
+      +'</tr>';
+  });
+  if(lineItems.length&&liTotal!==0){
+    rowsHtml+='<tr><td style="font-weight:600">Add. Items</td><td class="r" style="color:#94a3b8">--</td><td class="r" style="font-weight:700;color:#1a3a8a">'+fmt(liTotal)+'</td><td class="r" style="color:#f97316">--</td><td class="r" style="color:#ef4444">--</td><td class="r" style="font-weight:700;color:#16a34a">'+fmt(liTotal*0.50)+'</td></tr>';
+  }
+  if(calcs.filter(function(x){return x.calc.total>0;}).length>1||lineItems.length){
+    rowsHtml+='<tr style="border-top:2px solid #e2e8f0">'
+      +'<td style="font-weight:900;padding-top:10px">TOTAL</td>'
+      +'<td class="r" style="color:#94a3b8;padding-top:10px">'+fmtH(totalHrs)+'</td>'
+      +'<td class="r" style="font-weight:900;color:#1a3a8a;padding-top:10px">'+fmt(grandTotal)+'</td>'
+      +'<td class="r" style="font-weight:900;color:#f97316;padding-top:10px">'+fmt(totalMat)+'</td>'
+      +'<td class="r" style="font-weight:900;color:#ef4444;padding-top:10px">'+fmt(totalLabor)+'</td>'
+      +'<td class="r" style="font-weight:900;color:#16a34a;padding-top:10px">'+fmt(gp)+'</td>'
+      +'</tr>';
+  }
+  document.getElementById('num-room-rows').innerHTML=rowsHtml||'<tr><td colspan="6" style="color:#94a3b8;text-align:center;padding:20px">No rooms added yet</td></tr>';
+}
+
+
+// ── GoHighLevel Integration ───────────────────────────────
+var GHL_API_KEY = 'pit-49a6e92f-367c-4f96-ad77-bc8be0e842ba';
+var GHL_LOCATION_ID = 'dcjUTngcoS9yzVpJ2evz';
+var GHL_BASE = 'https://services.leadconnectorhq.com';
+
+function openGHLModal() {
+  // Pre-fill from job fields
+  var name = document.getElementById('cl-name') ? document.getElementById('cl-name').value : '';
+  var phone = document.getElementById('cl-phone') ? document.getElementById('cl-phone').value : '';
+  var coName = document.getElementById('co-name') ? (document.getElementById('co-name').value || 'Gould Painting') : 'Gould Painting';
+  var jobTitle = document.getElementById('job-title') ? (document.getElementById('job-title').value || 'Painting Estimate') : 'Painting Estimate';
+  if (name) document.getElementById('ghl-name').value = name;
+  if (phone) document.getElementById('ghl-phone').value = phone;
+  document.getElementById('ghl-subject').value = jobTitle + ' from ' + coName;
+  var modal = document.getElementById('ghl-modal');
+  modal.style.display = 'flex';
+  setGHLStatus('', '');
+}
+
+function setGHLStatus(msg, type) {
+  var el = document.getElementById('ghl-status');
+  if (!msg) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  el.style.background = type === 'error' ? '#fee2e2' : type === 'success' ? '#dcfce7' : '#dbeafe';
+  el.style.color = type === 'error' ? '#991b1b' : type === 'success' ? '#166534' : '#1e40af';
+  el.textContent = msg;
+}
+
+function buildGHLLineItems() {
+  var calcs = rooms.map(function(r) { return {room: r, calc: calcRoom(r)}; });
+  var items = [];
+  calcs.forEach(function(item) {
+    var room = item.room, calc = item.calc;
+    if (calc.total === 0) return;
+    items.push({
+      name: room.name,
+      description: naturalRoomDesc(room) + (room.notes ? ' — ' + room.notes : ''),
+      currency: 'USD',
+      amount: Math.round(calc.total * 100),
+      qty: 1,
+      type: 'service'
+    });
+  });
+  lineItems.forEach(function(li) {
+    var t = Math.round(li.qty * li.rate * 100);
+    if (t === 0) return;
+    items.push({
+      name: li.desc,
+      description: li.qty + ' ' + li.unit,
+      currency: 'USD',
+      amount: Math.abs(t),
+      qty: 1,
+      type: 'service'
+    });
+  });
+  return items;
+}
+
+async function findOrCreateContact(name, email, phone) {
+  var headers = {
+    'Authorization': 'Bearer ' + GHL_API_KEY,
+    'Content-Type': 'application/json',
+    'Version': '2021-07-28'
+  };
+  // Search by email first
+  if (email) {
+    var searchRes = await fetch(GHL_BASE + '/contacts/?locationId=' + GHL_LOCATION_ID + '&query=' + encodeURIComponent(email), { headers: headers });
+    var searchData = await searchRes.json();
+    if (searchData.contacts && searchData.contacts.length > 0) {
+      return searchData.contacts[0].id;
+    }
+  }
+  // Create new contact
+  var parts = (name || '').trim().split(' ');
+  var body = {
+    locationId: GHL_LOCATION_ID,
+    firstName: parts[0] || name,
+    lastName: parts.slice(1).join(' ') || '',
+    email: email || undefined,
+    phone: phone || undefined
+  };
+  var createRes = await fetch(GHL_BASE + '/contacts/', {
+    method: 'POST', headers: headers, body: JSON.stringify(body)
+  });
+  var createData = await createRes.json();
+  if (createData.contact) return createData.contact.id;
+  throw new Error('Could not create contact: ' + JSON.stringify(createData));
+}
+
+function openGHLFallback() {
+  // Build a plain-text summary to copy to clipboard
+  var calcs = rooms.map(function(r) { return {room: r, calc: calcRoom(r)}; });
+  var txPct = R('r-tax');
+  var roomSub = calcs.reduce(function(s,x){return s+x.calc.total;},0);
+  var liTotal = lineItemsTotal();
+  var sub = roomSub + liTotal;
+  var total = sub * (1 + txPct/100);
+
+  var name = document.getElementById('ghl-name').value || document.getElementById('cl-name').value || '';
+  var lines = [];
+  lines.push('ESTIMATE: ' + (document.getElementById('ghl-subject').value || 'Painting Estimate'));
+  lines.push('Client: ' + name);
+  lines.push('');
+  calcs.forEach(function(item) {
+    if(item.calc.total === 0) return;
+    lines.push(item.room.name + ' — ' + fmt(item.calc.total));
+    lines.push('  ' + naturalRoomDesc(item.room));
+  });
+  lineItems.forEach(function(li) {
+    var t = li.qty * li.rate;
+    if(t !== 0) lines.push(li.desc + ' — ' + fmt(t));
+  });
+  lines.push('');
+  if(txPct > 0) lines.push('Tax (' + txPct + '%): ' + fmt(total - sub));
+  lines.push('TOTAL: ' + fmt(total));
+
+  var summary = lines.join('\n');
+
+  // Copy to clipboard
+  navigator.clipboard.writeText(summary).then(function() {
+    setGHLStatus('✓ Estimate summary copied to clipboard! Opening GHL now — paste into the invoice notes.', 'success');
+  }).catch(function() {
+    setGHLStatus('Opening GHL new invoice tab. Total: ' + fmt(total), 'info');
+  });
+
+  // Open GHL new invoice page directly
+  var ghlUrl = 'https://app.gohighlevel.com/v2/location/' + GHL_LOCATION_ID + '/payments/invoices/create';
+  window.open(ghlUrl, '_blank');
+}
+
+async function sendToGHL() {
+  var email = document.getElementById('ghl-email').value.trim();
+  var name = document.getElementById('ghl-name').value.trim();
+  var phone = document.getElementById('ghl-phone').value.trim();
+  var subject = document.getElementById('ghl-subject').value.trim();
+
+  if (!email && !phone) {
+    setGHLStatus('Please enter at least an email or phone number.', 'error');
+    return;
+  }
+
+  var btn = document.getElementById('ghl-send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  setGHLStatus('Finding contact in GHL…', 'info');
+
+  try {
+    var contactId = await findOrCreateContact(name, email, phone);
+    setGHLStatus('✓ Contact found. Creating estimate…', 'info');
+
+    var lineItemsData = buildGHLLineItems();
+    var txPct = R('r-tax');
+    var calcs = rooms.map(function(r) { return {room: r, calc: calcRoom(r)}; });
+    var roomSub = calcs.reduce(function(s, x) { return s + x.calc.total; }, 0);
+    var liTotal = lineItemsTotal();
+    var sub = roomSub + liTotal;
+    var total = sub * (1 + txPct / 100);
+    var coName = (document.getElementById('co-name') && document.getElementById('co-name').value) || 'Gould Painting';
+    var jValid = (document.getElementById('job-valid') && document.getElementById('job-valid').value) || '30';
+    var dueDate = new Date();
+    dueDate.setDate(dueDate.getDate() + parseInt(jValid));
+
+    var apiHeaders = {
+      'Authorization': 'Bearer ' + GHL_API_KEY,
+      'Content-Type': 'application/json',
+      'Version': '2021-07-28'
+    };
+
+    // Build line items
+    var ghlItems = lineItemsData.map(function(item) {
+      return {
+        name: item.name,
+        description: item.description || '',
+        currency: 'USD',
+        amount: parseFloat((item.amount / 100).toFixed(2)),
+        qty: 1,
+        unitPrice: parseFloat((item.amount / 100).toFixed(2))
+      };
+    });
+
+    // Add tax as a separate line item if tax > 0
+    if (txPct > 0) {
+      var taxAmt = parseFloat((sub * txPct / 100).toFixed(2));
+      ghlItems.push({
+        name: 'Sales Tax (' + txPct + '%)',
+        description: 'State & local sales tax',
+        currency: 'USD',
+        amount: taxAmt,
+        qty: 1,
+        unitPrice: taxAmt
+      });
+    }
+
+    // GHL Invoices API — create as draft, you send from GHL
+    // Format phone as E.164
+    var rawPhone = phone.replace(/\D/g,'');
+    if(rawPhone.length===10) rawPhone='+1'+rawPhone;
+    else if(rawPhone.length===11) rawPhone='+'+rawPhone;
+    else rawPhone = phone;
+
+    var estimateBody = {
+      altId: GHL_LOCATION_ID,
+      altType: 'location',
+      name: (subject).slice(0, 40),
+      title: (subject).slice(0, 40),
+      currency: 'USD',
+      status: 'draft',
+      issueDate: new Date().toISOString().split('T')[0],
+      expiryDate: dueDate.toISOString().split('T')[0],
+      businessDetails: {
+        name: coName,
+        address: [{ city: 'Buffalo', state: 'NY', country: 'US' }],
+        phoneNo: '',
+        website: '',
+        logoUrl: ''
+      },
+      contactDetails: {
+        id: contactId,
+        name: name || '',
+        phoneNo: rawPhone,
+        email: email || '',
+        customFields: []
+      },
+      discount: { type: 'percentage', value: 0 },
+      frequencySettings: { enabled: false, frequency: 'monthly', startDate: new Date().toISOString().split('T')[0], endDate: dueDate.toISOString().split('T')[0] },
+      items: ghlItems.map(function(item) {
+        return {
+          name: item.name.slice(0, 40),
+          description: item.description || '',
+          currency: 'USD',
+          type: 'one_time',
+          amount: item.amount,
+          qty: 1,
+          unitPrice: item.amount,
+          discount: { type: 'percentage', value: 0 }
+        };
+      })
+    };
+
+    var res = await fetch('https://services.leadconnectorhq.com/invoices/estimate', {
+      method: 'POST',
+      headers: apiHeaders,
+      body: JSON.stringify(estimateBody)
+    });
+
+    var resText = await res.text();
+    var resData;
+    try { resData = JSON.parse(resText); } catch(e) { resData = {raw: resText}; }
+
+    if (!res.ok) {
+      var fullErr = JSON.stringify(resData).slice(0, 400);
+      setGHLStatus('GHL error: ' + fullErr, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Retry';
+      return;
+    }
+
+    var estimateId = (resData.estimate && (resData.estimate._id || resData.estimate.id)) || resData._id || resData.id;
+    var ghlUrl = 'https://app.gohighlevel.com/v2/location/' + GHL_LOCATION_ID + '/payments/v2/estimates';
+
+    if (estimateId || resData) {
+      setGHLStatus('\u2713 Draft estimate created in GHL for ' + (name||email) + '! Go to Payments \u2192 Invoices & Estimates to review and send.', 'success');
+      btn.textContent = '\u2192 Open GHL Estimates';
+      btn.style.background = '#166534';
+      btn.disabled = false;
+      btn.onclick = function() { window.open(ghlUrl, '_blank'); };
+    } else {
+      setGHLStatus('\u2713 Done! Go to GHL \u2192 Payments \u2192 Invoices & Estimates. Response: ' + JSON.stringify(resData).slice(0,100), 'success');
+      btn.textContent = '\u2192 Open GHL';
+      btn.style.background = '#166534';
+      btn.disabled = false;
+      btn.onclick = function() { window.open(ghlUrl, '_blank'); };
+    }
+
+  } catch (err) {
+    setGHLStatus('Error: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Retry';
+  }
+}
+
+window.onload = function() { updateMarginLabel(); };
+
+
+
+// ===================== JOB LOG =====================
+var JOB_LOG_KEY = 'paintpro_job_log';
+
+// ── Job Log: localStorage (works in any browser) ─────────────
+var JOB_LOG_STORAGE_KEY = 'gould-joblog-v1';
+
+async function loadJobLog() {
+  try { return JSON.parse(localStorage.getItem(JOB_LOG_STORAGE_KEY) || '[]'); }
+  catch(e) { return []; }
+}
+
+async function saveToJobLog() {
+  var txPct = R('r-tax');
+  var margin = R('r-margin');
+  var laborRate = R('r-labor');
+  var calcs = rooms.map(function(r) { return { room: r, calc: calcRoom(r) }; });
+  var roomSub = calcs.reduce(function(s, x) { return s + x.calc.total; }, 0);
+  var liTotal = lineItemsTotal();
+  var sub = roomSub + liTotal;
+  var total = sub * (1 + txPct / 100);
+  var totalHours = calcs.reduce(function(s, x) { return s + x.calc.hours; }, 0);
+  var totalMats = calcs.reduce(function(s, x) { return s + x.calc.mats; }, 0);
+  var paySub = totalHours * laborRate;
+  var gp = sub - totalMats - paySub;
+  var gpPct = sub > 0 ? (gp / sub * 100) : 0;
+
+  var entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString(),
+    client: V('cl-name') || 'Unknown',
+    address: V('cl-address') || '',
+    city: V('cl-city') || '',
+    phone: V('cl-phone') || '',
+    email: V('cl-email') || '',
+    job: V('job-title') || V('cl-address') || 'Untitled',
+    hours: Math.round(totalHours * 10) / 10,
+    quote: Math.round(sub * 100) / 100,
+    total: Math.round(total * 100) / 100,
+    mats: Math.round(totalMats * 100) / 100,
+    paySub: Math.round(paySub * 100) / 100,
+    gp: Math.round(gp * 100) / 100,
+    gpPct: Math.round(gpPct * 10) / 10,
+    margin: margin,
+    tax: txPct,
+    laborRate: laborRate,
+    // Full setup snapshot
+    setup: {
+      coName: V('co-name'), coPhone: V('co-phone'), coEmail: V('co-email'), coLic: V('co-lic'),
+      walls: R('r-walls'), ceiling: R('r-ceiling'), base: R('r-base'), dtrim: R('r-dtrim'),
+      crown: R('r-crown'), doorMin: R('r-door'),
+      wpWall: R('r-wp-wall'), wpCeil: R('r-wp-ceil'), wpTrim: R('r-wp-trim'), wpPrimer: R('r-wp-primer'),
+      margin: margin, tax: txPct, labor: laborRate
+    },
+    // Full rooms snapshot
+    roomsData: rooms.map(function(r) { return JSON.parse(JSON.stringify(r)); }),
+    lineItemsData: lineItems.map(function(li) { return JSON.parse(JSON.stringify(li)); }),
+    roomCalcs: calcs.map(function(x) {
+      return {
+        name: x.room.name,
+        hours: Math.round(x.calc.hours * 10) / 10,
+        price: Math.round(x.calc.total * 100) / 100,
+        mats: Math.round(x.calc.mats * 100) / 100,
+        gp: Math.round((x.calc.total - x.calc.mats - x.calc.hours * laborRate) * 100) / 100
+      };
+    })
+  };
+
+  var log = await loadJobLog();
+  log.unshift(entry);
+  localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
+
+  var msg = document.getElementById('save-log-msg');
+  if (msg) { msg.textContent = '\u2713 Saved! ' + entry.client + ' — ' + entry.date; msg.style.color='#16a34a'; }
+  renderJobLog();
+}
+
+async function deleteLogEntry(id) {
+  var log = (await loadJobLog()).filter(function(e) { return e.id !== id; });
+  localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
+  renderJobLog();
+}
+
+async function clearJobLog() {
+  if (confirm('Delete all saved jobs? This cannot be undone.')) {
+    localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify([]));
+    renderJobLog();
+  }
+}
+
+function exportToCSV() {
+  loadJobLog().then(function(log) {
+    if (!log.length) { alert('No jobs saved yet.'); return; }
+    var rows = [['Date','Client','Address','Job','Hours','Quote','Tax Total','Materials','Pay Sub','GP $','GP %','Margin %']];
+    log.forEach(function(e) {
+      rows.push([
+        e.date, e.client, (e.address||'')+(e.city?' '+e.city:''), e.job,
+        e.hours, e.quote, e.total||e.quote, e.mats, e.paySub, e.gp, e.gpPct+'%', (e.margin||'')+'%'
+      ]);
+    });
+    var csv = rows.map(function(r){ return r.map(function(c){ return '"'+(c||'').toString().replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+    var blob = new Blob([csv], {type:'text/csv'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'GoulPainting_JobLog_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click();
+  });
+}
+
+async function renderJobLog() {
+  var log = await loadJobLog();
+  var empty = document.getElementById('log-empty');
+  var wrap = document.getElementById('log-table-wrap');
+  var tbody = document.getElementById('log-rows');
+  var tfoot = document.getElementById('log-totals');
+  if (!tbody) return;
+
+  if (!log.length) {
+    if (empty) empty.style.display = '';
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  if (wrap) wrap.style.display = '';
+
+  tbody.innerHTML = log.map(function(e) {
+    var gpColor = e.gpPct >= 45 ? '#16a34a' : e.gpPct >= 30 ? '#d97706' : '#dc2626';
+    return '<tr style="border-bottom:1px solid #f1f5f9">' +
+      '<td style="padding:9px 12px;font-size:11px;color:#64748b">' + e.date + '</td>' +
+      '<td style="padding:9px 12px;font-weight:600;font-size:13px">' + e.client + '</td>' +
+      '<td style="padding:9px 12px;font-size:12px;color:#475569">' + (e.address||e.job||'') + '</td>' +
+      '<td class="r" style="padding:9px 12px;font-size:12px">' + e.hours + 'h</td>' +
+      '<td class="r" style="padding:9px 12px;font-weight:600">$' + e.quote.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+      '<td class="r" style="padding:9px 12px;color:#f97316">$' + e.mats.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+      '<td class="r" style="padding:9px 12px;color:#ef4444">$' + e.paySub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+      '<td class="r" style="padding:9px 12px;color:#16a34a;font-weight:600">$' + e.gp.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+      '<td class="r" style="padding:9px 12px;font-weight:700;color:' + gpColor + '">' + e.gpPct + '%</td>' +
+      '<td style="padding:9px 12px;white-space:nowrap">' +
+        (e.roomsData ? '<button onclick="loadJob(' + e.id + ')" style="background:#dbeafe;color:#1e40af;border:none;padding:4px 10px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:700;margin-right:4px">Load</button>' : '') +
+        '<button onclick="deleteLogEntry(' + e.id + ')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:14px" title="Delete">✕</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+
+  var totQ = log.reduce(function(s,e){return s+e.quote;},0);
+  var totGP = log.reduce(function(s,e){return s+e.gp;},0);
+  var totMats = log.reduce(function(s,e){return s+e.mats;},0);
+  var totSub = log.reduce(function(s,e){return s+e.paySub;},0);
+  var totHrs = log.reduce(function(s,e){return s+e.hours;},0);
+  var avgGPpct = totQ > 0 ? (totGP / totQ * 100) : 0;
+  tfoot.innerHTML = '<tr style="background:#f8fafc;font-weight:700;border-top:2px solid #e2e8f0">' +
+    '<td colspan="3" style="padding:10px 12px;color:#1a3a8a">TOTAL (' + log.length + ' jobs)</td>' +
+    '<td class="r" style="padding:10px 12px">' + Math.round(totHrs*10)/10 + 'h</td>' +
+    '<td class="r" style="padding:10px 12px">$' + totQ.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+    '<td class="r" style="padding:10px 12px;color:#f97316">$' + totMats.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+    '<td class="r" style="padding:10px 12px;color:#ef4444">$' + totSub.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+    '<td class="r" style="padding:10px 12px;color:#16a34a">$' + totGP.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) + '</td>' +
+    '<td class="r" style="padding:10px 12px;color:#16a34a">' + Math.round(avgGPpct*10)/10 + '%</td>' +
+    '<td></td></tr>';
+}
+
+async function loadJob(id) {
+  var log = await loadJobLog();
+  var e = log.find(function(j){ return j.id === id; });
+  if (!e) return;
+  if (!confirm('Load "' + e.client + ' — ' + e.job + '"? This will replace your current job.')) return;
+
+  // Restore setup
+  if (e.setup) {
+    var s = e.setup;
+    var fields = {
+      'co-name': s.coName, 'co-phone': s.coPhone, 'co-email': s.coEmail, 'co-lic': s.coLic,
+      'r-walls': s.walls, 'r-ceiling': s.ceiling, 'r-base': s.base, 'r-dtrim': s.dtrim,
+      'r-crown': s.crown, 'r-door': s.doorMin,
+      'r-wp-wall': s.wpWall, 'r-wp-ceil': s.wpCeil, 'r-wp-trim': s.wpTrim, 'r-wp-primer': s.wpPrimer,
+      'r-margin': s.margin, 'r-tax': s.tax, 'r-labor': s.labor
+    };
+    Object.keys(fields).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && fields[id] !== undefined) el.value = fields[id];
+    });
+    updateMarginLabel(); updateHeader();
+  }
+  // Restore client info
+  var cfields = {'cl-name': e.client, 'cl-address': e.address, 'cl-city': e.city, 'cl-phone': e.phone, 'job-title': e.job};
+  Object.keys(cfields).forEach(function(id) { var el=document.getElementById(id); if(el) el.value=cfields[id]||''; });
+
+  // Restore rooms
+  rooms = e.roomsData ? e.roomsData.map(function(r){ return JSON.parse(JSON.stringify(r)); }) : [];
+  lineItems = e.lineItemsData ? e.lineItemsData.map(function(li){ return JSON.parse(JSON.stringify(li)); }) : [];
+  rc = rooms.length;
+  renderRooms();
+  recalcAll();
+  showPage('rooms');
+  alert('Job loaded! Review your rooms, then go to Quote or My Numbers.');
+}
+
+// Render log when page loads
+renderJobLog();
+</script>
+</body>
+</html>
