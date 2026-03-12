@@ -1838,6 +1838,34 @@ async function sendSubContract() {
   };
 
   try {
+    // First find or create the contact so we have a contactId and userId
+    var subContactId = null;
+    try {
+      var cRes = await fetch('https://services.leadconnectorhq.com/contacts/?locationId=' + GHL_LOCATION_ID + '&query=' + encodeURIComponent(subEmail), {
+        headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' }
+      });
+      var cData = await cRes.json();
+      if (cData.contacts && cData.contacts.length > 0) {
+        subContactId = cData.contacts[0].id;
+      } else {
+        var nameParts = subName.split(' ');
+        var createRes = await fetch('https://services.leadconnectorhq.com/contacts/', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' },
+          body: JSON.stringify({ locationId: GHL_LOCATION_ID, firstName: nameParts[0], lastName: nameParts.slice(1).join(' ')||'', email: subEmail, phone: subPhone||undefined })
+        });
+        var createData = await createRes.json();
+        subContactId = createData.contact && createData.contact.id;
+      }
+    } catch(e) { console.warn('Contact lookup failed:', e); }
+
+    if (!subContactId) {
+      statusEl.style.background = '#fee2e2';
+      statusEl.style.color = '#991b1b';
+      statusEl.textContent = 'Could not find or create GHL contact for sub. Check email and try again.';
+      return;
+    }
+
     var res = await fetch('https://services.leadconnectorhq.com/proposals/templates/send', {
       method: 'POST',
       headers: {
@@ -1848,15 +1876,8 @@ async function sendSubContract() {
       body: JSON.stringify({
         locationId: GHL_LOCATION_ID,
         templateId: GHL_CONTRACT_TEMPLATE_ID,
-        name: 'Sub Agreement — ' + (V('cl-name')||'Job') + ' — ' + subName,
-        sendEmail: true,
-        recipients: [{
-          name: subName,
-          email: subEmail,
-          phone: subPhone || undefined,
-          role: 'Subcontractor'
-        }],
-        customValues: customValues
+        contactId: subContactId,
+        userId: subContactId
       })
     });
 
