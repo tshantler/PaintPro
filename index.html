@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hustler Bids</title>
+<title>Paint.io</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Mono:wght@500&display=swap');
@@ -67,6 +67,7 @@ header::after {
 }
 header h1 { font-size: 19px; font-weight: 800; letter-spacing: -0.3px; }
 header span { font-size: 12px; opacity: 0.55; font-weight: 500; }
+#header-company { font-size: 13px !important; font-weight: 700 !important; opacity: 1 !important; color: rgba(255,255,255,0.85) !important; display: block !important; letter-spacing: -0.2px; }
 
 nav {
   background: var(--surface);
@@ -327,7 +328,6 @@ table.qt td { padding: 7px 10px; border-bottom: 1px solid var(--surface2); }
   nav button { padding: 11px 10px; font-size: 11.5px; }
   header { padding: 10px 14px; height: 50px; }
   header h1 { font-size: 17px; }
-  header span { display: none; }
   .pq-parties { grid-template-columns: 1fr; }
   .pq-setup-grid { grid-template-columns: 1fr; }
   .pq-sig-grid { grid-template-columns: 1fr; }
@@ -364,26 +364,158 @@ table.qt td { padding: 7px 10px; border-bottom: 1px solid var(--surface2); }
   .print-quote td, .print-quote th { padding: 4px 8px !important; }
   @page { margin: 0.5in; size: letter; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL POLISH — upgrades all inline-styled elements
+   ═══════════════════════════════════════════════════════════ */
+
+/* Force DM Sans everywhere */
+*, button, input, select, textarea, a {
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+}
+
+/* All inline buttons get sharper radius + transition */
+button {
+  border-radius: 8px !important;
+  transition: filter 0.15s, transform 0.12s, box-shadow 0.15s !important;
+  letter-spacing: 0.01em;
+}
+button:hover { filter: brightness(1.08); }
+button:active { transform: scale(0.97); }
+
+/* Anchor buttons (Text/Call) */
+a[href^="sms:"], a[href^="tel:"] {
+  border-radius: 8px !important;
+  transition: filter 0.15s !important;
+  font-family: 'DM Sans', sans-serif !important;
+}
+a[href^="sms:"]:hover, a[href^="tel:"]:hover { filter: brightness(1.1); }
+
+/* Cards with colored left borders — lift on hover */
+.card[style*="border-left"] { transition: box-shadow 0.18s, transform 0.18s !important; }
+.card[style*="border-left"]:hover { box-shadow: 0 6px 24px rgba(15,31,92,0.13) !important; transform: translateY(-1px); }
+
+/* Section headers (ALL CAPS labels) */
+div[style*="text-transform:uppercase"],
+div[style*="text-transform: uppercase"] {
+  letter-spacing: 0.1em !important;
+}
+
+/* Status/badge pills */
+span[style*="border-radius:10px"],
+span[style*="border-radius: 10px"] {
+  border-radius: 20px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.04em;
+}
+
+/* Pipeline lead cards */
+#leads-list .card { border-radius: 14px !important; }
+
+/* Progress bar steps */
+div[style*="border-radius:50%"] { transition: background 0.2s !important; }
+
+/* Overlays */
+#estimator-overlay, #pre-call-overlay {
+  backdrop-filter: blur(2px);
+}
+
+/* Estimator header */
+#estimator-overlay > div:first-child,
+#pre-call-overlay > div:first-child {
+  border-bottom: 1px solid rgba(255,255,255,0.12) !important;
+}
+
+/* Stage number circles */
+div[style*="border-radius:50%"][style*="font-weight:900"] {
+  font-size: 12px !important;
+}
+
+/* Improve all inline green action buttons */
+button[style*="background:#16a34a"],
+button[style*="background: #16a34a"] {
+  background: linear-gradient(135deg, #059669, #16a34a) !important;
+  box-shadow: 0 2px 8px rgba(16,163,74,0.25) !important;
+}
+
+/* Improve all inline navy/blue buttons */
+button[style*="background:#1a3a8a"],
+button[style*="background: #1a3a8a"] {
+  background: linear-gradient(135deg, #0f1f5c, #1a3a8a) !important;
+  box-shadow: 0 2px 8px rgba(26,58,138,0.25) !important;
+}
+
+/* Improve all inline purple buttons */
+button[style*="background:#7c3aed"],
+button[style*="background: #7c3aed"] {
+  background: linear-gradient(135deg, #5b21b6, #7c3aed) !important;
+  box-shadow: 0 2px 8px rgba(124,58,237,0.25) !important;
+}
+
+/* Improve all inline red buttons */
+button[style*="background:#dc2626"],
+button[style*="background: #dc2626"] {
+  background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+  box-shadow: 0 2px 8px rgba(220,38,38,0.2) !important;
+}
+
+/* Full-width CTA buttons */
+button[style*="width:100%"] {
+  border-radius: 10px !important;
+  font-size: 14px !important;
+}
+
+/* Smoother modals */
+div[style*="position:fixed"][style*="z-index:1000"] > div,
+div[style*="position:fixed"][style*="z-index:999"] > div {
+  border-radius: 18px !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.22) !important;
+}
+
+/* Nav active indicator tweak */
+nav button.active {
+  background: linear-gradient(to bottom, rgba(59,130,246,0.06), transparent) !important;
+}
+
+.hf-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hf-btn.active-hf {
+  border-color: #166534;
+  background: #166534;
+  color: white;
+}
+
+/* Better scrollbar on desktop */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🔥 HUSTLER BIDS</h1>
-  <div style="display:flex;align-items:center;gap:10px">
+  <h1>Paint.io</h1>
+  <div style="display:flex;align-items:center;gap:12px">
     <div id="sync-indicator" style="font-size:11px;color:rgba(255,255,255,0.6);display:none">✓ synced</div>
-    <span id="header-company" style="font-size:12px;opacity:0.8">Gould Painting WNY</span>
-    <button onclick="showAddLead()" style="background:#ef4444;color:white;border:none;padding:7px 16px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer">+ New Lead</button>
-    <button onclick="showPage('setup')" title="Settings" style="background:rgba(255,255,255,0.15);color:white;border:1.5px solid rgba(255,255,255,0.3);width:36px;height:36px;border-radius:8px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center">⚙️</button>
+    <span id="header-company" style="font-size:13px;font-weight:700;opacity:0.9;letter-spacing:-0.2px">Gould Painting WNY</span>
   </div>
 </header>
 <nav>
-  <button onclick="showPage('leads')" style="background:#fdf4ff;color:#7c3aed">📋 Pipeline</button>
-  <button onclick="showPage('fu')"    style="background:#fff5f5;color:#dc2626">🔔 Follow Ups</button>
-  <button onclick="showPage('wo')"    style="background:#fff7ed;color:#c2410c">🔨 Work Order</button>
+  <button onclick="showPage('dash')"   style="background:#fdf4ff;color:#7c3aed">📊 Dashboard</button>
+  <button onclick="showPage('leads')"  style="background:#fdf4ff;color:#7c3aed">📋 Pipeline</button>
+  <button onclick="showPage('fu')"     style="background:#fff5f5;color:#dc2626">🔔 Follow Ups</button>
+  <button onclick="showPage('wo')"     style="background:#fff7ed;color:#c2410c">🔨 Work Order</button>
   <button onclick="showPage('active')" style="background:#f0f9ff;color:#0369a1">🚧 Active Jobs</button>
-  <button onclick="showPage('log')"   style="background:#eff6ff;color:#1e40af">📁 Job Log</button>
-  <button onclick="showPage('dash')"  style="background:#fdf4ff;color:#7c3aed">📊 Dashboard</button>
+  <button onclick="showPage('history')" style="background:#f0fdf4;color:#166534">📁 History</button>
 </nav>
 
 <!-- Toast message (used for confirmations throughout app) -->
@@ -586,9 +718,12 @@ table.qt td { padding: 7px 10px; border-bottom: 1px solid var(--surface2); }
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div>
         <div style="font-size:13px;font-weight:800;color:#7c3aed">📋 Lead Pipeline</div>
-        <div style="font-size:11px;color:#64748b;margin-top:2px">Leads from pre-call. Tap a card to load it into the estimator when you're ready to bid.</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px">All your leads. Work each one through the steps — Pre-Call → Appt → Estimate → Quote → Win.</div>
       </div>
-      <button onclick="showAddLead()" style="background:#7c3aed;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ Add Lead</button>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="showAddLead()" style="background:#7c3aed;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ New Lead</button>
+        <button onclick="showPage('setup')" title="Settings" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">⚙️</button>
+      </div>
     </div>
   </div>
 
@@ -619,8 +754,8 @@ table.qt td { padding: 7px 10px; border-bottom: 1px solid var(--surface2); }
 
   <!-- GHL Link Generator -->
   <div class="card" style="border-left:4px solid #0f9d58;background:#f0fdf4;padding:14px 16px">
-    <div style="font-size:13px;font-weight:800;color:#0f9d58;margin-bottom:4px">🔗 GHL → Hustler Bids Link</div>
-    <div style="font-size:11px;color:#64748b;margin-bottom:12px">Add this as a custom link on GHL contact records. Tapping it opens Hustler Bids pre-filled and saves the lead automatically.</div>
+    <div style="font-size:13px;font-weight:800;color:#0f9d58;margin-bottom:4px">🔗 GHL → Paint.io Link</div>
+    <div style="font-size:11px;color:#64748b;margin-bottom:12px">Add this as a custom link on GHL contact records. Tapping it opens Paint.io pre-filled and saves the lead automatically.</div>
     <div style="background:#1e293b;border-radius:8px;padding:12px 14px;margin-bottom:10px;overflow-x:auto">
       <div id="ghl-link-display" style="font-size:11px;color:#86efac;font-family:monospace;white-space:nowrap;line-height:1.6"></div>
     </div>
@@ -631,8 +766,8 @@ table.qt td { padding: 7px 10px; border-bottom: 1px solid var(--surface2); }
 
   <!-- GHL Webhook Setup -->
   <div class="card" style="border-left:4px solid #7c3aed;background:#faf5ff;padding:14px 16px">
-    <div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:4px">📅 GHL Calendar → Hustler Bids Webhook</div>
-    <div style="font-size:11px;color:#64748b;margin-bottom:10px">When someone books an appointment in GHL, this webhook auto-creates the lead in Hustler Bids with the appointment date — no manual entry.</div>
+    <div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:4px">📅 GHL Calendar → Paint.io Webhook</div>
+    <div style="font-size:11px;color:#64748b;margin-bottom:10px">When someone books an appointment in GHL, this webhook auto-creates the lead in Paint.io with the appointment date — no manual entry.</div>
     <div style="background:#1e293b;border-radius:8px;padding:10px 14px;margin-bottom:10px;overflow-x:auto">
       <div style="font-size:10px;color:#c4b5fd;font-family:monospace;line-height:1.8">
         https://tshantler.github.io/PaintPro?ghl_webhook=1<br>
@@ -1388,16 +1523,35 @@ Select all paint colors prior to start date</textarea>
 
 <!-- ACCEPT LEAD MODAL -->
 <div id="accept-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;align-items:center;justify-content:center">
-  <div style="background:white;border-radius:16px;padding:32px 28px;width:360px;max-width:95vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
-    <div style="font-size:48px;margin-bottom:12px">🎉</div>
-    <div style="font-size:20px;font-weight:900;color:#16a34a;margin-bottom:6px">Job Won!</div>
-    <div style="font-size:15px;color:#475569;margin-bottom:24px"><span id="accept-modal-name" style="font-weight:700"></span> accepted your quote.</div>
+  <div style="background:white;border-radius:16px;padding:28px 24px;width:380px;max-width:95vw;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="font-size:44px;margin-bottom:8px">🎉</div>
+    <div style="font-size:20px;font-weight:900;color:#16a34a;margin-bottom:4px">Job Won!</div>
+    <div style="font-size:14px;color:#475569;margin-bottom:20px"><span id="accept-modal-name" style="font-weight:700"></span> accepted your quote.</div>
+
+    <!-- Deposit collection -->
+    <div style="background:#f0fdf4;border:2px solid #16a34a;border-radius:12px;padding:16px;margin-bottom:18px;text-align:left">
+      <div style="font-size:11px;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">💳 Collect Deposit Now</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font-size:13px;color:#475569">Quote Total</span>
+        <span id="accept-modal-quote" style="font-size:14px;font-weight:800;color:#1e293b">—</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <span style="font-size:13px;color:#475569">30% Deposit Due</span>
+        <span id="accept-modal-deposit" style="font-size:18px;font-weight:900;color:#16a34a">—</span>
+      </div>
+      <button id="accept-dep-btn" onclick="acceptModalMarkDeposit()"
+        style="width:100%;background:#16a34a;color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:800;cursor:pointer">
+        ✅ Mark Deposit Received
+      </button>
+      <div id="accept-dep-confirm" style="display:none;font-size:12px;font-weight:700;color:#16a34a;margin-top:8px;text-align:center">✓ Deposit marked received!</div>
+    </div>
+
     <button onclick="document.getElementById('accept-modal').style.display='none'; showPage('wo'); buildWOWonList();"
-      style="width:100%;background:#16a34a;color:white;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:900;cursor:pointer;margin-bottom:10px">
-      Build Work Order →
+      style="width:100%;background:#1a3a8a;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer;margin-bottom:10px">
+      🔨 Build Work Order →
     </button>
     <button onclick="document.getElementById('accept-modal').style.display='none';"
-      style="width:100%;background:white;color:#64748b;border:1px solid #e2e8f0;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer">
+      style="width:100%;background:white;color:#64748b;border:1px solid #e2e8f0;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer">
       Stay in Pipeline
     </button>
   </div>
@@ -1473,21 +1627,21 @@ Select all paint colors prior to start date</textarea>
     <div id="feeler-scoreboard" style="display:none;background:white;border-radius:10px;border:2px solid #e2e8f0;padding:12px 14px;margin-bottom:10px">
       <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:10px">Response Tracker</div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
-        <div style="text-align:center;background:#f8fafc;border-radius:8px;padding:10px 6px">
+        <div style="text-align:center;background:#fffbeb;border-radius:8px;padding:10px 6px">
           <div id="sb-count-sent" style="font-size:22px;font-weight:900;color:#d97706">0</div>
           <div style="font-size:10px;font-weight:700;color:#92400e;margin-top:2px">WAITING</div>
         </div>
+        <div style="text-align:center;background:#eff6ff;border-radius:8px;padding:10px 6px">
+          <div id="sb-count-interested" style="font-size:22px;font-weight:900;color:#2563eb">0</div>
+          <div style="font-size:10px;font-weight:700;color:#1d4ed8;margin-top:2px">INTERESTED</div>
+        </div>
         <div style="text-align:center;background:#f0fdf4;border-radius:8px;padding:10px 6px">
           <div id="sb-count-yes" style="font-size:22px;font-weight:900;color:#16a34a">0</div>
-          <div style="font-size:10px;font-weight:700;color:#166534;margin-top:2px">SAID YES</div>
+          <div style="font-size:10px;font-weight:700;color:#166534;margin-top:2px">CONFIRMED</div>
         </div>
         <div style="text-align:center;background:#fff5f5;border-radius:8px;padding:10px 6px">
           <div id="sb-count-no" style="font-size:22px;font-weight:900;color:#dc2626">0</div>
-          <div style="font-size:10px;font-weight:700;color:#991b1b;margin-top:2px">SAID NO</div>
-        </div>
-        <div style="text-align:center;background:#f8fafc;border-radius:8px;padding:10px 6px">
-          <div id="sb-count-pending" style="font-size:22px;font-weight:900;color:#64748b">0</div>
-          <div style="font-size:10px;font-weight:700;color:#475569;margin-top:2px">NOT SENT</div>
+          <div style="font-size:10px;font-weight:700;color:#991b1b;margin-top:2px">PASSED</div>
         </div>
       </div>
       <!-- Quick-tap response row — shows after feelers sent -->
@@ -1498,7 +1652,7 @@ Select all paint colors prior to start date</textarea>
       <!-- Winner banner -->
       <div id="sb-winner-banner" style="display:none;background:#f0fdf4;border:2px solid #16a34a;border-radius:8px;padding:10px 14px;margin-top:8px;text-align:center">
         <div style="font-size:12px;font-weight:800;color:#16a34a" id="sb-winner-text"></div>
-        <button onclick="woUnlockStage3()" style="margin-top:8px;background:#16a34a;color:white;border:none;padding:9px 24px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">Build Work Order →</button>
+        <div style="font-size:11px;color:#166534;margin-top:4px">Send their contract then hit Build Work Order on their card below ↓</div>
       </div>
     </div>
 
@@ -1522,15 +1676,9 @@ Select all paint colors prior to start date</textarea>
           <button onclick="addFeelerSub()" style="background:#0f9d58;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ Add</button>
         </div>
       </details>
-      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:10px">
-        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:6px">FEELER TEXT PREVIEW</div>
-        <div id="feeler-preview" style="font-size:13px;color:#374151;font-style:italic;line-height:1.5"></div>
-      </div>
-      <button id="feeler-send-btn" onclick="sendAllFeelers()" style="width:100%;background:#0f9d58;color:white;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">📲 Send Feeler to All Subs</button>
-      <div id="feeler-status" style="margin-top:8px;font-size:12px;color:#64748b;text-align:center"></div>
-      <div style="border-top:1px solid #e2e8f0;margin-top:14px;padding-top:14px">
-        <button onclick="woUnlockStage3()" style="width:100%;background:#16a34a;color:white;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer">✅ Sub Confirmed — Build Work Order →</button>
-      </div>
+      <div id="feeler-preview" style="display:none"></div>
+      <button id="feeler-send-btn" style="display:none"></button>
+      <div id="feeler-status" style="display:none"></div>
     </div>
   </div>
 
@@ -1548,26 +1696,17 @@ Select all paint colors prior to start date</textarea>
         <div><label class="lbl">Sub Phone</label><input id="wo-sub-phone" placeholder="7165551234" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px"></div>
         <div><label class="lbl">Sub Email</label><input id="wo-sub-email" placeholder="sub@email.com" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px"></div>
         <div><label class="lbl">Start Date</label><input id="wo-start-date" type="date" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px"></div>
-        <div style="grid-column:span 2"><label class="lbl">Wall Color(s)</label><input id="wo-wall-color" placeholder="e.g. Benjamin Moore OC-17 White Dove" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px"></div>
-        <div style="grid-column:span 2"><label class="lbl">Trim Color</label><input id="wo-trim-color" placeholder="e.g. BM Simply White OC-17" style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:14px"></div>
-        <div style="grid-column:span 2"><label class="lbl">Additional Notes</label><textarea id="wo-color-notes" rows="2" placeholder="Ceiling color, accent wall, door color, special instructions..." style="width:100%;padding:9px 12px;border:1px solid #cbd5e1;border-radius:7px;font-size:13px;resize:none"></textarea></div>
-      </div>
-      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
-        <button onclick="previewWorkOrder()" style="flex:1;min-width:120px;background:#1a3a8a;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">👁 Preview</button>
-        <button onclick="sendWorkOrderText()" style="flex:1;min-width:120px;background:#0f9d58;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">📱 Text Sub</button>
-        <button onclick="sendWorkOrderEmail()" style="flex:1;min-width:120px;background:#d97706;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✉️ Email Sub</button>
-        <button onclick="sendSubContract()" style="flex:1;min-width:120px;background:#7c3aed;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✍️ Contract</button>
-      </div>
-      <div id="wo-contract-status" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;font-weight:600"></div>
-      <div id="wo-photo-summary" style="display:none;margin-bottom:12px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px">
-        <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">📷 Job Photos</div>
-        <div id="wo-photo-grid" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        <input type="hidden" id="wo-wall-color" value="">
+        <input type="hidden" id="wo-trim-color" value="">
+        <input type="hidden" id="wo-color-notes" value="">
       </div>
       <div id="wo-preview" style="display:none;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;font-size:13px;white-space:pre-wrap;line-height:1.7;font-family:monospace;margin-bottom:12px"></div>
-      <button onclick="sendWOAndActivate()" style="width:100%;background:#0369a1;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer">🚧 Move to Active Jobs →</button>
-      <div style="margin-top:8px">
-        <button onclick="openGHLCal('job')" style="width:100%;background:white;color:#7c3aed;border:2px solid #7c3aed;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">📅 Open GHL Job Calendar</button>
+      <div id="wo-contract-status" style="display:none;margin-bottom:12px;padding:12px;border-radius:8px;font-size:13px;font-weight:600"></div>
+      <div style="display:flex;gap:10px;margin-bottom:12px">
+        <button onclick="previewWorkOrder()" style="flex:1;background:#1a3a8a;color:white;border:none;padding:13px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">👁 Preview</button>
+        <button onclick="sendSubContract()" style="flex:1;background:#7c3aed;color:white;border:none;padding:13px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">✍️ Send Contract</button>
       </div>
+      <button onclick="sendWOAndActivate()" style="width:100%;background:#0369a1;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer">🚧 Move to Active Jobs →</button>
     </div>
   </div>
 
@@ -1582,7 +1721,7 @@ Select all paint colors prior to start date</textarea>
         <div style="font-size:13px;font-weight:800;color:#0369a1">🚧 Active Jobs</div>
         <div style="font-size:11px;color:#64748b;margin-top:2px">Jobs in progress — from sub accepted to payment collected.</div>
       </div>
-      <button onclick="addActiveJob()" style="background:#0369a1;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ Add Job</button>
+
     </div>
   </div>
 
@@ -1627,6 +1766,40 @@ Select all paint colors prior to start date</textarea>
 </div>
 <!-- END ACTIVE JOBS PAGE -->
 
+<div class="page" id="page-history">
+  <div class="card" style="border-left:4px solid #166534;background:#f0fdf4;padding:14px 16px;margin-bottom:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-size:15px;font-weight:900;color:#166534">📁 Job History</div>
+        <div style="font-size:12px;color:#166534;margin-top:2px">Every quoted, won, or lost job — all the details in one place.</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="history-search" type="text" placeholder="Search client..." oninput="buildHistory()"
+          style="padding:7px 12px;border:1.5px solid #bbf7d0;border-radius:8px;font-size:13px;width:150px">
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter pills -->
+  <div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 0 4px">
+    <button onclick="setHistoryFilter('all')"    id="hf-all"    class="hf-btn active-hf">All</button>
+    <button onclick="setHistoryFilter('Quoted')" id="hf-Quoted" class="hf-btn">💵 Quoted</button>
+    <button onclick="setHistoryFilter('Won')"    id="hf-Won"    class="hf-btn">🏆 Won</button>
+    <button onclick="setHistoryFilter('Lost')"   id="hf-Lost"   class="hf-btn">❌ Lost</button>
+  </div>
+
+  <!-- Stats bar -->
+  <div id="history-stats" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px"></div>
+
+  <!-- Cards -->
+  <div id="history-list"></div>
+  <div id="history-empty" class="card" style="text-align:center;padding:40px;color:#94a3b8">
+    <div style="font-size:32px;margin-bottom:8px">📁</div>
+    <div style="font-weight:600">No history yet</div>
+    <div style="font-size:13px;margin-top:4px">Jobs you quote, win, or lose will appear here.</div>
+  </div>
+</div>
+
 <div class="page" id="page-dash">
 
   <!-- Morning Briefing Header -->
@@ -1648,6 +1821,15 @@ Select all paint colors prior to start date</textarea>
     <div id="dash-this-week" style="font-size:13px;color:#94a3b8">No jobs scheduled this week</div>
   </div>
 
+  <!-- Closed Jobs -->
+  <div class="card" id="dash-closed-card" style="padding:14px 16px;margin-bottom:0">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:800;color:#1e293b">🏆 Closed Jobs</div>
+      <button onclick="exportToCSV()" style="background:#f1f5f9;color:#475569;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">⬇ Export CSV</button>
+    </div>
+    <div id="dash-closed-list"><div style="color:#94a3b8;font-size:13px">No closed jobs yet</div></div>
+  </div>
+
   <!-- GP Trend Chart -->
   <div class="card">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -1664,69 +1846,7 @@ Select all paint colors prior to start date</textarea>
 
 </div>
 
-<div class="page" id="page-log">
 
-  <!-- Header -->
-  <div class="card" style="border-left:4px solid #1e40af;background:#eff6ff;padding:14px 16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <div>
-        <div class="card-title" style="color:#1e40af;margin:0">📁 Job Log</div>
-        <p style="font-size:12px;color:#1e40af;margin-top:4px">Every estimate you've saved. Mark outcomes, enter actual hours, load old jobs back in.</p>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="exportToCSV()" style="background:#1e40af;color:white;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">⬇ Export CSV</button>
-        <button onclick="clearJobLog()" style="background:#fee2e2;color:#991b1b;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">🗑 Clear All</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Status filter pills -->
-  <div style="display:flex;gap:6px;flex-wrap:wrap;padding:4px 0 8px">
-    <button onclick="setLogFilter('all')"    id="logf-all"    style="padding:5px 14px;border-radius:20px;border:2px solid #1e40af;background:#1e40af;color:white;font-size:12px;font-weight:700;cursor:pointer">All</button>
-    <button onclick="setLogFilter('Open')"   id="logf-Open"   style="padding:5px 14px;border-radius:20px;border:2px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:700;cursor:pointer">Open</button>
-    <button onclick="setLogFilter('Won')"    id="logf-Won"    style="padding:5px 14px;border-radius:20px;border:2px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:700;cursor:pointer">Won</button>
-    <button onclick="setLogFilter('Lost')"   id="logf-Lost"   style="padding:5px 14px;border-radius:20px;border:2px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:700;cursor:pointer">Lost</button>
-  </div>
-
-  <!-- Production Accuracy -->
-  <div class="card" id="log-accuracy-card" style="display:none">
-    <div class="card-title">⏱ Production Accuracy — Bid vs Actual Hours</div>
-    <div id="log-accuracy-empty" style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">Enter actual hours on completed jobs below to track accuracy.</div>
-    <div id="log-accuracy"></div>
-  </div>
-
-  <!-- Jobs Table -->
-  <div class="card" id="log-empty" style="text-align:center;padding:40px;color:#94a3b8">
-    <div style="font-size:32px;margin-bottom:8px">📋</div>
-    <div style="font-weight:600">No saved jobs yet</div>
-    <div style="font-size:13px;margin-top:4px">Send a quote via GHL to auto-save, or use "Save without sending" on the Quote tab.</div>
-  </div>
-
-  <div id="log-table-wrap" style="display:none">
-    <div class="card" style="padding:0;overflow:hidden">
-      <div style="overflow-x:auto">
-        <table class="qt" style="font-size:13px;width:100%;min-width:720px">
-          <thead><tr style="background:#f8fafc">
-            <th style="text-align:left;padding:10px 12px">Date / Client</th>
-            <th class="r" style="padding:10px 8px">Quote</th>
-            <th class="r" style="padding:10px 8px;color:#16a34a">GP</th>
-            <th class="r" style="padding:10px 8px;color:#d97706">Sub Pay</th>
-            <th style="text-align:center;padding:10px 8px;color:#d97706">💳 Dep</th>
-            <th style="text-align:center;padding:10px 8px;color:#0369a1">📤 Final</th>
-            <th style="text-align:center;padding:10px 8px;color:#7c3aed">💸 Sub</th>
-            <th class="r" style="padding:10px 8px">Actual Hrs</th>
-            <th style="text-align:center;padding:10px 8px">Status</th>
-            <th style="padding:10px 8px">Notes</th>
-            <th style="padding:10px 8px"></th>
-          </tr></thead>
-          <tbody id="log-rows"></tbody>
-          <tfoot id="log-totals"></tfoot>
-        </table>
-      </div>
-    </div>
-  </div>
-
-</div>
 
 <script>
 
@@ -1892,18 +2012,19 @@ function showPage(p) {
   if (overlay) overlay.style.display = 'none';
 
   document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-  var pages=['leads','fu','wo','active','log','dash'];
+  var pages=['leads','fu','wo','active','history','log','dash'];
   document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
   var pageEl = document.getElementById('page-'+p);
   if (pageEl) pageEl.classList.add('active');
   if(p==='wo')      { refreshWoPhotoSummary(); refreshWOFeeler(); buildWOWonList(); }
   if(p==='dash')    buildDashboard();
   if(p==='fu')      buildFollowUps();
+  if(p==='history') buildHistory();
   var floatSave = document.getElementById('float-save');
   if (floatSave) floatSave.style.display = 'none';
   if(p==='active')  buildActiveJobs();
   if(p==='leads')   buildLeads();
-  if(p==='log')     renderJobLog();
+  if(p==='log')     { showPage('history'); return; }
   var floatBar = document.getElementById('float-bar');
   if (floatBar) floatBar.classList.remove('show');
 }
@@ -2130,8 +2251,9 @@ function savePreCall() {
 
 function clearPreCall() {
   _preCallLeadId = null;
-  document.getElementById('pre-no-lead').style.display  = 'block';
+  document.getElementById('pre-no-lead').style.display  = 'none';
   document.getElementById('pre-active').style.display   = 'none';
+  showPage('leads');
 }
 
 function resetPreChecklist() {
@@ -3214,7 +3336,7 @@ async function ghlUpdateOpportunityStage(contactId, stage) {
   }
 }
 
-// ── WEBHOOK RECEIVER (GHL → Hustler Bids) ────────────────────
+// ── WEBHOOK RECEIVER (GHL → Paint.io) ────────────────────────
 // GHL sends appointment data here when a calendar booking is made.
 // Set this URL in your GHL workflow as a webhook action:
 //   https://tshantler.github.io/PaintPro?ghl_webhook=1&name=...
@@ -3710,13 +3832,25 @@ async function sendToGHL() {
 // ===================== SUBCONTRACT =====================
 var GHL_CONTRACT_TEMPLATE_ID = '69b310d88ac14109cb815ddc';
 
-async function sendSubContract() {
+async function sendSubContract(subId) {
+  // If called from a feeler card, pre-fill Stage 3 fields with that sub first
+  if (subId) {
+    var fsub = feelerSubs.find(function(s){ return s.id == subId; });
+    if (fsub) {
+      var n = document.getElementById('wo-sub-name');
+      var p = document.getElementById('wo-sub-phone');
+      var e = document.getElementById('wo-sub-email');
+      if (n) { n.value = fsub.name;  n.style.background='#f0fdf4'; n.style.borderColor='#16a34a'; }
+      if (p) { p.value = fsub.phone; p.style.background='#f0fdf4'; p.style.borderColor='#16a34a'; }
+      if (e && fsub.email) { e.value = fsub.email; e.style.background='#f0fdf4'; e.style.borderColor='#16a34a'; }
+    }
+  }
   var subName  = document.getElementById('wo-sub-name').value.trim();
   var subEmail = document.getElementById('wo-sub-email').value.trim();
   var subPhone = document.getElementById('wo-sub-phone').value.trim();
   var startDate = document.getElementById('wo-start-date').value;
 
-  if (!subEmail) { alert('Enter sub email address first.'); return; }
+  if (!subEmail) { alert('No email on file for this sub — add their email in Stage 3 first.'); return; }
   if (!subName)  { alert('Enter sub name first.'); return; }
 
   var statusEl = document.getElementById('wo-contract-status');
@@ -4559,6 +4693,130 @@ async function updateJobOutcome(id, field, value) {
   }
 }
 
+var _historyFilter = 'all';
+
+function setHistoryFilter(f) {
+  _historyFilter = f;
+  ['all','Quoted','Won','Lost'].forEach(function(k) {
+    var btn = document.getElementById('hf-' + k);
+    if (btn) {
+      btn.classList.toggle('active-hf', k === f);
+    }
+  });
+  buildHistory();
+}
+
+function buildHistory() {
+  var list    = document.getElementById('history-list');
+  var empty   = document.getElementById('history-empty');
+  var stats   = document.getElementById('history-stats');
+  if (!list) return;
+
+  var search  = (document.getElementById('history-search') || {}).value || '';
+  var sq = search.toLowerCase().trim();
+
+  // Pull from leads — show Quoted, Won, Lost
+  var eligible = leads.filter(function(l) {
+    return ['Quoted','Won','Lost'].indexOf(l.status) !== -1;
+  });
+
+  // Filter by status
+  var filtered = _historyFilter === 'all' ? eligible
+    : eligible.filter(function(l){ return l.status === _historyFilter; });
+
+  // Search
+  if (sq) {
+    filtered = filtered.filter(function(l) {
+      return (l.name||'').toLowerCase().includes(sq)
+          || (l.address||'').toLowerCase().includes(sq)
+          || (l.city||'').toLowerCase().includes(sq)
+          || (l.jobtype||'').toLowerCase().includes(sq);
+    });
+  }
+
+  // Sort newest first (by id, which is timestamp-based)
+  filtered = filtered.slice().sort(function(a,b){ return b.id - a.id; });
+
+  // Stats bar
+  var won = eligible.filter(function(l){ return l.status==='Won'; });
+  var wonRev = won.reduce(function(s,l){ return s + (l.quoteAmt||0); }, 0);
+  var closeRate = eligible.length > 0 ? Math.round(won.length / eligible.filter(function(l){ return l.status !== 'Quoted'; }).length * 100) : 0;
+  stats.innerHTML = [
+    { label: 'Total Jobs', val: eligible.length, color: '#1e293b' },
+    { label: 'Won', val: won.length, color: '#16a34a' },
+    { label: 'Revenue', val: wonRev > 0 ? '$' + wonRev.toLocaleString() : '—', color: '#16a34a' },
+    { label: 'Close Rate', val: isNaN(closeRate) ? '—' : closeRate + '%', color: closeRate >= 50 ? '#16a34a' : '#d97706' },
+  ].map(function(s) {
+    return '<div style="background:white;border-radius:8px;padding:8px 14px;border:1px solid #e2e8f0;text-align:center">'
+      + '<div style="font-size:16px;font-weight:900;color:' + s.color + '">' + s.val + '</div>'
+      + '<div style="font-size:10px;color:#94a3b8;font-weight:700;margin-top:1px">' + s.label + '</div>'
+      + '</div>';
+  }).join('');
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  var STATUS_COLOR = { 'Quoted': '#0369a1', 'Won': '#16a34a', 'Lost': '#dc2626' };
+  var STATUS_ICON  = { 'Quoted': '💵', 'Won': '🏆', 'Lost': '❌' };
+
+  list.innerHTML = filtered.map(function(l) {
+    var color = STATUS_COLOR[l.status] || '#64748b';
+    var quote = l.quoteAmt || 0;
+
+    // Estimate labor from ballpark or quoteAmt
+    var estHours  = l.bidHours || 0;
+    var actHours  = l.actualHours || 0;
+    var materials = l.materialsCost || 0;
+    var laborCost = actHours ? actHours * 45 : (estHours * 45);
+    var gp        = quote - laborCost - materials;
+    var gpPct     = quote > 0 ? Math.round(gp / quote * 100) : null;
+
+    var hrsHtml = '';
+    if (estHours || actHours) {
+      var over = actHours && estHours && actHours > estHours;
+      hrsHtml = '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">'
+        + (estHours ? '<span style="font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:10px;font-weight:700">Bid: ' + estHours + 'h</span>' : '')
+        + (actHours ? '<span style="font-size:11px;background:' + (over?'#fee2e2':'#dcfce7') + ';color:' + (over?'#dc2626':'#16a34a') + ';padding:2px 8px;border-radius:10px;font-weight:700">Actual: ' + actHours + 'h ' + (over ? '⚠️ over':'✅') + '</span>' : '')
+        + (materials ? '<span style="font-size:11px;background:#faf5ff;color:#7c3aed;padding:2px 8px;border-radius:10px;font-weight:700">Materials: $' + materials.toLocaleString() + '</span>' : '')
+        + '</div>';
+    }
+
+    // Quote preview snippet
+    var noteSnippet = l.notes ? '<div style="font-size:12px;color:#94a3b8;margin-top:5px;font-style:italic">' + l.notes.slice(0,120) + (l.notes.length>120?'…':'') + '</div>' : '';
+    var ballparkHtml = l.ballpark ? '<div style="font-size:12px;color:#d97706;margin-top:2px">Ballpark: $' + Number(l.ballpark).toLocaleString() + '</div>' : '';
+
+    return '<div class="card" style="padding:14px 16px;border-left:4px solid ' + color + ';margin-bottom:0">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      + '<div style="flex:1">'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      + '<span style="font-size:15px;font-weight:900;color:#1e293b">' + l.name + '</span>'
+      + '<span style="font-size:11px;font-weight:800;background:' + color + ';color:white;padding:2px 9px;border-radius:10px">' + STATUS_ICON[l.status] + ' ' + l.status + '</span>'
+      + '</div>'
+      + '<div style="font-size:12px;color:#64748b;margin-top:3px">'
+      + (l.address||'') + (l.city?' · '+l.city:'') + (l.jobtype?' · '+l.jobtype:'')
+      + '</div>'
+      + (l.appt ? '<div style="font-size:11px;color:#94a3b8;margin-top:2px">Appt: ' + l.appt + '</div>' : '')
+      + ballparkHtml
+      + noteSnippet
+      + hrsHtml
+      + '</div>'
+      + '<div style="text-align:right;min-width:80px;padding-left:10px">'
+      + (quote > 0 ? '<div style="font-size:17px;font-weight:900;color:#1e293b">$' + quote.toLocaleString() + '</div>' : '')
+      + (gpPct !== null && quote > 0
+          ? '<div style="font-size:12px;font-weight:800;color:' + (gp>=0?'#16a34a':'#dc2626') + '">GP: $' + Math.round(gp).toLocaleString() + '</div>'
+          + '<div style="font-size:11px;color:' + (gp>=0?'#16a34a':'#dc2626') + '">' + gpPct + '% margin</div>'
+          : '')
+      + (l.source ? '<div style="font-size:10px;color:#cbd5e1;margin-top:4px">' + l.source + '</div>' : '')
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
 async function buildDashboard() {
   var log = await loadJobLog();
   var url = localStorage.getItem(SHEETS_URL_KEY) || '';
@@ -4697,6 +4955,41 @@ async function buildDashboard() {
       + '</div>';
   }).join('');
 
+  // ── Closed Jobs ──────────────────────────────────────────────────
+  var closedEl = document.getElementById('dash-closed-list');
+  if (closedEl) {
+    var wonJobs = log.filter(function(e){ return e.status === 'Won'; }).slice().reverse();
+    if (wonJobs.length === 0) {
+      closedEl.innerHTML = '<div style="color:#94a3b8;font-size:13px">No closed jobs yet</div>';
+    } else {
+      closedEl.innerHTML = wonJobs.map(function(e) {
+        var gp      = e.gp || 0;
+        var gpPct   = e.gpPct || (e.quote > 0 ? Math.round(gp/e.quote*100) : 0);
+        var gpColor = gp > 0 ? '#16a34a' : '#dc2626';
+        var bidHrs  = e.bidHours || e.hours || 0;
+        var actHrs  = e.actualHours || 0;
+        var hrsDiff = actHrs && bidHrs ? Math.round((actHrs - bidHrs)*10)/10 : null;
+        var hrsColor = hrsDiff === null ? '#94a3b8' : (hrsDiff > 0 ? '#dc2626' : '#16a34a');
+        var hrsLabel = hrsDiff === null ? (bidHrs ? bidHrs+'h bid' : '') : (hrsDiff > 0 ? '+'+hrsDiff+'h over' : Math.abs(hrsDiff)+'h under');
+        var dateStr = e.date ? new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+        return '<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+          + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:14px;font-weight:800;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (e.client||'—') + '</div>'
+          + '<div style="font-size:11px;color:#64748b;margin-top:2px">' + dateStr + (e.type ? ' · ' + e.type : '') + '</div>'
+          + '<div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">'
+          + (hrsLabel ? '<span style="font-size:11px;font-weight:700;color:' + hrsColor + ';background:' + (hrsDiff > 0 ? '#fee2e2' : (hrsDiff < 0 ? '#dcfce7' : '#f1f5f9')) + ';padding:2px 7px;border-radius:10px">⏱ ' + hrsLabel + '</span>' : '')
+          + (e.materialsCost > 0 ? '<span style="font-size:11px;font-weight:700;color:#7c3aed;background:#f5f3ff;padding:2px 7px;border-radius:10px">🪣 $' + e.materialsCost.toLocaleString() + ' materials</span>' : '')
+          + '</div>'
+          + '</div>'
+          + '<div style="text-align:right;flex-shrink:0">'
+          + (e.quote > 0 ? '<div style="font-size:15px;font-weight:900;color:#1e293b">$' + Math.round(e.quote).toLocaleString() + '</div>' : '')
+          + (gp > 0 ? '<div style="font-size:12px;font-weight:800;color:' + gpColor + '">GP: $' + Math.round(gp).toLocaleString() + ' <span style="font-weight:600">(' + gpPct + '%)</span></div>' : '')
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+  }
+
   // ── Chart ──────────────────────────────────────────────────────
   var chartJobs = log.filter(function(e){ return e.status === 'Won'; }).slice(-15);
   var chartEmpty = document.getElementById('dash-chart-empty');
@@ -4773,12 +5066,17 @@ window.onload = function() {
 
     // ── GHL Webhook receiver ─────────────────────────────────
     // Fires when GHL calendar booking sends data to this URL
-    // Set up in GHL: Workflow → Action → Webhook → GET to Hustler Bids URL
+    // Set up in GHL: Workflow → Action → Webhook → GET to Paint.io URL
     if (params.get('ghl_webhook')) {
       processGHLWebhook(params);
     }
 
   } catch(e) { /* silent — never break the app */ }
+
+  // Open on Dashboard by default
+  if (!window.location.search.includes('ghl_webhook') && !window.location.search.includes('name=')) {
+    showPage('dash');
+  }
 };
 
 
@@ -4888,16 +5186,38 @@ function buildFeelerSubList() {
     var lbl = statusLabels[s.status] || 'Not Sent';
 
     var respRow = '';
-    if (s.status === 'sent') {
+    if (s.status === 'pending') {
       respRow = '<div style="display:flex;gap:6px;margin-top:7px">'
-        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'yes\')" style="padding:5px 14px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">&#10003; Said Yes</button>'
-        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'no\')" style="padding:5px 14px;background:#fff5f5;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">&#10007; Said No</button>'
+        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'sent\')" style="padding:5px 14px;background:#1a3a8a;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">📲 Mark Feeler Sent</button>'
+        + '</div>';
+    } else if (s.status === 'sent') {
+      respRow = '<div style="display:flex;gap:6px;margin-top:7px;align-items:center">'
+        + '<span style="font-size:11px;font-weight:700;color:#d97706;background:#fef3c7;padding:3px 9px;border-radius:8px">⏳ Feeler sent — waiting...</span>'
+        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'interested\')" style="padding:5px 12px;background:#16a34a;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">👍 Interested</button>'
+        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'no\')" style="padding:5px 10px;background:#fff5f5;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">✗ No</button>'
+        + '</div>';
+    } else if (s.status === 'interested') {
+      respRow = '<div style="margin-top:8px;background:#eff6ff;border:1.5px solid #3b82f6;border-radius:8px;padding:9px 12px">'
+        + '<div style="font-size:11px;font-weight:800;color:#1d4ed8;margin-bottom:8px">👍 Interested — send them the Work Order</div>'
+        + '<button onclick="event.stopPropagation();sendWorkOrderToSub(' + s.id + ');setFeelerStatus(' + s.id + ',\'wo_sent\')" style="width:100%;background:#1a3a8a;color:white;border:none;padding:9px 12px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer">📋 Send Work Order →</button>'
+        + '</div>';
+    } else if (s.status === 'wo_sent') {
+      respRow = '<div style="margin-top:8px;background:#faf5ff;border:1.5px solid #7c3aed;border-radius:8px;padding:9px 12px">'
+        + '<div style="font-size:11px;font-weight:800;color:#7c3aed;margin-bottom:8px">📋 Work Order sent — did they accept?</div>'
+        + '<div style="display:flex;gap:7px">'
+        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'yes\')" style="flex:1;background:#16a34a;color:white;border:none;padding:9px 12px;border-radius:7px;font-size:13px;font-weight:800;cursor:pointer">✅ Accepted</button>'
+        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'no\')" style="flex:1;background:#fff5f5;color:#dc2626;border:1px solid #fecaca;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer">✗ Passed</button>'
+        + '</div>'
         + '</div>';
     } else if (s.status === 'yes') {
-      respRow = '<div style="font-size:11px;font-weight:700;color:#16a34a;margin-top:5px">&#127881; Confirmed &#8212; will auto-fill Work Order</div>';
+      respRow = '<div style="margin-top:8px;background:#f0fdf4;border:1.5px solid #16a34a;border-radius:8px;padding:9px 12px">'
+        + '<div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:8px">✅ Accepted — ready to go!</div>'
+        + '<button onclick="event.stopPropagation();woUnlockStage3WithSub(' + s.id + ')" style="width:100%;background:#1a3a8a;color:white;border:none;padding:10px 12px;border-radius:7px;font-size:13px;font-weight:800;cursor:pointer">🔨 Build Work Order →</button>'
+        + '</div>';
     } else if (s.status === 'no') {
-      respRow = '<div style="font-size:11px;color:#dc2626;margin-top:5px">Unavailable for this job</div>';
+      respRow = '<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:5px">❌ Not available for this job</div>';
     }
+
 
     return '<div onclick="toggleFeelerSubSelect(' + s.id + ')" style="padding:11px 13px;background:' + bg + ';border-radius:9px;border:2px solid ' + bdr + ';cursor:pointer;margin-bottom:7px">'
       + '<div style="display:flex;align-items:center;gap:10px">'
@@ -4934,54 +5254,53 @@ function updateScoreboard() {
   var board = document.getElementById('feeler-scoreboard');
   if (!board) return;
 
-  var sent    = feelerSubs.filter(function(s){ return s.status === 'sent'; });
-  var yes     = feelerSubs.filter(function(s){ return s.status === 'yes'; });
-  var no      = feelerSubs.filter(function(s){ return s.status === 'no'; });
-  var pending = feelerSubs.filter(function(s){ return s.status === 'pending'; });
-  var anySent = sent.length + yes.length + no.length > 0;
+  var sent       = feelerSubs.filter(function(s){ return s.status === 'sent'; });
+  var interested = feelerSubs.filter(function(s){ return s.status === 'interested' || s.status === 'wo_sent'; });
+  var yes        = feelerSubs.filter(function(s){ return s.status === 'yes'; });
+  var no         = feelerSubs.filter(function(s){ return s.status === 'no'; });
 
-  // Show board only once feelers have been sent
-  board.style.display = anySent ? 'block' : 'none';
-  if (!anySent) return;
+  board.style.display = feelerSubs.length > 0 ? 'block' : 'none';
+  if (feelerSubs.length === 0) return;
 
   var el = function(id){ return document.getElementById(id); };
-  if (el('sb-count-sent'))    el('sb-count-sent').textContent    = sent.length;
-  if (el('sb-count-yes'))     el('sb-count-yes').textContent     = yes.length;
-  if (el('sb-count-no'))      el('sb-count-no').textContent      = no.length;
-  if (el('sb-count-pending')) el('sb-count-pending').textContent = pending.length;
+  if (el('sb-count-sent'))       el('sb-count-sent').textContent       = sent.length;
+  if (el('sb-count-interested')) el('sb-count-interested').textContent = interested.length;
+  if (el('sb-count-yes'))        el('sb-count-yes').textContent        = yes.length;
+  if (el('sb-count-no'))         el('sb-count-no').textContent         = no.length;
 
-  // Quick-response tap list — only subs that were sent but haven't responded yet
   var quickSection = el('sb-quick-response');
-  var quickList    = el('sb-quick-list');
-  if (sent.length > 0 && quickList) {
-    quickSection.style.display = 'block';
-    quickList.innerHTML = sent.map(function(s) {
-      return '<div style="display:flex;align-items:center;justify-content:space-between;background:#fffbeb;border:1px solid #fde047;border-radius:8px;padding:9px 12px">'
-        + '<div>'
-        + '<span style="font-size:13px;font-weight:800;color:#1e293b">' + s.name + '</span>'
-        + (s.rating ? '<span style="font-size:11px;margin-left:6px">' + s.rating + '</span>' : '')
-        + '<span style="font-size:12px;color:#92400e;margin-left:8px">Waiting...</span>'
-        + '</div>'
-        + '<div style="display:flex;gap:6px">'
-        + '<button onclick="setFeelerStatus(' + s.id + ',\'yes\')" style="padding:6px 16px;background:#16a34a;color:white;border:none;border-radius:7px;font-size:13px;font-weight:800;cursor:pointer">&#10003; Yes</button>'
-        + '<button onclick="setFeelerStatus(' + s.id + ',\'no\')" style="padding:6px 14px;background:#dc2626;color:white;border:none;border-radius:7px;font-size:13px;font-weight:800;cursor:pointer">&#10007; No</button>'
-        + '</div>'
-        + '</div>';
-    }).join('');
-  } else if (quickSection) {
-    quickSection.style.display = 'none';
-  }
+  if (quickSection) quickSection.style.display = 'none';
 
-  // Winner banner
   var winnerBanner = el('sb-winner-banner');
   var winnerText   = el('sb-winner-text');
   if (yes.length > 0 && winnerBanner) {
-    var winner = yes[0];
     winnerBanner.style.display = 'block';
-    if (winnerText) winnerText.textContent = '&#127881; ' + winner.name + ' is in! Ready to build the work order.';
+    if (winnerText) winnerText.textContent = '🎉 ' + yes[0].name + ' confirmed! Hit Build Work Order on their card below.';
   } else if (winnerBanner) {
     winnerBanner.style.display = 'none';
   }
+}
+
+function sendWorkOrderToSub(subId) {
+  var sub = feelerSubs.find(function(s){ return s.id === subId; });
+  if (!sub) return;
+  var jobName  = (document.getElementById('wo-client-name') && document.getElementById('wo-client-name').textContent) || '';
+  var address  = (document.getElementById('wo-address-display') && document.getElementById('wo-address-display').textContent) || '';
+  var jobtype  = (document.getElementById('wo-jobtype-display') && document.getElementById('wo-jobtype-display').textContent) || '';
+  var start    = (document.getElementById('wo-start-date') && document.getElementById('wo-start-date').value) || 'TBD';
+  var calcs    = rooms.map(function(r){ return calcRoom(r); });
+  var hours    = calcs.reduce(function(s,x){ return s + x.hours; }, 0);
+  var pay      = (hours * 45).toFixed(0);
+  var msg = 'Hey ' + sub.name + ', here are the job details:\n\n'
+    + (jobName  ? 'Client: ' + jobName + '\n' : '')
+    + (address  ? 'Address: ' + address + '\n' : '')
+    + (jobtype  ? 'Job Type: ' + jobtype + '\n' : '')
+    + 'Est. Hours: ~' + Math.round(hours) + ' hrs\n'
+    + 'Your Pay: $' + pay + ' ($45/hr)\n'
+    + (start !== 'TBD' ? 'Start Date: ' + start + '\n' : '')
+    + '\nLet me know if you can take this one!';
+  var phone = sub.phone.replace(/\D/g,'');
+  window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
 }
 
 function toggleFeelerSubSelect(id) {
@@ -5137,6 +5456,105 @@ function saveActiveJob() {
   buildActiveJobs();
 }
 
+function ajSaveStart(id) {
+  var el = document.getElementById('aj-start-' + id);
+  if (!el) return;
+  var val = el.value;
+  activeJobs = activeJobs.map(function(j){
+    return j.id === id ? Object.assign({}, j, { start: val }) : j;
+  });
+  saveActiveJobs();
+}
+
+function ajConfirmClient(id) {
+  var job = activeJobs.find(function(j){ return j.id === id; });
+  if (!job) return;
+  var date = job.start ? new Date(job.start).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'your scheduled date';
+  var name = (job.client||'').split(' ')[0];
+  var msg = 'Hi ' + name + '! Confirming your paint job is scheduled for ' + date + '. Our crew will arrive in the morning. Questions? Call/text (716) 221-6418. - Thomas, Gould Painting WNY';
+  if (confirm('Text this to client? ' + msg)) {
+    window.open('sms:' + (job.phone||'').replace(/[^0-9]/g,'') + '?body=' + encodeURIComponent(msg));
+    activeJobs = activeJobs.map(function(j){
+      return j.id === id ? Object.assign({}, j, { clientConfirmed: true }) : j;
+    });
+    saveActiveJobs();
+    buildActiveJobs();
+  }
+}
+
+function ajConfirmSub(id) {
+  var job = activeJobs.find(function(j){ return j.id === id; });
+  if (!job) return;
+  var date = job.start ? new Date(job.start).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'the scheduled date';
+  var msg = 'Hey ' + (job.sub||'') + ' — confirming you are set for ' + (job.client||'the job') + ' at ' + (job.address||'the address') + ' starting ' + date + '. Let me know if anything changes. — Thomas';
+  if (confirm('Text this to sub? ' + msg)) {
+    var subPhone = prompt('Sub phone number:', '');
+    if (subPhone) {
+      window.open('sms:' + subPhone.replace(/\D/g,'') + '?body=' + encodeURIComponent(msg));
+    }
+    activeJobs = activeJobs.map(function(j){
+      return j.id === id ? Object.assign({}, j, { subConfirmedDate: true }) : j;
+    });
+    saveActiveJobs();
+    buildActiveJobs();
+  }
+}
+
+function ajSubOnSite(id) {
+  updateAJStatus(id, 'In Progress');
+  var job = activeJobs.find(function(j){ return j.id===id; });
+  if (job && job.phone) {
+    var name = (job.client||'').split(' ')[0];
+    var msg = 'Hi ' + name + '! Just wanted to let you know our crew is on their way and will be starting your project today. Feel free to reach out with any questions — Thomas / Gould Painting (716) 221-6418';
+    if (confirm('Text the customer that the sub is on site?\n\n' + msg)) {
+      window.open('sms:' + job.phone.replace(/\D/g,'') + '?body=' + encodeURIComponent(msg));
+    }
+  }
+}
+
+function ajSaveActual(id) {
+  var hrsEl  = document.getElementById('aj-actual-hrs-' + id);
+  var matEl  = document.getElementById('aj-materials-' + id);
+  var hrs    = hrsEl  ? parseFloat(hrsEl.value)  || 0 : null;
+  var mat    = matEl  ? parseFloat(matEl.value)  || 0 : null;
+  activeJobs = activeJobs.map(function(j) {
+    if (j.id !== id) return j;
+    var update = {};
+    if (hrs !== null) update.actualHours = hrs;
+    if (mat !== null) update.materialsCost = mat;
+    if (hrs) update.subpay = Math.round(hrs * 45);
+    return Object.assign({}, j, update);
+  });
+  saveActiveJobs();
+  // re-render without losing focus
+  var job = activeJobs.find(function(j){ return j.id===id; });
+  if (job && job.bidHours) {
+    var diff = job.actualHours ? Math.round((job.actualHours - job.bidHours)*10)/10 : null;
+    var pct  = job.actualHours ? Math.round(job.bidHours/job.actualHours*100) : null;
+    // update scorecard hint live
+  }
+}
+
+function ajMoveToPunchList(id) {
+  var text = prompt('Add first punch list item (or leave blank to skip):');
+  activeJobs = activeJobs.map(function(j) {
+    if (j.id !== id) return j;
+    var list = j.punchList || [];
+    if (text && text.trim()) list.push({ text: text.trim(), done: false });
+    return Object.assign({}, j, { status: 'Punch List', punchList: list });
+  });
+  saveActiveJobs();
+  buildActiveJobs();
+}
+
+function ajMoveToPayment(id) {
+  activeJobs = activeJobs.map(function(j){
+    return j.id === id ? Object.assign({}, j, { status: 'Punch List', punchDone: true }) : j;
+  });
+  saveActiveJobs();
+  buildActiveJobs();
+}
+
 function updateAJStatus(id, status) {
   activeJobs = activeJobs.map(function(j){ return j.id===id ? Object.assign({},j,{status:status}) : j; });
   saveActiveJobs();
@@ -5206,56 +5624,54 @@ function addAJCheckIn(id) {
   buildActiveJobs();
 }
 
-async function closeAJJob(id) {
-  if (!confirm('Mark this job Complete and close it?')) return;
+function closeAJJob(id) {
+  var aj = activeJobs.find(function(j){ return j.id === id; });
+  if (!aj) return;
 
-  // Prompt for actual hours
-  var actualHrs = prompt('Enter actual hours worked (for bid accuracy tracking):', '');
-  var hrs = parseFloat(actualHrs);
-
-  // Mark complete in Active Jobs
-  activeJobs = activeJobs.map(function(j){ return j.id===id ? Object.assign({},j,{status:'Complete'}) : j; });
+  // Remove from active jobs immediately
+  activeJobs = activeJobs.filter(function(j){ return j.id !== id; });
   saveActiveJobs();
+  buildActiveJobs();
 
-  // Find matching job in Job Log by client name and auto-mark Won
-  var aj = activeJobs.find(function(j){ return j.id===id; });
-  if (aj) {
-    var log = await loadJobLog();
-    // Match by client name — find most recent pending match
+  // Update Job Log with actuals
+  try {
+    var raw = localStorage.getItem(JOB_LOG_KEY);
+    var log = raw ? JSON.parse(raw) : [];
     var match = log.find(function(e){
       return (e.client||'').toLowerCase().trim() === (aj.client||'').toLowerCase().trim()
         && e.status !== 'Won' && e.status !== 'Lost';
     });
     if (match) {
       match.status = 'Won';
-      if (!isNaN(hrs) && hrs > 0) match.actualHours = hrs;
-      localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
+      if (aj.actualHours > 0) match.actualHours = aj.actualHours;
+      if (aj.materialsCost > 0) match.materialsCost = aj.materialsCost;
+      localStorage.setItem(JOB_LOG_KEY, JSON.stringify(log));
       syncOneToSheets(match);
-
-      // Fire GHL triggers
       ghlTrigger('job_won', { name: aj.client, phone: aj.phone || '', email: '' });
-
-      // Offer review request
-      var sendReview = confirm('Job complete! 🎉\n\nSend ' + aj.client + ' a Google review request text via GHL?');
-      if (sendReview) {
-        ghlTrigger('review_request', { name: aj.client, phone: aj.phone || '', email: '' });
-      }
-
-      // Show confirmation
-      var floatEl = document.getElementById('float-save-msg');
-      if (floatEl) {
-        floatEl.style.display='block';
-        floatEl.style.background='#166534';
-        floatEl.textContent='✅ Job marked Won in Dashboard!';
-        setTimeout(function(){ floatEl.style.display='none'; },4000);
-      }
-    } else {
-      alert('Job marked Complete. Could not find a matching entry in Job Log — update Dashboard manually if needed.');
     }
+  } catch(e) { console.warn('Job log update failed', e); }
+
+  buildDashboard();
+
+  // Navigate to Job Log — Won filter
+  setLogFilter('Won');
+  showPage('history');
+
+  // Toast
+  var floatEl = document.getElementById('float-save-msg');
+  if (floatEl) {
+    floatEl.style.display='block';
+    floatEl.style.background='#166534';
+    floatEl.textContent='✅ ' + aj.client + ' closed & moved to Job Log!';
+    setTimeout(function(){ floatEl.style.display='none'; }, 4000);
   }
 
-  buildActiveJobs();
-  buildDashboard();
+  // Review request — after UI updates
+  setTimeout(function(){
+    if (aj.phone && confirm('Send ' + aj.client + ' a Google review request via GHL?')) {
+      ghlTrigger('review_request', { name: aj.client, phone: aj.phone || '', email: '' });
+    }
+  }, 300);
 }
 
 function deleteAJJob(id) {
@@ -5314,102 +5730,203 @@ function buildActiveJobs() {
   var closed = activeJobs.filter(function(j){ return j.status === 'Complete'; });
   var sorted = open.concat(closed);
 
-  if (sorted.length === 0) {
-    list.innerHTML = '';
-    empty.style.display = '';
-    return;
-  }
+  if (sorted.length === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
   empty.style.display = 'none';
 
+  var STATUS_STEP = { 'Scheduled':0, 'In Progress':1, 'Punch List':2, 'Complete':4 };
+
   list.innerHTML = sorted.map(function(j) {
-    var color    = AJ_COLORS[j.status] || '#64748b';
-    var isDone   = j.status === 'Complete';
-    var opacity  = isDone ? 'opacity:0.6' : '';
-    var statusBtns = AJ_STATUSES.map(function(s) {
-      var active = j.status === s;
-      return '<button onclick="updateAJStatus(' + j.id + ',\'' + s + '\')" style="padding:4px 10px;border-radius:12px;border:2px solid ' + AJ_COLORS[s] + ';background:' + (active ? AJ_COLORS[s] : 'white') + ';color:' + (active ? 'white' : AJ_COLORS[s]) + ';font-size:11px;font-weight:700;cursor:pointer">' + s + '</button>';
-    }).join('');
+    var isDone    = j.status === 'Complete';
+    var stepIndex = STATUS_STEP[j.status] !== undefined ? STATUS_STEP[j.status] : 0;
+    if (j.status === 'Punch List' && (j.punchDone || (j.punchList && j.punchList.length > 0 && j.punchList.every(function(x){ return x.done; })))) stepIndex = 3;
 
-    var laborRate = parseFloat((document.getElementById('r-laborrate') && document.getElementById('r-laborrate').value) || 45);
-    var actualSubPay = j.actualHours ? Math.round(j.actualHours * laborRate) : (j.subpay || 0);
-    var depositAmt   = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
-    var finalAmt     = j.quote > 0 ? j.quote - depositAmt : 0;
+    var STEP_COLOR = ['#f59e0b','#0369a1','#7c3aed','#16a34a','#16a34a'];
+    var borderColor = STEP_COLOR[stepIndex] || '#64748b';
 
-    var paySection = '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:8px">'
-      + '<div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">PAYMENTS</div>'
-      + '<div style="display:flex;flex-direction:column;gap:6px">'
-      // Deposit row
-      + '<div style="display:flex;align-items:center;justify-content:space-between">'
-      + '<div style="font-size:12px;color:#64748b">💳 Deposit (30%)' + (depositAmt > 0 ? ' — <b>$' + depositAmt.toLocaleString() + '</b>' : '') + '</div>'
-      + (j.deposit
-          ? '<span style="font-size:11px;font-weight:700;color:#16a34a;background:#dcfce7;padding:2px 10px;border-radius:10px">✓ Received</span>'
-          : '<button onclick="toggleAJPay(' + j.id + ',\'deposit\')" style="background:#d97706;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Mark Received</button>'
-        )
-      + '</div>'
-      // Final invoice row
-      + '<div style="display:flex;align-items:center;justify-content:space-between">'
-      + '<div style="font-size:12px;color:#64748b">📤 Final Invoice (70%)' + (finalAmt > 0 ? ' — <b>$' + finalAmt.toLocaleString() + '</b>' : '') + '</div>'
-      + (j.invoiced
-          ? '<span style="font-size:11px;font-weight:700;color:#16a34a;background:#dcfce7;padding:2px 10px;border-radius:10px">✓ Sent & Paid</span>'
-          : '<button onclick="sendFinalInvoice(' + j.id + ')" style="background:#0369a1;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Send via GHL</button>'
-        )
-      + '</div>'
-      // Sub pay row
-      + '<div style="display:flex;align-items:center;justify-content:space-between">'
-      + '<div style="font-size:12px;color:#64748b">💸 Sub Pay' + (actualSubPay > 0 ? ' — <b>$' + actualSubPay.toLocaleString() + '</b>' + (j.actualHours ? ' (' + j.actualHours + 'hrs × $' + laborRate + ')' : '') : '') + '</div>'
-      + (j.subPaid
-          ? '<span style="font-size:11px;font-weight:700;color:#16a34a;background:#dcfce7;padding:2px 10px;border-radius:10px">✓ Paid</span>'
-          : '<button onclick="toggleAJPay(' + j.id + ',\'subPaid\')" style="background:#7c3aed;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Mark Paid</button>'
-        )
-      + '</div>'
-      + '</div></div>';
+    var depositAmt = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
+    var finalAmt   = j.quote > 0 ? j.quote - depositAmt : 0;
 
-    var checkInHtml = (j.checkIns||[]).length > 0
-      ? '<div style="margin-top:8px;font-size:11px;color:#64748b">'
-        + (j.checkIns||[]).map(function(c){ return '<div style="padding:4px 0;border-bottom:1px solid #f1f5f9">📍 ' + c.date + ' — ' + c.note + '</div>'; }).join('')
+    // ── STAGE HELPER ──
+    // status: 'done' | 'active' | 'locked'
+    function stage(icon, title, status, bodyHtml) {
+      var bg     = status === 'done'   ? '#f0fdf4'
+                 : status === 'active' ? 'white'
+                 : '#f8fafc';
+      var border = status === 'done'   ? '#bbf7d0'
+                 : status === 'active' ? borderColor
+                 : '#e2e8f0';
+      var titleColor = status === 'done'   ? '#16a34a'
+                     : status === 'active' ? borderColor
+                     : '#cbd5e1';
+      var badge  = status === 'done'
+        ? '<span style="font-size:10px;font-weight:800;color:#16a34a;background:#dcfce7;padding:2px 8px;border-radius:10px">✓ Done</span>'
+        : status === 'active'
+        ? '<span style="font-size:10px;font-weight:800;color:white;background:' + borderColor + ';padding:2px 8px;border-radius:10px">Now</span>'
+        : '';
+      return '<div style="border:1.5px solid ' + border + ';border-radius:10px;background:' + bg + ';margin-bottom:8px;overflow:hidden">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;' + (status === 'active' ? 'border-bottom:1.5px solid ' + border + ';' : '') + '">'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="font-size:16px">' + icon + '</span>'
+        + '<span style="font-size:13px;font-weight:800;color:' + titleColor + '">' + title + '</span>'
         + '</div>'
-      : '';
+        + badge
+        + '</div>'
+        + (status === 'active' ? '<div style="padding:12px 14px">' + bodyHtml + '</div>' : '')
+        + '</div>';
+    }
 
-    return '<div class="card" style="padding:14px 16px;border-left:4px solid ' + color + ';' + opacity + '">'
-      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+    // ── STAGE 1: SCHEDULED ──
+    var s1 = stage('📅', 'Scheduled', stepIndex === 0 ? 'active' : 'done',
+      '<div style="font-size:11px;font-weight:800;color:#92400e;margin-bottom:10px">Confirm start date with client + sub before day 1</div>'
+      + '<div style="display:flex;gap:8px;margin-bottom:10px">'
+      + '<div style="flex:1">'
+      + '<div style="font-size:11px;color:#64748b;margin-bottom:4px">Start Date</div>'
+      + '<input id="aj-start-' + j.id + '" type="date" value="' + (j.start||'') + '" onchange="ajSaveStart(' + j.id + ')" style="width:100%;padding:8px 10px;border:1.5px solid #fde68a;border-radius:7px;font-size:13px;font-weight:700">'
+      + '</div>'
+      + '</div>'
+      + '<div style="display:flex;gap:8px;margin-bottom:10px">'
+      + (!j.clientConfirmed
+          ? '<button onclick="ajConfirmClient(' + j.id + ')" style="flex:1;background:white;color:#d97706;border:1.5px solid #f59e0b;padding:9px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer">📲 Text Client</button>'
+          : '<div style="flex:1;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:7px;padding:9px;font-size:12px;font-weight:800;color:#16a34a;text-align:center">✓ Client confirmed</div>'
+        )
+      + (!j.subConfirmedDate
+          ? '<button onclick="ajConfirmSub(' + j.id + ')" style="flex:1;background:white;color:#7c3aed;border:1.5px solid #7c3aed;padding:9px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer">📲 Text Sub</button>'
+          : '<div style="flex:1;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:7px;padding:9px;font-size:12px;font-weight:800;color:#16a34a;text-align:center">✓ Sub confirmed</div>'
+        )
+      + '</div>'
+      + '<button onclick="ajSubOnSite(' + j.id + ')" style="width:100%;background:#0369a1;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">🔨 Sub On Site — Start Job →</button>'
+    );
+
+    // ── STAGE 2: IN PROGRESS ──
+    var checkInHtml = (j.checkIns||[]).length > 0
+      ? '<div style="margin-bottom:10px">' + (j.checkIns||[]).map(function(c){
+          return '<div style="font-size:11px;color:#64748b;padding:4px 0;border-bottom:1px solid #e0f2fe">📍 ' + c.date + ' — ' + c.note + '</div>';
+        }).join('') + '</div>' : '';
+    var s2Body = checkInHtml
+      + '<div style="display:flex;gap:8px">'
+      + '<button onclick="addAJCheckIn(' + j.id + ')" style="flex:1;background:white;color:#0369a1;border:1.5px solid #0369a1;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">📍 Log Check-In</button>'
+      + '<button onclick="ajMoveToPunchList(' + j.id + ')" style="flex:2;background:#7c3aed;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer">📋 Work Done — Punch List →</button>'
+      + '</div>';
+    var s2 = stage('🔨', 'In Progress', stepIndex === 1 ? 'active' : stepIndex > 1 ? 'done' : 'locked', s2Body);
+
+    // ── STAGE 3: PUNCH LIST ──
+    var punchItems = j.punchList || [];
+    var allDone = punchItems.length === 0 || punchItems.every(function(x){ return x.done; });
+    var punchRows = punchItems.length > 0
+      ? punchItems.map(function(item, i){
+          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f3e8ff">'
+            + '<input type="checkbox" ' + (item.done?'checked':'') + ' onchange="togglePunchItem(' + j.id + ',' + i + ')" style="accent-color:#7c3aed;width:16px;height:16px">'
+            + '<span style="font-size:13px;color:' + (item.done?'#a78bfa':'#374151') + ';' + (item.done?'text-decoration:line-through':'') + '">' + item.text + '</span>'
+            + '</div>';
+        }).join('')
+      : '<div style="font-size:12px;color:#a78bfa;padding:4px 0">No items — add one or skip to payment</div>';
+
+    var actualsHtml = '<div style="border-top:1px solid #ede9fe;margin-top:12px;padding-top:12px">'
+      + '<div style="font-size:11px;font-weight:800;color:#64748b;margin-bottom:8px">📊 LOG ACTUALS</div>'
+      + '<div style="display:flex;gap:8px;margin-bottom:8px">'
+      + '<div style="flex:1">'
+      + '<div style="font-size:11px;color:#64748b;margin-bottom:4px">Actual Hours' + (j.bidHours ? ' <span style="color:#a78bfa">(bid: '+j.bidHours+'h)</span>' : '') + '</div>'
+      + '<input id="aj-actual-hrs-' + j.id + '" type="number" min="0" step="0.5" value="' + (j.actualHours||'') + '" placeholder="e.g. 14" oninput="ajSaveActual(' + j.id + ')" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700">'
+      + '</div>'
+      + '<div style="flex:1">'
+      + '<div style="font-size:11px;color:#64748b;margin-bottom:4px">Materials ($)</div>'
+      + '<input id="aj-materials-' + j.id + '" type="number" min="0" step="1" value="' + (j.materialsCost||'') + '" placeholder="e.g. 320" oninput="ajSaveActual(' + j.id + ')" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700">'
+      + '</div>'
+      + '</div>'
+      + (j.actualHours && j.bidHours ? (function(){
+          var diff = Math.round((j.actualHours - j.bidHours)*10)/10;
+          var pct  = Math.round(j.bidHours/j.actualHours*100);
+          var over = diff > 0;
+          return '<div style="background:' + (over?'#fef2f2':'#f0fdf4') + ';border-radius:7px;padding:7px 10px;font-size:12px;color:' + (over?'#dc2626':'#16a34a') + ';font-weight:700">'
+            + (over ? '⚠️ ' + diff + 'h OVER bid — ' + pct + '% accuracy' : '✅ Under bid by ' + Math.abs(diff) + 'h — ' + pct + '% accuracy')
+            + '</div>';
+        })(j) : '')
+      + '</div>';
+
+    var s3Body = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      + '<span style="font-size:12px;font-weight:700;color:#6d28d9">' + punchItems.filter(function(x){return x.done;}).length + '/' + punchItems.length + ' items done</span>'
+      + '<button onclick="addPunchItem(' + j.id + ')" style="background:#7c3aed;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Add Item</button>'
+      + '</div>'
+      + punchRows
+      + actualsHtml
+      + (allDone ? '<button onclick="ajMoveToPayment(' + j.id + ')" style="width:100%;margin-top:12px;background:#16a34a;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">' + (punchItems.length === 0 ? '💵 No Items — Collect Payment →' : '💵 All Fixed — Collect Payment →') + '</button>' : '');
+    var s3 = stage('📋', 'Punch List', stepIndex === 2 ? 'active' : stepIndex > 2 ? 'done' : stepIndex >= 1 ? 'active' : 'locked', s3Body);
+
+    // ── STAGE 4: PAYMENT ──
+    var gpBlock = '';
+    if (j.bidHours || j.materialsCost || j.actualHours) {
+      var laborCost   = j.actualHours ? j.actualHours * 45 : (j.bidHours ? j.bidHours * 45 : 0);
+      var gp          = (j.quote||0) - laborCost - (j.materialsCost||0);
+      var gpPct       = j.quote > 0 ? Math.round(gp/j.quote*100) : null;
+      var hrsColor    = (j.actualHours && j.bidHours) ? (j.actualHours > j.bidHours ? '#dc2626' : '#16a34a') : '#64748b';
+      gpBlock = '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:12px">'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:8px">'
+        + (j.bidHours    ? '<div><div style="font-size:9px;color:#94a3b8;font-weight:700">BID HRS</div><div style="font-size:15px;font-weight:900;color:#64748b">' + j.bidHours + 'h</div></div>' : '<div></div>')
+        + (j.actualHours ? '<div><div style="font-size:9px;color:#94a3b8;font-weight:700">ACTUAL HRS</div><div style="font-size:15px;font-weight:900;color:' + hrsColor + '">' + j.actualHours + 'h</div></div>' : '<div></div>')
+        + (j.materialsCost ? '<div><div style="font-size:9px;color:#94a3b8;font-weight:700">MATERIALS</div><div style="font-size:15px;font-weight:900;color:#1e293b">$' + (j.materialsCost||0).toLocaleString() + '</div></div>' : '<div></div>')
+        + '</div>'
+        + (gpPct !== null ? '<div style="border-top:1px solid #e2e8f0;padding-top:8px;display:flex;justify-content:space-between;align-items:center">'
+          + '<span style="font-size:11px;color:#64748b">Gross Profit</span>'
+          + '<span style="font-size:15px;font-weight:900;color:' + (gp>=0?'#16a34a':'#dc2626') + '">$' + Math.round(gp).toLocaleString() + ' <span style="font-size:11px;font-weight:700">(' + gpPct + '%)</span></span>'
+          + '</div>' : '')
+        + '</div>';
+    }
+
+    var s4Body = gpBlock
+      + '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+      + '<span style="font-size:12px;color:#475569">30% Deposit</span>'
+      + '<span style="font-size:13px;font-weight:800;color:' + (j.deposit?'#16a34a':'#d97706') + '">' + (depositAmt>0?'$'+depositAmt.toLocaleString():'—') + (j.deposit?' ✓':' pending') + '</span>'
+      + '</div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center">'
+      + '<span style="font-size:12px;color:#475569">Final Balance (70%)</span>'
+      + '<span style="font-size:16px;font-weight:900;color:#16a34a">' + (finalAmt>0?'$'+finalAmt.toLocaleString():'—') + '</span>'
+      + '</div>'
+      + '</div>'
+      + (!j.invoiced
+        ? '<button onclick="sendFinalInvoice(' + j.id + ')" style="width:100%;background:#0369a1;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:8px">📤 Send Final Invoice via GHL</button>'
+        : '<div style="font-size:12px;font-weight:700;color:#16a34a;padding:6px 0;margin-bottom:6px">✓ Invoice sent</div>'
+      )
+      + (!j.finalPaid
+        ? '<button onclick="toggleAJPay(' + j.id + ',\'finalPaid\')" style="width:100%;background:#16a34a;color:white;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;margin-bottom:12px">✅ Mark Final Payment Received</button>'
+        : '<div style="font-size:12px;font-weight:700;color:#16a34a;padding:6px 0;margin-bottom:6px">✓ Final payment received</div>'
+      )
+      + '<div style="border-top:1px solid #e2e8f0;padding-top:12px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      + '<span style="font-size:12px;font-weight:800;color:#7c3aed">💸 Sub Pay</span>'
+      + '<span style="font-size:14px;font-weight:900;color:#1e293b">' + (j.actualHours ? j.actualHours+'h × $45 = ' : '') + '$' + (j.subpay||0).toLocaleString() + '</span>'
+      + '</div>'
+      + (!j.subPaid
+        ? '<button onclick="toggleAJPay(' + j.id + ',\'subPaid\')" style="width:100%;background:#7c3aed;color:white;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">💸 Mark Sub Paid</button>'
+        : '<div style="font-size:12px;font-weight:700;color:#16a34a">✓ Sub paid</div>'
+      )
+      + '</div>'
+      + (j.finalPaid && j.subPaid
+        ? '<button onclick="closeAJJob(' + j.id + ')" style="width:100%;margin-top:12px;background:#1a3a8a;color:white;border:none;padding:13px;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;letter-spacing:0.3px">🏆 Close Job & Request Review →</button>'
+        : '');
+    var s4 = stage('💵', 'Final Payment', stepIndex === 3 ? 'active' : 'locked', s4Body);
+
+    // ── CARD HEADER ──
+    var header = '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
       + '<div>'
-      + '<div style="font-size:14px;font-weight:800;color:#1e293b">' + j.client + '</div>'
-      + '<div style="font-size:12px;color:#64748b">' + (j.address||'') + ' · ' + j.type + '</div>'
-      + (j.sub ? '<div style="font-size:12px;color:#64748b">Sub: ' + j.sub + (j.start ? ' · Start: ' + j.start : '') + '</div>' : '')
+      + '<div style="font-size:16px;font-weight:900;color:#1e293b">' + j.client + '</div>'
+      + '<div style="font-size:12px;color:#64748b;margin-top:2px">' + (j.address||'') + (j.type?' · '+j.type:'') + '</div>'
+      + (j.sub ? '<div style="font-size:12px;color:#7c3aed;margin-top:2px;font-weight:600">👷 ' + j.sub + (j.start?' · starts '+j.start:'') + '</div>' : '')
       + '</div>'
       + '<div style="text-align:right">'
-      + (j.quote > 0 ? '<div style="font-size:15px;font-weight:900;color:#1e293b">$' + j.quote.toLocaleString() + '</div>' : '')
-      + (j.subpay > 0 ? '<div style="font-size:11px;color:#64748b">Sub: $' + j.subpay.toLocaleString() + '</div>' : '')
+      + (j.quote>0 ? '<div style="font-size:17px;font-weight:900;color:#1e293b">$' + j.quote.toLocaleString() + '</div>' : '')
+      + '<button onclick="deleteAJJob(' + j.id + ')" style="background:none;border:none;color:#e2e8f0;font-size:18px;cursor:pointer;display:block;margin-left:auto;margin-top:4px">✕</button>'
       + '</div>'
-      + '</div>'
-      + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">' + statusBtns + '</div>'
-      + paySection
-      + (j.notes  ? '<div style="font-size:12px;color:#64748b;margin-bottom:4px">📝 ' + j.notes  + '</div>' : '')
-      + (j.colors ? '<div style="font-size:12px;color:#7c3aed;margin-bottom:6px">🎨 ' + j.colors + '</div>' : '')
-      + checkInHtml
-      // Punch list
-      + (j.punchList && j.punchList.length > 0
-        ? '<div style="margin-top:8px;padding:8px 10px;background:#fef9c3;border:1px solid #fde68a;border-radius:6px">'
-          + '<div style="font-size:11px;font-weight:700;color:#b45309;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">📋 Punch List</div>'
-          + j.punchList.map(function(item,i){
-              return '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid rgba(0,0,0,0.06)">'
-                + '<input type="checkbox" ' + (item.done?'checked':'') + ' onchange="togglePunchItem('+j.id+','+i+')" style="accent-color:#16a34a">'
-                + '<span style="font-size:12px;color:#374151;' + (item.done?'text-decoration:line-through;color:#94a3b8':'') + '">' + item.text + '</span>'
-                + '</div>';
-            }).join('')
-          + '</div>'
-        : '')
-      + '<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">'
-      + '<button onclick="addPunchItem(' + j.id + ')" style="padding:5px 12px;background:#fef9c3;color:#b45309;border:1px solid #fde68a;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">📋 Punch List</button>'
-      + '<button onclick="addAJCheckIn(' + j.id + ')" style="padding:5px 12px;background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">📍 Check In</button>'
-      + '<button onclick="viewAJQuote(\'' + (j.client||'') + '\')" style="padding:5px 12px;background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">📄 View Quote</button>'
-      + '<button onclick="openGHLCal(\'job\')" style="padding:5px 12px;background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">📅 Job Calendar</button>'
-      + (!isDone ? '<button onclick="closeAJJob(' + j.id + ')" style="padding:5px 12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">✓ Complete</button>' : '')
-      + '<button onclick="deleteAJJob(' + j.id + ')" style="padding:5px 10px;background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;cursor:pointer;margin-left:auto">✕</button>'
-      + '</div>'
+      + '</div>';
+
+    return '<div class="card" style="padding:14px 16px;border-left:4px solid ' + borderColor + '">'
+      + header
+      + s1 + s2 + s3 + s4
       + '</div>';
   }).join('');
 }
+
+
 
 // ── GHL Link Generator ────────────────────────────────────────
 function buildGHLLink() {
@@ -5641,6 +6158,7 @@ function editLead(id) {
 
 function closeLeadModal() {
   document.getElementById('lead-modal').style.display = 'none';
+  showPage('leads');
 }
 
 function saveLead() {
@@ -5677,8 +6195,6 @@ function saveLead() {
     saveLeads();
     closeLeadModal();
     buildLeads();
-    // Auto-launch pre-call for brand new leads
-    startPreCall(lead.id);
     return;
   }
   saveLeads();
@@ -5747,10 +6263,34 @@ function acceptLead(id) {
   var modalName = document.getElementById('accept-modal-name');
   if (modal && modalName) {
     modalName.textContent = lead.name;
+    // Populate deposit amounts
+    var quote = lead.quoteAmt ? Number(lead.quoteAmt) : (window._lastGrandTotal ? Number(window._lastGrandTotal) : 0);
+    var dep = quote * 0.3;
+    var qEl = document.getElementById('accept-modal-quote');
+    var dEl = document.getElementById('accept-modal-deposit');
+    if (qEl) qEl.textContent = quote > 0 ? '$' + quote.toLocaleString() : '—';
+    if (dEl) dEl.textContent = dep > 0 ? '$' + dep.toFixed(0) : '—';
+    // Reset deposit button state
+    var depBtn = document.getElementById('accept-dep-btn');
+    var depConfirm = document.getElementById('accept-dep-confirm');
+    if (depBtn) { depBtn.style.display = lead.depositPaid ? 'none' : 'block'; }
+    if (depConfirm) { depConfirm.style.display = lead.depositPaid ? 'block' : 'none'; }
+    window._acceptModalLeadId = id;
     modal.style.display = 'flex';
   } else {
     showPage('wo');
   }
+}
+
+function acceptModalMarkDeposit() {
+  var id = window._acceptModalLeadId;
+  if (!id) return;
+  leads = leads.map(function(l){ return l.id === id ? Object.assign({}, l, { depositPaid: true }) : l; });
+  saveLeads();
+  var depBtn = document.getElementById('accept-dep-btn');
+  var depConfirm = document.getElementById('accept-dep-confirm');
+  if (depBtn) depBtn.style.display = 'none';
+  if (depConfirm) depConfirm.style.display = 'block';
 }
 function markDepositReceived(id) {
   leads = leads.map(function(l){ return l.id === id ? Object.assign({}, l, { depositPaid: true }) : l; });
@@ -6030,6 +6570,22 @@ function woUnlockStage3() {
   setTimeout(function(){ if(s3) s3.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
 }
 
+function woUnlockStage3WithSub(subId) {
+  var sub = feelerSubs.find(function(s){ return s.id === subId; });
+  if (!sub) { woUnlockStage3(); return; }
+  var nameEl  = document.getElementById('wo-sub-name');
+  var phoneEl = document.getElementById('wo-sub-phone');
+  var emailEl = document.getElementById('wo-sub-email');
+  if (nameEl)  { nameEl.value  = sub.name;  nameEl.style.background='#f0fdf4'; nameEl.style.borderColor='#16a34a'; }
+  if (phoneEl) { phoneEl.value = sub.phone; phoneEl.style.background='#f0fdf4'; phoneEl.style.borderColor='#16a34a'; }
+  if (emailEl) { emailEl.value = sub.email||''; if(sub.email){ emailEl.style.background='#f0fdf4'; emailEl.style.borderColor='#16a34a'; } }
+  var s3 = document.getElementById('wo-stage3');
+  var s3num = document.getElementById('wo-stage3-num');
+  if (s3) { s3.style.display = 'block'; }
+  if (s3num) { s3num.style.background = '#1a3a8a'; s3num.style.color = 'white'; }
+  setTimeout(function(){ if(s3) s3.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
+}
+
 function buildLeads() {
   var list  = document.getElementById('leads-list');
   var empty = document.getElementById('leads-empty');
@@ -6085,23 +6641,23 @@ function buildLeads() {
     if (l.status === 'New') {
       primaryBtn = '<button onclick="startPreCall('+l.id+')" style="background:#0369a1;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">📞 Pre-Call →</button>';
     } else if (l.status === 'Appt Set') {
-      primaryBtn = '<button onclick="loadLeadIntoEstimator('+l.id+')" style="background:#7c3aed;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">📐 Estimate →</button>';
+      primaryBtn = '<button onclick="updateLeadStatus('+l.id+',\'Ready to Bid\')" style="background:#d97706;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">📐 Ready to Bid →</button>';
     } else if (l.status === 'Ready to Bid') {
-      primaryBtn = '<button onclick="loadLeadIntoEstimator('+l.id+')" style="background:#7c3aed;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">📐 Estimate →</button>';
+      primaryBtn = '<button onclick="loadLeadIntoEstimator('+l.id+')" style="background:#7c3aed;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">📐 Bid Now →</button>';
     } else if (l.status === 'Quoted') {
-      primaryBtn = '<button onclick="acceptLead('+l.id+')" style="background:#16a34a;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">✅ Accepted →</button>';
+      primaryBtn = '<button onclick="acceptLead('+l.id+')" style="background:#16a34a;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">✅ Won →</button>';
     } else if (l.status === 'Won') {
       primaryBtn = '<button onclick="loadLeadIntoWorkOrder('+l.id+')" style="background:#16a34a;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap">🔨 Work Order →</button>';
     }
 
     // Progress steps definition
     var STEPS = [
-      { key:'pre',      label:'Pre-Call',   icon:'📞' },
-      { key:'appt',     label:'Appt Set',   icon:'📅' },
-      { key:'estimate', label:'Estimate',   icon:'📐' },
-      { key:'quoted',   label:'Quoted',     icon:'💵' },
-      { key:'won',      label:'Won',        icon:'🏆' },
-      { key:'wo',       label:'Work Order', icon:'🔨' },
+      { key:'pre',      label:'Pre-Call',  icon:'📞' },
+      { key:'appt',     label:'Appt Set',  icon:'📅' },
+      { key:'estimate', label:'Bid Now',   icon:'📐' },
+      { key:'quoted',   label:'Quoted',    icon:'💵' },
+      { key:'won',      label:'Won',       icon:'🏆' },
+      { key:'wo',       label:'Work Order',icon:'🔨' },
     ];
 
     var stepIndex = {
@@ -6142,13 +6698,6 @@ function buildLeads() {
       progressBar += '</div>';
     });
     progressBar += '</div>';
-
-    // Status dropdown (small, for manual override)
-    var statusSelect = '<select onchange="updateLeadStatus('+l.id+',this.value)" style="padding:4px 6px;border:1.5px solid '+color+';border-radius:6px;font-size:11px;font-weight:700;color:'+color+';background:white;cursor:pointer;max-width:110px">'
-      + ['New','Appt Set','Ready to Bid','Quoted','Won','Lost'].map(function(s){
-          return '<option value="'+s+'"'+(l.status===s?' selected':'')+'>'+s+'</option>';
-        }).join('')
-      + '</select>';
 
     // Key meta — one line
     var meta = [jobtypeLabel, l.phone, l.email ? l.email : '', apptStr ? '📅 '+apptStr : '', l.ballpark ? '💬 '+l.ballpark : '', l.quoteAmt > 0 ? '💵 $'+Number(l.quoteAmt).toLocaleString() : ''].filter(Boolean).join(' · ');
@@ -6191,6 +6740,9 @@ function buildLeads() {
 
       // Row 2 — progress bar (hidden for Lost)
       + (l.status !== 'Lost' ? progressBar : lostBanner)
+
+      // Row 3 — next step hint for Appt Set
+      + (l.status === 'Appt Set' ? '<div style="font-size:10px;color:#d97706;font-weight:700;margin-top:5px">📅 Appointment set' + (apptStr ? ' for '+apptStr : '') + ' — hit "Ready to Bid" when you\'re on site.</div>' : '')
 
       + '</div>';
   }).join('');
@@ -6783,6 +7335,67 @@ function renderJobLog() {
   var log = [];
   try { log = JSON.parse(localStorage.getItem(JOB_LOG_KEY) || '[]'); } catch(e) {}
 
+  // Recently Closed block — last 5 Won jobs sorted by date desc
+  var recentEl = document.getElementById('log-recent-closed');
+  if (recentEl) {
+    var won = log.filter(function(e){ return e.status === 'Won'; })
+      .sort(function(a,b){ return (b.date||'') > (a.date||'') ? 1 : -1 })
+      .slice(0, 5);
+    if (won.length > 0) {
+      recentEl.style.display = 'block';
+      recentEl.innerHTML = '<div class="card" style="border-left:4px solid #16a34a;padding:14px 16px">'
+        + '<div style="font-size:11px;font-weight:800;color:#16a34a;margin-bottom:10px">🏆 RECENTLY CLOSED</div>'
+        + won.map(function(e) {
+            var labor    = e.actualHours ? e.actualHours * 45 : (e.paySub || e.subPay || 0);
+            var mats     = e.materialsCost || 0;
+            var gp       = (e.quote||0) - labor - mats;
+            var gpPct    = e.quote > 0 ? Math.round(gp/e.quote*100) : null;
+            var gpColor  = gp > 0 ? '#16a34a' : '#dc2626';
+            var hrsDiff  = (e.actualHours && e.hours) ? Math.round((e.actualHours - e.hours)*10)/10 : null;
+            var hrsColor = hrsDiff === null ? '#64748b' : (hrsDiff > 0 ? '#dc2626' : '#16a34a');
+            return '<div style="padding:10px 0;border-bottom:1px solid #f0fdf4;display:flex;justify-content:space-between;align-items:flex-start">'
+              + '<div>'
+              + '<div style="font-size:14px;font-weight:800;color:#1e293b">' + (e.client||'—') + '</div>'
+              + '<div style="font-size:11px;color:#64748b">' + (e.date||'') + (e.city?' · '+e.city:'') + (e.type?' · '+e.type:'') + '</div>'
+              + (hrsDiff !== null ? '<div style="font-size:11px;font-weight:700;color:'+hrsColor+';margin-top:2px">'
+                + (hrsDiff > 0 ? '⚠️ +'+hrsDiff+'h over bid' : '✅ '+Math.abs(hrsDiff)+'h under bid') + '</div>' : '')
+              + '</div>'
+              + '<div style="text-align:right">'
+              + '<div style="font-size:15px;font-weight:900;color:#1e293b">$' + (e.quote||0).toLocaleString() + '</div>'
+              + (gpPct !== null ? '<div style="font-size:12px;font-weight:700;color:'+gpColor+'">GP: $'+Math.round(gp).toLocaleString()+' ('+gpPct+'%)</div>' : '')
+              + (mats > 0 ? '<div style="font-size:11px;color:#94a3b8">Materials: $'+mats.toLocaleString()+'</div>' : '')
+              + '</div>'
+              + '</div>';
+          }).join('')
+        + '</div>';
+    } else {
+      recentEl.style.display = 'none';
+    }
+  }
+
+  // Recently Closed section — top 5 Won jobs, most recent first
+  var recentWrap  = document.getElementById('log-recent-wrap');
+  var recentCards = document.getElementById('log-recent-cards');
+  var won = log.filter(function(e){ return e.status === 'Won'; })
+              .slice(-10).reverse().slice(0,5);
+  if (recentWrap && recentCards) {
+    if (won.length > 0) {
+      recentWrap.style.display = 'block';
+      recentCards.innerHTML = won.map(function(e) {
+        var revenue  = e.total || 0;
+        var labor    = e.actualHours ? e.actualHours * 45 : (e.bidHours ? e.bidHours * 45 : 0);
+        var mats     = e.materialsCost || 0;
+        var gp       = revenue - labor - mats;
+        var gpPct    = revenue > 0 ? Math.round(gp/revenue*100) : null;
+        var hrsOver  = e.actualHours && e.bidHours && e.actualHours > e.bidHours;
+        var hrsDiff  = e.actualHours && e.bidHours ? Math.round((e.actualHours - e.bidHours)*10)/10 : null;
+        return '<div class="card" style="padding:12px 14px;border-left:4px solid #16a34a;margin-bottom:8px">'          + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'          + '<div>'          + '<div style="font-size:14px;font-weight:900;color:#1e293b">' + (e.client||'—') + '</div>'          + '<div style="font-size:11px;color:#64748b">' + (e.address||'') + (e.type?' · '+e.type:'') + (e.date?' · '+e.date:'') + '</div>'          + '</div>'          + '<div style="text-align:right">'          + (revenue > 0 ? '<div style="font-size:16px;font-weight:900;color:#1e293b">$'+revenue.toLocaleString()+'</div>' : '')          + (gpPct !== null ? '<div style="font-size:11px;font-weight:700;color:' + (gp>=0?'#16a34a':'#dc2626') + '">' + (gp>=0?'+':'') + '$'+Math.round(gp).toLocaleString()+' GP ('+gpPct+'%)</div>' : '')          + '</div>'          + '</div>'          + '<div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">'          + (e.actualHours ? '<div style="font-size:11px;color:' + (hrsOver?'#dc2626':'#16a34a') + ';font-weight:700">⏱ ' + e.actualHours + 'h actual' + (hrsDiff !== null ? ' (' + (hrsDiff>0?'+':'') + hrsDiff + ' vs bid)' : '') + '</div>' : '')          + (mats > 0 ? '<div style="font-size:11px;color:#64748b">🎨 $'+mats.toLocaleString()+' materials</div>' : '')          + (labor > 0 ? '<div style="font-size:11px;color:#7c3aed">👷 $'+labor.toLocaleString()+' labor</div>' : '')          + '</div>'          + '</div>';
+      }).join('');
+    } else {
+      recentWrap.style.display = 'none';
+    }
+  }
+
   var filtered = _logFilter === 'all' ? log : log.filter(function(e){ return e.status === _logFilter; });
 
   var emptyEl = document.getElementById('log-empty');
@@ -6938,7 +7551,7 @@ function exportToCSV() {
   var blob = new Blob([csv], { type: 'text/csv' });
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'hustler-bids-job-log-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.download = 'paintio-job-log-' + new Date().toISOString().slice(0,10) + '.csv';
   a.click();
 }
 
