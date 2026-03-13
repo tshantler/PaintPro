@@ -518,6 +518,7 @@ nav button.active {
   <button onclick="showPage('history')" style="background:#f0fdf4;color:#166534">📁 History</button>
   <button onclick="showPage('commission')" style="background:#fff7ed;color:#c2410c">💰 Commission</button>
   <button onclick="showPage('onboard')" style="background:#f0f9ff;color:#0369a1">📘 Onboarding</button>
+  <button onclick="showPage('sales');salesTab('process')" style="background:#fff1f2;color:#be123c">🎯 Sales Training</button>
 </nav>
 
 <!-- Toast message (used for confirmations throughout app) -->
@@ -725,6 +726,7 @@ nav button.active {
       <div style="display:flex;gap:8px;align-items:center">
         <button onclick="showAddLead()" style="background:#7c3aed;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ New Lead</button>
         <button onclick="showDataManager()" title="Backup/Restore Data" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">💾</button>
+        <button onclick="startDemo()" title="App Tour" style="background:#7c3aed;color:white;border:none;padding:7px 12px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">▶ Tour</button>
         <button onclick="showPage('setup')" title="Settings" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">⚙️</button>
       </div>
     </div>
@@ -752,7 +754,7 @@ nav button.active {
 </div>
 <!-- END LEAD PIPELINE PAGE -->
 
-<div class="page active" id="page-setup">
+<div class="page" id="page-setup">
 
   <!-- Data Backup -->
   <div class="card" style="border-left:4px solid #dc2626;background:#fff5f5;padding:14px 16px">
@@ -1860,78 +1862,98 @@ Select all paint colors prior to start date</textarea>
 
 <!-- ONBOARDING PAGE -->
 <div class="page" id="page-onboard">
-  <div style="font-size:16px;font-weight:900;color:#1e293b;margin-bottom:12px">📘 Onboarding Guide</div>
-  <div style="display:flex;flex-direction:column;gap:12px">
+  <div style="font-size:16px;font-weight:900;color:#1e293b;margin-bottom:4px">📘 Partner Onboarding</div>
+  <div style="font-size:12px;color:#64748b;margin-bottom:14px">Interactive app tutorial — follow each step to learn the full workflow</div>
 
-    <!-- Section: Pre-Call -->
+
+  <div style="margin-top:4px;display:flex;gap:10px">
+    <button onclick="startDemo()" id="ob-next-btn" style="flex:2;background:#7c3aed;color:white;border:none;padding:12px;border-radius:8px;font-size:15px;font-weight:900;cursor:pointer">▶ Start App Tour</button>
+  </div>
+  <div id="ob-complete-msg" style="display:none;margin-top:16px;background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:18px;text-align:center">
+    <div style="font-size:22px;margin-bottom:6px">🎉</div>
+    <div style="font-size:15px;font-weight:900;color:#166534">You're ready to sell!</div>
+    <div style="font-size:12px;color:#4ade80;margin-top:4px">Review the reference cards below anytime</div>
+    <button onclick="showPage('leads')" style="margin-top:12px;background:#16a34a;color:white;border:none;padding:10px 24px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">→ Go to Pipeline</button>
+  </div>
+
+  <!-- Reference Cards (always visible) -->
+  <div style="margin-top:20px;font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px">📋 Quick Reference</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+
     <div class="card" style="padding:14px 16px;border-left:4px solid #7c3aed">
-      <div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:8px">📞 Pre-Call Checklist</div>
-      <div style="font-size:13px;color:#1e293b;line-height:1.7">
-        1. Answer within 3 rings — speed to lead is everything<br>
-        2. Confirm the address and what they need painted<br>
-        3. Ask: <em>"Is this interior, exterior, or both?"</em><br>
-        4. Ask: <em>"Any specific colors in mind?"</em><br>
-        5. Log ballpark budget if they offer it<br>
-        6. Book the on-site appointment — give them 2 times to choose<br>
-        7. Confirm your phone number and send a text after: <em>"Hi [Name], it's Thomas from Gould Painting. Looking forward to meeting you [day] at [time]! — (716) 221-6418"</em>
+      <div style="font-size:12px;font-weight:800;color:#7c3aed;margin-bottom:6px">📞 Pre-Call Checklist</div>
+      <div style="font-size:12px;color:#1e293b;line-height:1.8">
+        ✓ Answer within 3 rings — speed to lead wins<br>
+        ✓ Confirm address + what needs painting<br>
+        ✓ Ask: <em>"Interior, exterior, or both?"</em><br>
+        ✓ Get ballpark budget if they offer it<br>
+        ✓ Book appointment — give 2 time options<br>
+        ✓ Send confirmation text after the call
       </div>
     </div>
 
-    <!-- Section: On-Site Estimate -->
     <div class="card" style="padding:14px 16px;border-left:4px solid #d97706">
-      <div style="font-size:13px;font-weight:800;color:#d97706;margin-bottom:8px">📐 On-Site Estimate</div>
-      <div style="font-size:13px;color:#1e293b;line-height:1.7">
-        1. Walk every room before measuring — understand the full scope<br>
-        2. Measure walls (L × H), ceiling, and all trim<br>
-        3. Note number of doors, windows, and coat counts<br>
-        4. Take photos of every room (for reference + scope disputes)<br>
-        5. Check Numbers tab to review labor, GP, and profit margin<br>
-        6. Target: <strong>40%+ GP margin</strong>. Below 30% — reconsider or adjust scope<br>
-        7. Present quote clearly — don't apologize for the price
+      <div style="font-size:12px;font-weight:800;color:#d97706;margin-bottom:6px">📐 On-Site Estimate</div>
+      <div style="font-size:12px;color:#1e293b;line-height:1.8">
+        ✓ Walk every room first — understand full scope<br>
+        ✓ Measure walls (L × H), ceiling, trim<br>
+        ✓ Note doors, windows, coat counts<br>
+        ✓ Take photos of every room<br>
+        ✓ Target <strong>40%+ GP margin</strong> — below 30% reconsider<br>
+        ✓ Present confidently — never apologize for price
       </div>
     </div>
 
-    <!-- Section: Closing -->
     <div class="card" style="padding:14px 16px;border-left:4px solid #16a34a">
-      <div style="font-size:13px;font-weight:800;color:#16a34a;margin-bottom:8px">🏆 Closing the Job</div>
-      <div style="font-size:13px;color:#1e293b;line-height:1.7">
-        1. After sending quote, follow up in 24 hrs: <em>"Hey [Name], just wanted to make sure you got the quote. Happy to answer any questions!"</em><br>
-        2. Second follow up at 3 days if no response<br>
-        3. If they say yes — collect 30% deposit immediately<br>
-        4. Mark Won → Build Work Order → Confirm sub<br>
-        5. Never start a job without a deposit in hand
+      <div style="font-size:12px;font-weight:800;color:#16a34a;margin-bottom:6px">🏆 Closing &amp; Follow Up</div>
+      <div style="font-size:12px;color:#1e293b;line-height:1.8">
+        ✓ Follow up 24hrs after sending quote<br>
+        ✓ Second follow up at 3 days — no response<br>
+        ✓ Yes? Collect <strong>30% deposit immediately</strong><br>
+        ✓ Never start a job without deposit in hand
       </div>
     </div>
 
-    <!-- Section: Sub Management -->
     <div class="card" style="padding:14px 16px;border-left:4px solid #0369a1">
-      <div style="font-size:13px;font-weight:800;color:#0369a1;margin-bottom:8px">🔨 Sub Management</div>
-      <div style="font-size:13px;color:#1e293b;line-height:1.7">
-        1. Send feeler texts 1–2 weeks before start date<br>
-        2. Labor rate: <strong>$45/hr flat</strong> — no exceptions<br>
-        3. Confirm sub 48 hrs before start — text them the address and start time<br>
-        4. Text client day before: <em>"Our crew will be there tomorrow at [time] — any questions?"</em><br>
-        5. Punch list must be completed before final payment released<br>
-        6. Pay sub within 3 days of receiving final payment
+      <div style="font-size:12px;font-weight:800;color:#0369a1;margin-bottom:6px">🔨 Sub Management</div>
+      <div style="font-size:12px;color:#1e293b;line-height:1.8">
+        ✓ Send feeler texts 1–2 weeks before start<br>
+        ✓ Labor rate: <strong>$45/hr flat — no exceptions</strong><br>
+        ✓ Confirm sub 48hrs before start<br>
+        ✓ Text client day before job starts<br>
+        ✓ Punch list done before releasing final payment<br>
+        ✓ Pay sub within 3 days of receiving final payment
       </div>
     </div>
 
-    <!-- Section: Business Numbers -->
     <div class="card" style="padding:14px 16px;border-left:4px solid #1a3a8a">
-      <div style="font-size:13px;font-weight:800;color:#1a3a8a;margin-bottom:8px">📊 Business Benchmarks</div>
-      <div style="font-size:13px;color:#1e293b;line-height:1.7">
-        <strong>Gould Painting WNY</strong> · Buffalo/Amherst, NY<br>
-        Phone: (716) 221-6418 · office@gouldpaintingwny.com<br><br>
+      <div style="font-size:12px;font-weight:800;color:#1a3a8a;margin-bottom:6px">📊 Key Numbers</div>
+      <div style="font-size:12px;color:#1e293b;line-height:1.8">
         Target close rate: <strong>40%+</strong><br>
         Target GP margin: <strong>40%+</strong><br>
         Standard deposit: <strong>30%</strong><br>
         Labor rate to subs: <strong>$45/hr</strong><br>
-        Partner commission: <strong>15% of GP</strong><br>
-        Follow up window: <strong>next day, then 3 days</strong>
+        Your commission: <strong>15% of GP per job</strong><br>
+        Follow up: <strong>24hrs then 3 days</strong>
       </div>
     </div>
 
   </div>
+</div>
+
+<div class="page" id="page-sales">
+  <div style="font-size:16px;font-weight:900;color:#1e293b;margin-bottom:2px">🎯 Sales Training</div>
+  <div style="font-size:12px;color:#64748b;margin-bottom:14px">Objections · Scripts · Closing · Follow-up</div>
+
+  <!-- Tab bar -->
+  <div style="display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px">
+    <button onclick="salesTab('process')" id="stab-process" class="stab" style="white-space:nowrap;flex-shrink:0;padding:7px 14px;border-radius:20px;border:none;font-size:12px;font-weight:800;cursor:pointer;background:#be123c;color:white">🏈 6-Step Process</button>
+    <button onclick="salesTab('objections')" id="stab-objections" class="stab" style="white-space:nowrap;flex-shrink:0;padding:7px 14px;border-radius:20px;border:1.5px solid #e2e8f0;font-size:12px;font-weight:800;cursor:pointer;background:white;color:#475569">💬 Objections</button>
+    <button onclick="salesTab('phone')" id="stab-phone" class="stab" style="white-space:nowrap;flex-shrink:0;padding:7px 14px;border-radius:20px;border:1.5px solid #e2e8f0;font-size:12px;font-weight:800;cursor:pointer;background:white;color:#475569">📞 Phone Scripts</button>
+    <button onclick="salesTab('closing')" id="stab-closing" class="stab" style="white-space:nowrap;flex-shrink:0;padding:7px 14px;border-radius:20px;border:1.5px solid #e2e8f0;font-size:12px;font-weight:800;cursor:pointer;background:white;color:#475569">🏆 Closing</button>
+  </div>
+
+  <div id="sales-tab-content"></div>
 </div>
 
 <div class="page" id="page-dash">
@@ -2000,7 +2022,7 @@ Select all paint colors prior to start date</textarea>
 
 
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 
 var WALL_COV = 350;
 var TRIM_COV = 400;
@@ -2164,7 +2186,7 @@ function showPage(p) {
   if (overlay) overlay.style.display = 'none';
 
   document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-  var pages=['dash','leads','fu','wo','active','history','commission','onboard'];
+  var pages=['dash','leads','fu','wo','active','history','commission','onboard','sales'];
   document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
   var pageEl = document.getElementById('page-'+p);
   if (pageEl) pageEl.classList.add('active');
@@ -2177,6 +2199,7 @@ function showPage(p) {
   if (floatSave) floatSave.style.display = 'none';
   if(p==='active')  buildActiveJobs();
   if(p==='leads')   buildLeads();
+  if(p==='sales')   { _salesTab = _salesTab || 'process'; buildSalesTab(); }
   if(p==='log')     { showPage('history'); return; }
   var floatBar = document.getElementById('float-bar');
   if (floatBar) floatBar.classList.remove('show');
@@ -7036,127 +7059,6 @@ function buildLeads() {
   }).join('');
 }
 
-function openLeadProfile(id) {
-  var lead = leads.find(function(l){ return l.id === id; });
-  if (!lead) return;
-
-  var jobtypeMap = {
-    'interior':'🏠 Interior','exterior':'🏡 Exterior','deck':'🪵 Deck',
-    'interior-exterior':'🏠🏡 Int + Ext','interior-deck':'🏠🪵 Int + Deck',
-    'exterior-deck':'🏡🪵 Ext + Deck','full':'🏠🏡🪵 Full Job'
-  };
-  var jt = jobtypeMap[lead.jobtype] || lead.jobtype || '—';
-
-  var statusColors = {'New':'#0369a1','Appt Set':'#7c3aed','Ready to Bid':'#d97706','Quoted':'#2563eb','Won':'#16a34a','Lost':'#dc2626'};
-  var sc = statusColors[lead.status] || '#64748b';
-
-  function row(label, val) {
-    if (!val) return '';
-    return '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9">'
-      + '<div style="font-size:12px;color:#94a3b8;font-weight:600">'+label+'</div>'
-      + '<div style="font-size:12px;color:#1e293b;font-weight:700;text-align:right;max-width:60%">'+val+'</div>'
-      + '</div>';
-  }
-
-  function section(title, color, body) {
-    return '<div style="margin-bottom:14px">'
-      + '<div style="font-size:10px;font-weight:800;color:'+color+';text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;padding-bottom:4px;border-bottom:2px solid '+color+'">'+title+'</div>'
-      + body
-      + '</div>';
-  }
-
-  var contactSection = section('👤 Contact', '#0369a1',
-    row('Name',    lead.name)
-    + row('Phone', lead.phone ? '<a href="tel:'+lead.phone+'" style="color:#0369a1">'+lead.phone+'</a>' : '')
-    + row('Email', lead.email ? '<a href="mailto:'+lead.email+'" style="color:#0369a1">'+lead.email+'</a>' : '')
-    + row('Address', (lead.address||'') + (lead.city ? ', '+lead.city : ''))
-  );
-
-  var jobSection = section('📋 Job Details', '#7c3aed',
-    row('Job Type',    jt)
-    + row('Source',    lead.source)
-    + row('Status',    '<span style="color:'+sc+';font-weight:800">'+lead.status+'</span>')
-    + row('Appointment', lead.appt)
-    + row('Ballpark',  lead.ballpark)
-    + row('Quote Amt', lead.quoteAmt > 0 ? '$'+Number(lead.quoteAmt).toLocaleString() : '')
-    + row('Deposit',   lead.depositPaid ? '✅ Received' : (lead.status === 'Won' ? '⏳ Pending' : ''))
-  );
-
-  var preCallSection = section('📞 Pre-Call Notes', '#d97706',
-    '<div style="font-size:12px;color:#374151;line-height:1.7;white-space:pre-wrap;padding:8px;background:#fffbeb;border-radius:6px;min-height:40px">'
-    + (lead.notes || '<span style="color:#94a3b8;font-style:italic">No notes recorded</span>')
-    + '</div>'
-    + (lead.preCallItems ? '<div style="font-size:11px;color:#d97706;margin-top:6px;font-weight:700">✅ Checklist: '+lead.preCallItems+' items completed</div>' : '')
-    + (lead.preCallDate  ? '<div style="font-size:11px;color:#94a3b8;margin-top:2px">Called: '+new Date(lead.preCallDate).toLocaleDateString()+'</div>' : '')
-  );
-
-  var quoteSection = lead.quoteAmt > 0
-    ? section('💵 Quote', '#16a34a',
-        row('Quote Total', '$'+Number(lead.quoteAmt).toLocaleString())
-        + row('Deposit (30%)', '$'+Math.round(lead.quoteAmt*0.3).toLocaleString())
-        + row('Balance',       '$'+Math.round(lead.quoteAmt*0.7).toLocaleString())
-        + row('Quoted On', lead.proposalDate || '')
-      )
-    + (lead.numbersHTML ? '<div style="margin-bottom:8px"><button onclick="var p=this.nextElementSibling;var open=p.style.display===\'block\';p.style.display=open?\'none\':\'block\';this.textContent=open?\'💰 View Numbers\':\'▲ Hide Numbers\';" style="width:100%;background:#f0fdf4;border:1.5px solid #86efac;color:#166534;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">💰 View Production Numbers</button><div style="display:none;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-top:4px;font-size:12px;overflow-x:auto">'+lead.numbersHTML+'</div></div>' : '')
-    + (lead.proposalHTML ? '<div style="margin-bottom:8px"><button onclick="var p=this.nextElementSibling;var open=p.style.display===\'block\';p.style.display=open?\'none\':\'block\';this.textContent=open?\'📄 View Proposal\':\'▲ Hide Proposal\';" style="width:100%;background:#f0f9ff;border:1.5px solid #bae6fd;color:#0369a1;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">📄 View Proposal</button><div style="display:none;border:1px solid #e2e8f0;border-radius:10px;padding:20px;margin-top:4px;font-size:12px;overflow-x:auto">'+lead.proposalHTML+'</div></div>' : '')
-    : '';
-
-  var lostSection = lead.lostReason
-    ? section('❌ Lost Reason', '#dc2626',
-        '<div style="font-size:12px;color:#374151;padding:8px;background:#fef2f2;border-radius:6px">'+lead.lostReason+'</div>'
-      )
-    : '';
-
-  var html = '<div id="lead-profile-overlay" onclick="closeProfileIfBg(event)" '
-    + 'style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;display:flex;align-items:flex-end;justify-content:center">'
-    + '<div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:540px;max-height:88vh;display:flex;flex-direction:column">'
-
-      // Header
-      + '<div style="background:linear-gradient(135deg,#1a3a8a,#1e40af);border-radius:16px 16px 0 0;padding:16px 18px 14px;flex-shrink:0">'
-        + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-          + '<div>'
-            + '<div style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">Lead Profile</div>'
-            + '<div style="font-size:18px;font-weight:900;color:white">'+lead.name+'</div>'
-            + '<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:2px">'+jt+' · <span style="color:white;font-weight:700">'+lead.status+'</span></div>'
-          + '</div>'
-          + '<button onclick="closeLeadProfile()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">✕ Close</button>'
-        + '</div>'
-      + '</div>'
-
-      // Scrollable body
-      + '<div style="overflow-y:auto;padding:18px;flex:1">'
-        + contactSection
-        + jobSection
-        + preCallSection
-        + quoteSection
-        + lostSection
-      + '</div>'
-
-      // Footer actions
-      + '<div style="padding:12px 18px 24px;border-top:1px solid #f1f5f9;display:flex;gap:8px;flex-shrink:0">'
-        + '<button onclick="closeLeadProfile();startPreCall('+lead.id+')" style="flex:1;background:#0369a1;color:white;border:none;padding:11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">📞 Pre-Call</button>'
-        + (lead.status === 'Appt Set' || lead.status === 'Ready to Bid'
-            ? '<button onclick="closeLeadProfile();loadLeadIntoEstimator('+lead.id+')" style="flex:1;background:#7c3aed;color:white;border:none;padding:11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">📐 Estimate</button>'
-            : '')
-        + (lead.status === 'Quoted'
-            ? '<button onclick="closeLeadProfile();acceptLead('+lead.id+')" style="flex:1;background:#16a34a;color:white;border:none;padding:11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">✅ Accept</button>'
-            : '')
-        + '<button onclick="closeLeadProfile();editLead('+lead.id+')" style="flex:1;background:#f1f5f9;color:#475569;border:none;padding:11px;border-radius:8px;font-size:12px;font-weight:800;cursor:pointer">✏️ Edit</button>'
-      + '</div>'
-
-    + '</div>'
-  + '</div>';
-
-  var el = document.createElement('div');
-  el.id  = 'lead-profile-container';
-  el.innerHTML = html;
-  document.body.appendChild(el);
-}
-
-function closeLeadProfile() {
-  var el = document.getElementById('lead-profile-container');
-  if (el) el.remove();
-}
 
 function updateQuoteLeadBar() {
   var bar = document.getElementById('quote-lead-bar');
@@ -7239,11 +7141,7 @@ function showLeadSummaryModal() {
   document.body.appendChild(el);
 }
 
-function closePresentMode() {
-  var el = document.getElementById('present-overlay');
-  if (el) el.remove();
-  try { document.exitFullscreen && document.exitFullscreen(); } catch(e) {}
-}
+// closePresentMode defined below
 
 function openPresentMode() {
   // Build quote first
@@ -7285,53 +7183,74 @@ function openPresentMode() {
     buildLeads();
   }
 
-  // Create fullscreen overlay
+  // Create fullscreen overlay — clean proposal presentation, NO action buttons visible
   var el = document.createElement('div');
   el.id = 'present-mode-overlay';
-  el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:white;overflow-y:auto;';
+  el.style.cssText = 'position:fixed;inset:0;z-index:9999;background:white;display:flex;flex-direction:column;overflow:hidden;';
 
-  // Top bar
-  var topBar = '<div style="position:sticky;top:0;background:#1a3a8a;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:10">'
-    + '<div style="font-size:15px;font-weight:900">🖥️ Presenting to Client</div>'
+  // Top bar — Print + Close only
+  var topEl = document.createElement('div');
+  topEl.style.cssText = 'flex-shrink:0;background:#1a3a8a;color:white;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;';
+  topEl.innerHTML = '<div style="font-size:13px;font-weight:700;opacity:0.75">Gould Painting WNY — Proposal</div>'
     + '<div style="display:flex;gap:8px">'
-    + '<button onclick="window.print()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">🖨 Print</button>'
-    + '<button onclick="closePresentModeToLead()" style="background:#f59e0b;border:none;color:white;padding:7px 18px;border-radius:7px;font-size:13px;font-weight:800;cursor:pointer">Next Step →</button>'
-    + '</div>'
+    + '<button onclick="window.print()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">🖨 Print</button>'
+    + '<button onclick="showPresentCloseModal()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">✕ Close</button>'
     + '</div>';
 
-  // Internal numbers panel
-  var qnPanelHTML = '<div id="pm-qn-panel" style="display:none;background:#f0fdf4;border:2px solid #22c55e;border-top:none;border-radius:0 0 8px 8px;padding:14px 16px;max-width:800px;margin:0 auto">'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px" id="pm-qn-summary"></div>'
-    + '<table class="qt" style="font-size:12px;width:100%"><thead><tr>'
-    + '<th>Room</th><th class="r" style="color:#94a3b8">Hours</th><th class="r">Price</th>'
-    + '<th class="r" style="color:#f97316">Materials</th><th class="r" style="color:#ef4444">Sub Pay</th><th class="r" style="color:#16a34a">GP</th>'
-    + '</tr></thead><tbody id="pm-qn-rows"></tbody></table>'
-    + '<div style="font-size:10px;color:#94a3b8;margin-top:8px;text-align:center">Internal only — client cannot see this</div>'
-    + '</div>';
-
-  var actionBar = '<div style="max-width:800px;margin:16px auto 0;padding:0 24px">'
-    + '<button onclick="var p=document.getElementById(\'pm-qn-panel\');var open=p.style.display===\'block\';p.style.display=open?\'none\':\'block\';this.querySelector(\'.pm-arrow\').textContent=open?\'▼\':\'▲\';if(!open)buildPMNumbers();" style="width:100%;background:#f0fdf4;border:2px solid #22c55e;color:#166534;padding:10px 16px;border-radius:8px 8px 0 0;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-bottom:0">'
-    + '<span>💰 Check Your Numbers (GP / Sub Pay / Hours)</span><span class="pm-arrow">▼</span></button>'
-    + qnPanelHTML
-    + '<div style="margin-top:12px;padding:14px 16px;background:#eff6ff;border:2px solid #bfdbfe;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px">'
-    + '<div>'
-    + '<div style="font-size:13px;font-weight:800;color:#1e40af">✅ Proposal saved to lead card</div>'
-    + '<div style="font-size:12px;color:#3b82f6;margin-top:2px">Status set to Quoted — hit Next Step to go back to the lead</div>'
-    + '</div>'
-    + '<button onclick="closePresentModeToLead()" style="background:#1e40af;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap">Next Step →</button>'
-    + '</div>'
-    + '</div>';
-
-  // Clone quote content
+  // Proposal fills the screen
   var cloned = quotePreview.cloneNode(true);
-  cloned.style.cssText = 'max-width:800px;margin:0 auto;padding:32px 24px 60px;';
+  cloned.style.cssText = 'flex:1;overflow-y:auto;padding:32px 24px 24px;max-width:860px;width:100%;margin:0 auto;box-sizing:border-box;';
   cloned.querySelectorAll('button, input, select, textarea').forEach(function(e){ e.remove(); });
 
-  el.innerHTML = topBar + actionBar;
+  el.appendChild(topEl);
   el.appendChild(cloned);
   document.body.appendChild(el);
 
   document.body.style.overflow = 'hidden';
+}
+
+function closePresentCloseModal() {
+  var m = document.getElementById('present-close-modal');
+  if (m) m.remove();
+}
+function showPresentCloseModal() {
+  var modal = document.createElement('div');
+  modal.id = 'present-close-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:white;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:18px;font-weight:900;color:#1e293b;margin-bottom:6px;text-align:center';
+  title.textContent = 'What happened?';
+
+  var sub = document.createElement('div');
+  sub.style.cssText = 'font-size:13px;color:#94a3b8;text-align:center;margin-bottom:24px';
+  sub.textContent = 'How did the proposal go?';
+
+  var btnWon = document.createElement('button');
+  btnWon.style.cssText = 'width:100%;background:#16a34a;color:white;border:none;padding:16px;border-radius:10px;font-size:16px;font-weight:900;cursor:pointer;margin-bottom:10px;display:block';
+  btnWon.textContent = '\u2705 They Said Yes \u2014 Mark Won';
+  btnWon.onclick = function(){ closePresentCloseModal(); closePresentModeAndAccept(); };
+
+  var btnFu = document.createElement('button');
+  btnFu.style.cssText = 'width:100%;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;margin-bottom:10px;display:block';
+  btnFu.textContent = '\ud83d\udd14 Not Yet \u2014 Follow Up';
+  btnFu.onclick = function(){ closePresentCloseModal(); closePresentModeToLead(); };
+
+  var btnBack = document.createElement('button');
+  btnBack.style.cssText = 'width:100%;background:transparent;color:#94a3b8;border:none;padding:10px;font-size:13px;font-weight:600;cursor:pointer;display:block';
+  btnBack.textContent = '\u21a9 Back to Proposal';
+  btnBack.onclick = function(){ closePresentCloseModal(); };
+
+  box.appendChild(title);
+  box.appendChild(sub);
+  box.appendChild(btnWon);
+  box.appendChild(btnFu);
+  box.appendChild(btnBack);
+  modal.appendChild(box);
+  document.body.appendChild(modal);
 }
 
 function closePresentModeToLead() {
@@ -7363,13 +7282,21 @@ function closePresentModeToLead() {
     }
   }
 
-  // Close estimator and open the lead profile card
+  // Close estimator, go to Follow Ups so the lead doesn't fall through the cracks
+  closeEstimator();
+  showPage('fu');
+}
+function closePresentModeAndAccept() {
+  var el = document.getElementById('present-mode-overlay');
+  if (el) el.remove();
+  document.body.style.overflow = '';
   closeEstimator();
   if (_activeLeadId) {
-    var lid = _activeLeadId;
-    setTimeout(function(){ openLeadProfile(lid); }, 200);
+    acceptLead(_activeLeadId);
   }
 }
+
+
 
 function buildPMNumbers() {
   var calcs = rooms.map(function(r){ return {room:r, calc:calcRoom(r)}; });
@@ -7439,6 +7366,31 @@ function closeSummaryModal() {
   var el = document.getElementById('lead-summary-container');
   if (el) el.remove();
 }
+
+function pushLeadToFollowUps(id) {
+  var lead = leads.find(function(l){ return l.id === id; });
+  if (!lead) return;
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  var already = fuList.find(function(f){ return f.leadId === lead.id; });
+  if (!already) {
+    fuList.unshift({
+      id:     'lead-' + lead.id,
+      leadId: lead.id,
+      name:   lead.name,
+      phone:  lead.phone || '',
+      amount: lead.quoteAmt || 0,
+      sent:   new Date().toISOString().slice(0,10),
+      notes:  'Quoted ' + (lead.quoteAmt > 0 ? '$'+Number(lead.quoteAmt).toLocaleString() : '') + ' — awaiting answer',
+      done:   false,
+      auto:   true
+    });
+    try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+  }
+  closeLeadProfile();
+  showPage('fu');
+}
+
 
 function openLeadProfile(id) {
   var lead = leads.find(function(l){ return l.id === id; });
@@ -8440,6 +8392,447 @@ function markFULost(id) {
 
   buildFollowUps();
 }
+
+
+// ===================== DEMO MODE =====================
+
+var _demoStep = 0;
+var _demoActive = false;
+var _demoLeadId = null;
+
+var _demoSteps = [
+  {
+    title: "Welcome to Hustler Bids 👋",
+    body: "This is your full job management system — from the moment a lead calls in to collecting final payment. This tour walks you through every step. Hit Next to begin.",
+    page: 'dash',
+    highlight: null,
+    action: null
+  },
+  {
+    title: "📊 The Dashboard",
+    body: "Every morning starts here. You see your active jobs, leads that need attention, MTD revenue, and any follow-ups due today. Thomas checks this first thing every day.",
+    page: 'dash',
+    highlight: '#page-dash',
+    action: function(){ showPage('dash'); }
+  },
+  {
+    title: "📋 The Lead Pipeline",
+    body: "Every new lead lives here. Leads move left to right through stages: New → Appt Set → Quoted → Won. The progress bar on each card shows exactly where they are.",
+    page: 'leads',
+    highlight: '#page-leads',
+    action: function(){ showPage('leads'); _demoInjectLead(); }
+  },
+  {
+    title: "📞 Step 1: Pre-Call",
+    body: "When a lead comes in, hit the Pre-Call button on their card. This opens a checklist to run through on the phone — confirm the address, job type, book the appointment. Saving this flips them to Appt Set automatically.",
+    page: 'leads',
+    highlight: '.demo-lead-card',
+    action: function(){ showPage('leads'); }
+  },
+  {
+    title: "📐 Step 2: Bid Now (The Estimator)",
+    body: "On appointment day, open the lead and hit Bid Now. The Estimator opens — you measure each room, enter dimensions, and the app calculates labor, materials, and your profit margin in real time.",
+    page: 'leads',
+    highlight: '.demo-lead-card',
+    action: function(){ showPage('leads'); }
+  },
+  {
+    title: "💵 Step 3: Quote & Present",
+    body: "Once rooms are measured, go to the Quote tab. Review the proposal — it shows the client Total Investment, deposit due, and scope of work. Hit Present to show it to the client on your phone or laptop.",
+    page: 'leads',
+    highlight: null,
+    action: function(){ showPage('leads'); }
+  },
+  {
+    title: "✅ Step 4: Mark Won",
+    body: "They say yes! Hit Mark Won — the app fires a confetti modal, saves the job, and prompts you to build the Work Order. Always collect the 30% deposit before starting.",
+    page: 'leads',
+    highlight: null,
+    action: function(){ showPage('leads'); }
+  },
+  {
+    title: "🔨 Step 5: Work Order",
+    body: "The Work Order loads the won job automatically. Send feeler texts to your sub crew here, confirm who's doing the job, set the start date, and move it to Active Jobs.",
+    page: 'wo',
+    highlight: '#page-wo',
+    action: function(){ showPage('wo'); buildWOWonList(); }
+  },
+  {
+    title: "🚧 Step 6: Active Jobs",
+    body: "Track every job in progress here. Log check-ins, mark invoiced/paid, manage the punch list, and mark complete when done. Completing a job triggers a review request to the client.",
+    page: 'active',
+    highlight: '#page-active',
+    action: function(){ showPage('active'); }
+  },
+  {
+    title: "🔔 Follow Ups",
+    body: "Any lead you quoted but didn't close goes here automatically. You'll see who needs a follow-up call and when. Quick-dial from this screen — one tap to call.",
+    page: 'fu',
+    highlight: '#page-fu',
+    action: function(){ showPage('fu'); }
+  },
+  {
+    title: "💰 Your Commission",
+    body: "Every job you close earns you 15% of gross profit. The Commission tab tracks your earnings per job and your running total. Thomas pays out after final payment is collected.",
+    page: 'commission',
+    highlight: '#page-commission',
+    action: function(){ showPage('commission'); }
+  },
+  {
+    title: "📁 Job History",
+    body: "Every completed job lives here permanently — full record of quote, final amount, who did the work, and notes. Use this to spot returning clients and reference past work.",
+    page: 'history',
+    highlight: '#page-history',
+    action: function(){ showPage('history'); }
+  },
+  {
+    title: "🎉 You're Ready!",
+    body: "That's the full workflow. The rule is simple: every lead gets worked — Pre-Call → Estimate → Quote → Won → Active → Complete. Nothing falls through the cracks. Go get it!",
+    page: 'leads',
+    highlight: null,
+    action: function(){ showPage('leads'); _demoCleanupLead(); }
+  }
+];
+
+function _demoInjectLead() {
+  var existing = leads.find(function(l){ return l.name === 'Demo Client'; });
+  if (existing) { _demoLeadId = existing.id; buildLeads(); return; }
+  var lead = {
+    id: Date.now(),
+    name: 'Demo Client',
+    phone: '(716) 555-0000',
+    email: 'demo@example.com',
+    address: '123 Main St',
+    city: 'Buffalo, NY',
+    jobtype: 'interior',
+    status: 'New',
+    source: 'Demo',
+    notes: 'This is a demo lead for the app tutorial.',
+    ballpark: '$2,000–$3,000',
+    created: new Date().toISOString()
+  };
+  _demoLeadId = lead.id;
+  leads.unshift(lead);
+  saveLeads();
+  buildLeads();
+}
+
+function _demoCleanupLead() {
+  if (!_demoLeadId) return;
+  leads = leads.filter(function(l){ return l.id !== _demoLeadId; });
+  _demoLeadId = null;
+  saveLeads();
+  buildLeads();
+}
+
+function _demoHighlight(selector) {
+  // Remove old highlights
+  document.querySelectorAll('.demo-highlight-ring').forEach(function(e){ e.remove(); });
+  if (!selector) return;
+  var target = document.querySelector(selector);
+  if (!target) return;
+  var rect = target.getBoundingClientRect();
+  var ring = document.createElement('div');
+  ring.className = 'demo-highlight-ring';
+  ring.style.cssText = 'position:fixed;z-index:9990;border:3px solid #7c3aed;border-radius:12px;pointer-events:none;'
+    + 'box-shadow:0 0 0 4000px rgba(0,0,0,0.35);'
+    + 'top:' + (rect.top - 6) + 'px;'
+    + 'left:' + (rect.left - 6) + 'px;'
+    + 'width:' + (rect.width + 12) + 'px;'
+    + 'height:' + (rect.height + 12) + 'px;'
+    + 'transition:all 0.3s;';
+  document.body.appendChild(ring);
+}
+
+function _demoBuildCard() {
+  var s = _demoSteps[_demoStep];
+  var total = _demoSteps.length;
+  var pct = Math.round((_demoStep / (total - 1)) * 100);
+
+  var card = document.getElementById('demo-card');
+  if (!card) return;
+
+  card.innerHTML = ''
+    + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      + '<div style="font-size:10px;font-weight:800;color:#7c3aed;text-transform:uppercase;letter-spacing:0.07em">App Tour · ' + (_demoStep + 1) + ' of ' + total + '</div>'
+      + '<button onclick="stopDemo()" style="background:#f1f5f9;border:none;color:#94a3b8;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">✕ Exit</button>'
+    + '</div>'
+    + '<div style="background:#f1f5f9;border-radius:6px;height:5px;margin-bottom:12px;overflow:hidden">'
+      + '<div style="height:100%;width:' + pct + '%;background:linear-gradient(90deg,#7c3aed,#1a3a8a);border-radius:6px;transition:width 0.4s"></div>'
+    + '</div>'
+    + '<div style="font-size:15px;font-weight:900;color:#1e293b;margin-bottom:8px">' + s.title + '</div>'
+    + '<div style="font-size:13px;color:#475569;line-height:1.7;margin-bottom:16px">' + s.body + '</div>'
+    + '<div style="display:flex;gap:8px">'
+      + (_demoStep > 0 ? '<button onclick="demoPrev()" style="flex:1;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">← Back</button>' : '')
+      + (_demoStep < total - 1
+          ? '<button onclick="demoNext()" style="flex:2;background:#7c3aed;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:900;cursor:pointer">Next →</button>'
+          : '<button onclick="stopDemo()" style="flex:2;background:#16a34a;color:white;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:900;cursor:pointer">🎉 Done!</button>')
+    + '</div>';
+}
+
+function startDemo() {
+  _demoStep = 0;
+  _demoActive = true;
+
+  // Create floating demo card
+  var card = document.createElement('div');
+  card.id = 'demo-card';
+  card.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;'
+    + 'background:white;border-radius:16px;padding:20px;width:calc(100% - 40px);max-width:480px;'
+    + 'box-shadow:0 8px 40px rgba(0,0,0,0.25);border-top:4px solid #7c3aed;';
+  document.body.appendChild(card);
+
+  _demoRunStep();
+}
+
+function _demoRunStep() {
+  var s = _demoSteps[_demoStep];
+  if (s.action) {
+    try { s.action(); } catch(e) {}
+  }
+  setTimeout(function(){
+    _demoHighlight(s.highlight);
+    _demoBuildCard();
+    // Scroll highlighted element into view
+    if (s.highlight) {
+      var el = document.querySelector(s.highlight);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 300);
+}
+
+function demoNext() {
+  if (_demoStep < _demoSteps.length - 1) {
+    _demoStep++;
+    _demoRunStep();
+  }
+}
+
+function demoPrev() {
+  if (_demoStep > 0) {
+    _demoStep--;
+    _demoRunStep();
+  }
+}
+
+function stopDemo() {
+  _demoActive = false;
+  _demoCleanupLead();
+  document.querySelectorAll('.demo-highlight-ring').forEach(function(e){ e.remove(); });
+  var card = document.getElementById('demo-card');
+  if (card) card.remove();
+  showPage('leads');
+}
+
+// ===================== END DEMO MODE =====================
+
+// ===================== SALES TRAINING =====================
+
+var _salesTab = 'process';
+
+var _salesData = {
+
+  process: [
+    {
+      title: "The Big Idea: Field Position Theory",
+      icon: "&#127944;",
+      color: "#7c3aed",
+      body: "Think of every sale like a football field. You start on your own goal line. Every interaction moves you closer to the end zone.\n\nWeak salespeople only get to the 50 yard line then throw a Hail Mary when they show the price. Great salespeople walk in and the customer just says yes.\n\nGoal: by the time you present the contract, the customer is already ready to buy. Every step sets up the next."
+    },
+    {
+      title: "Step 1: Rapport — Trust Wins, Not Price",
+      icon: "&#129309;",
+      color: "#0369a1",
+      body: "Price is NOT the most important thing. Trust is.\n\nThe moment someone opens the door:\n\"Hey, how's it going? I'm [Name]. How long have you guys lived here?\"\n\nThen follow their lead and build naturally.\n\n3 RULES:\n\n1. Always START with rapport. Skip it and try to add it later — it falls flat every time.\n\n2. Transition when ready. Read the customer. Some talk for 30 minutes, some give short answers. When it's time: \"Okay cool, let's talk about the project.\"\n\n3. Mirror your customer:\n   Tone — soft customer, speak softly. High energy, match it.\n   Pace — fast mover, move fast. Slow and relaxed, slow down.\n   Body language — expressive, be more expressive. Calm, be calm.\n\nHarvard study: salespeople who mirror see 17% better results. You sell to them the way they want to be sold to."
+    },
+    {
+      title: "Step 2: The Initial Phone Call",
+      icon: "&#128222;",
+      color: "#d97706",
+      body: "The call is where you win or lose — before you ever show up.\n\nOne coaching client dropped from 56% to 35% close rate just by adding an auto-booking widget that skipped the phone call. He removed it. Four weeks later: back to 56%.\n\nThe call has 5 jobs:\n\n1. QUALIFY — Ask lots of questions. It makes the customer get more serious about the project.\n\n2. CREATE BUYING STATE OF MIND — Painting has no built-in urgency. They're window shopping. Change that.\n\n3. SET EXPECTATIONS — Tell them what the estimate will look like so it goes the way you want.\n\n4. GET ALL DECISION MAKERS THERE — \"Is there anyone else who will have input on this? Can we find a time you're both available? It's a big investment and I want to answer everyone's questions.\"\n\n5. TRIAL CLOSE — Confirm all details and give them a reason to take the appointment seriously."
+    },
+    {
+      title: "Step 3: Pre-Closes (Create a Reason to Decide Now)",
+      icon: "&#127919;",
+      color: "#be123c",
+      body: "Give people a reason to decide NOW instead of later — honestly, no fake urgency.\n\nPRE-CLOSE 1 — SCHEDULING DISCOUNT:\n\"I have a spot I need filled in 4 weeks. If you can take that slot, I'll knock a bit off the price.\"\nThis is real — it genuinely helps you fill the schedule.\n\nPRE-CLOSE 2 — SAME-DAY DECISION DISCOUNT:\n\"If everything looks good at the appointment and you want to move forward that day, I'll knock a little off because it saves me follow-up time. Fair?\"\n\nWhy it works: When customers decide in person with you, they choose you. Every day after you leave, another competitor gets in front of them.\n\nAsk yourself: if every customer gave you a decision at the estimate, would that be valuable? Yes. So give them a small incentive to do it."
+    },
+    {
+      title: "Step 4: The Walkaround",
+      icon: "&#128210;",
+      color: "#16a34a",
+      body: "Walk the project WITH the customer and work through every decision together.\n\nFor every decision point:\n1. Present the options\n2. Give YOUR recommendation based on their needs\n3. Ask: \"That's my recommendation — but what would you like to do?\"\n\nWhat this does:\n  Educates the customer — builds your credibility\n  Makes them like and trust you more\n  Opens their eyes to scope and cost before they see the price\n  Feels customized — they picked it, they own it\n  Less likely to say they want other estimates\n\nNEVER SAY: \"What we do is...\"\nALWAYS SAY: \"What we recommend is... but what would you like?\"\n\nThe walkaround is what separates a professional from a guy who just hands over a number."
+    },
+    {
+      title: "Step 5: Price Anchoring",
+      icon: "&#128176;",
+      color: "#0891b2",
+      body: "Your customer already has a price in their head. If your price is higher than what they expect, you lose.\n\nYou cannot always change your price. You CAN change what they expect.\n\nTECHNIQUE 1 — PRICE PER DAY:\n\"We run about $1,500 a day. This is probably a 4-5 day job.\"\nNow they calculate $6,000-$7,500 before seeing the contract.\n\nTECHNIQUE 2 — REFERENCE A COMPARABLE JOB:\n\"We did a house down the street, same size. Came out around $7,000. They added the trim and it was $7,800. So you're probably in that ballpark.\"\n\nTECHNIQUE 3 — CALL OUT WHAT COSTS MONEY:\n\"Just so you know — that ceiling detail is really time-consuming. Most people don't realize how much work goes into that.\"\n\nTECHNIQUE 4 — MINDSET:\nThe most important one. Whatever the price is, they can afford it. They live in a house that costs that much to paint.\n\nSay the price. Be quiet. Believe the number is right."
+    },
+    {
+      title: "Step 6: The Close",
+      icon: "&#127942;",
+      color: "#16a34a",
+      body: "3 parts: Review the contract. Ask for the job. Handle objections.\n\nPART 1 — REVIEW THE CONTRACT:\nWalk through everything discussed. Then present the price options.\n\nPART 2 — ASK FOR THE JOB:\n\"So — which option do you want to go with?\"\nPut the pen down. Stop talking.\nDo NOT fill the silence. First person to speak after price loses leverage.\n\nPART 3 — HANDLE THEIR RESPONSE:\n\nThey say yes — sign them up.\n\nThey ask a question — answer briefly, then close again: \"Is that the option you're leaning towards?\"\n\nThey object (need to think, getting estimates, price high):\n\"Oh totally, no problem. Can I ask a few quick questions before I go?\"\n\nTHE 4-QUESTION SEQUENCE:\n1. Are you definitely doing this project?\n2. Did I get you everything you need and want?\n3. Are you comfortable with me and our company?\n4. Is the price about what you were expecting?\n\nIf any answer is No — that is the real objection. Fix it.\nIf all Yes: \"Out of curiosity, what are you looking for in the other estimate?\"\n\nThen lock in the follow-up:\n\"I'll hold that discount for you. When will you be able to let me know — Thursday? Great. I'll call you Thursday.\""
+    }
+  ],
+
+  objections: [
+    {
+      q: "Your price is too high.",
+      a: "I totally understand. Can I ask — is it the total number, or more about the deposit timing?\n\n[Run the 4-question sequence]\n1. Are you definitely doing this project?\n2. Did I get you everything you need?\n3. Are you comfortable with us?\n4. Is the price about what you expected?\n\nThen: \"I'll hold that discount for you. When will you be able to decide?\"",
+      tip: "Never drop price immediately. Run the 4 questions first. Find where the real no is. If all 4 are yes, they are buying — just need a nudge."
+    },
+    {
+      q: "I need to think about it.",
+      a: "Oh yeah, totally no problem. Can I ask a few quick questions before I go?\n\n1. Are you definitely doing this project?\n2. Did I get you everything you need?\n3. Are you comfortable with me and our company?\n4. Is the price about what you expected?\n\n[Set follow-up date]\n\"I'll hold that discount price for you. When will you be able to let me know?\"",
+      tip: "Need to think about it is almost always an unanswered objection. The 4 questions flush it out. Lock in a hard follow-up date before you leave."
+    },
+    {
+      q: "I'm going to get other estimates.",
+      a: "Oh yeah, totally no problem. Can I ask a few quick questions?\n\n[Run 4-question sequence]\n\nIf all yes: \"Out of curiosity, what are you looking for in the other estimate?\"\n\n\"I'll hold that discount price until you're ready. When will you have seen the other estimate? Thursday? I'll call you Thursday.\"",
+      tip: "Don't fight it. Run the 4 questions, find out if there's a real issue, then lock in a follow-up with the discount still on the table."
+    },
+    {
+      q: "Can you do it for less?",
+      a: "Our pricing is measurement-based so there's not much room to move on the total.\n\nWhat I can do is look at the scope with you — if there's anything you're flexible on, like a room or product choice, I can adjust it that way.\n\nWe did a house down the street about the same size — came out around $X. You're actually right in that ballpark.",
+      tip: "Only discount by reducing scope, never by cutting margin. Offer to remove work, not cut price. Use a reference job to re-anchor their expectations."
+    },
+    {
+      q: "We might wait until spring.",
+      a: "Totally makes sense. Fair warning — our spring schedule fills up fast, usually by February.\n\nHere's what I can do: I have a spot opening in [month]. If you can be flexible with timing, I'll hold it and give you a scheduling discount. You're locked in with no pressure right now.",
+      tip: "Use the scheduling discount as a real honest incentive. A soft calendar hold is low-friction commitment that keeps them warm and off the competitor's calendar."
+    }
+  ],
+
+  phone: [
+    {
+      label: "Inbound Call — Full Script",
+      script: "\"Thanks for calling Gould Painting, this is [Name] — how can I help you today?\"\n\n[Let them explain the project]\n\n\"Perfect, I can definitely help with that. Can I grab your name and address?\"\n\n[Qualify with questions]\n\"Is this interior, exterior, or both?\"\n\"How many rooms, roughly?\"\n\"What's driving the project — refresh, moving, damage?\"\n\n[Set expectations]\n\"What I like to do is come out, walk the whole project with you, go through all your options, and put together a customized proposal. Takes about an hour. Does that work?\"\n\n[Get all decision makers]\n\"Is there anyone else who will have input on this? Can we find a time you're both available? It's a big investment — I want to make sure I answer everyone's questions.\"\n\n[Trial close]\n\"Perfect. So — [date], [time], [address]. And hey — if everything looks good and you're happy with the proposal, I'll knock a bit off the price if you can decide that day. It just saves me follow-up time. Sound fair?\"\n\n\"Great — see you [day] at [time]. Text me if anything changes.\""
+    },
+    {
+      label: "Confirmation Text — After Booking",
+      script: "\"Hey [Name]! It's [Your Name] from Gould Painting WNY. Just confirming our appointment [Day] at [Time] at [Address]. Looking forward to meeting you — text me if anything comes up! (716) 221-6418\""
+    },
+    {
+      label: "Day-Before Reminder",
+      script: "\"Hey [Name], just a heads up — I'll be at your place tomorrow at [Time] for the estimate. Looking forward to it! Let me know if anything changes. — [Your Name], Gould Painting\""
+    },
+    {
+      label: "No Answer — Voicemail",
+      script: "\"Hey [Name], this is [Your Name] calling from Gould Painting WNY. Reaching out about the painting estimate you requested. I'd love to set up a time to come take a look. Call me back at (716) 221-6418 or I'll try you again tomorrow. Thanks!\""
+    }
+  ],
+
+  closing: [
+    {
+      label: "The 4-Question Objection Sequence",
+      body: "Use this every time you get any version of a no. Never skip it, never reorder it.\n\nFirst, validate: \"Oh yeah, totally no problem. Can I just ask a few quick questions before I go?\"\n\nThen:\n1. \"Are you definitely doing this project?\" — If No, that is the real issue.\n2. \"Did I get you everything you need and want in this proposal?\"\n3. \"Are you comfortable with me and our company to deliver on this?\"\n4. \"Is the price about what you were expecting?\"\n\nIf any answer is No — that is the real objection. Address it.\nIf all are Yes — \"Out of curiosity, what are you looking for in the other estimate?\"\n\nThen set a firm follow-up date and hold the discount as incentive."
+    },
+    {
+      label: "The Silent Close — Present and Stop Talking",
+      body: "Walk through the contract. Review everything you discussed. Then say the options and prices.\n\n\"So — option one is $X, option two is $X, option three is $X.\"\n\nThen: \"Which one do you want to go with?\"\n\nPut the pen down. Stop talking.\n\nDo not fill the silence. The first person to speak after presenting price loses leverage. Let them read it. Let them think.\n\nIf they ask a question — answer it briefly, then close again:\n\"Is that the option you're leaning towards? Want to do it?\""
+    },
+    {
+      label: "Locking In the Follow-Up",
+      body: "If they do not sign today, do not leave without a date.\n\n\"I totally get it — you have another estimate Thursday. I do not want to pressure you. Here's what I'll do: I'll hold that discount price for you until you're ready. When will you be able to let me know?\"\n\nThey say Friday — \"Perfect. I'll hold this for you till Friday and give you a call then. Sound good?\"\n\nThis does 3 things:\n1. Keeps you in the running without pressure\n2. Gives them a real incentive to decide quickly\n3. Locks in a follow-up so you are not chasing cold leads"
+    },
+    {
+      label: "Price Confidence — The Mindset Close",
+      body: "The biggest reason salespeople lose on price is their own energy when they say it.\n\nIf you flinch when you say the price — they flinch.\nIf you apologize for the price — they think it's too high.\nIf you say it confidently and go quiet — they process it on its merits.\n\nRemember: the person you're quoting lives in a house that costs that much to paint. They can afford it. You just have to believe the price is right.\n\nSay the price. Put the pen down. Be quiet. Let them decide."
+    }
+  ]
+};
+
+
+function salesTab(tab) {
+  _salesTab = tab;
+  document.querySelectorAll('.stab').forEach(function(b){
+    var isActive = b.id === 'stab-' + tab;
+    b.style.background = isActive ? '#be123c' : 'white';
+    b.style.color = isActive ? 'white' : '#475569';
+    b.style.border = isActive ? 'none' : '1.5px solid #e2e8f0';
+  });
+  buildSalesTab();
+}
+
+function buildSalesTab() {
+  var el = document.getElementById('sales-tab-content');
+  if (!el) return;
+
+  if (_salesTab === 'process') {
+    var html = '<div style="font-size:11px;color:#94a3b8;margin-bottom:12px;font-weight:700;line-height:1.6">From a sales system that closes $300M/yr. Read each step. Memorize the key lines. These 6 steps move every customer from cold to closed.</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:12px">';
+    _salesData.process.forEach(function(s) {
+      html += '<div style="background:white;border:1.5px solid #e2e8f0;border-left:4px solid ' + s.color + ';border-radius:12px;padding:16px">'
+        + '<div style="font-size:13px;font-weight:900;color:' + s.color + ';margin-bottom:10px">' + s.icon + ' ' + s.title + '</div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.9;white-space:pre-wrap">' + s.body + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+
+  } else if (_salesTab === 'objections') {
+    var html = '<div style="font-size:11px;color:#94a3b8;margin-bottom:10px;font-weight:700">Tap a card to reveal the exact response</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:10px">';
+    _salesData.objections.forEach(function(obj) {
+      html += '<div onclick="salesFlip(this)" style="cursor:pointer;background:white;border:1.5px solid #fecdd3;border-radius:12px;overflow:hidden">'
+        + '<div style="background:#fff1f2;padding:12px 16px">'
+          + '<div style="font-size:10px;font-weight:800;color:#be123c;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">Client says:</div>'
+          + '<div style="font-size:13px;font-weight:800;color:#1e293b;font-style:italic">"' + obj.q + '"</div>'
+        + '</div>'
+        + '<div class="sales-answer" style="display:none;padding:12px 16px;border-top:1.5px solid #fecdd3">'
+          + '<div style="font-size:10px;font-weight:800;color:#16a34a;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px">You say:</div>'
+          + '<div style="font-size:12px;color:#1e293b;line-height:1.8;white-space:pre-wrap;margin-bottom:10px;font-style:italic">' + obj.a + '</div>'
+          + '<div style="background:#f0fdf4;border-radius:8px;padding:8px 12px">'
+            + '<div style="font-size:10px;font-weight:800;color:#166534;margin-bottom:2px">💡 PRO TIP</div>'
+            + '<div style="font-size:11px;color:#374151;line-height:1.6">' + obj.tip + '</div>'
+          + '</div>'
+        + '</div>'
+        + '<div style="padding:5px 16px;text-align:right"><span class="flip-hint" style="font-size:10px;color:#94a3b8;font-weight:700">▼ Tap to reveal</span></div>'
+      + '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+
+  } else if (_salesTab === 'phone') {
+    var html = '<div style="display:flex;flex-direction:column;gap:12px">';
+    _salesData.phone.forEach(function(s) {
+      html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden">'
+        + '<div style="background:#f0f9ff;padding:10px 16px;border-bottom:1px solid #bae6fd">'
+          + '<div style="font-size:12px;font-weight:800;color:#0369a1">📞 ' + s.label + '</div>'
+        + '</div>'
+        + '<div style="padding:14px 16px;font-size:12px;color:#374151;line-height:1.9;white-space:pre-wrap;font-style:italic">' + s.script + '</div>'
+      + '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+
+  } else if (_salesTab === 'closing') {
+    var html = '<div style="display:flex;flex-direction:column;gap:12px">';
+    _salesData.closing.forEach(function(c) {
+      html += '<div style="background:white;border:1.5px solid #e2e8f0;border-left:4px solid #16a34a;border-radius:12px;padding:14px 16px">'
+        + '<div style="font-size:12px;font-weight:900;color:#16a34a;margin-bottom:8px">🏆 ' + c.label + '</div>'
+        + '<div style="font-size:12px;color:#374151;line-height:1.9;white-space:pre-wrap">' + c.body + '</div>'
+      + '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  }
+}
+
+function salesFlip(card) {
+  var ans = card.querySelector('.sales-answer');
+  var hint = card.querySelector('.flip-hint');
+  if (!ans) return;
+  var open = ans.style.display === 'block';
+  ans.style.display = open ? 'none' : 'block';
+  if (hint) hint.textContent = open ? '▼ Tap to reveal' : '▲ Hide';
+}
+
+// salesTab called directly from nav button
+
+// ===================== END SALES TRAINING =====================
 </script>
 
 
@@ -8464,12 +8857,4 @@ function markFULost(id) {
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button onclick="exportLeadsCSV()" style="background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Leads CSV</button>
           <button onclick="exportCommissionCSV()" style="background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Commission CSV</button>
-          <button onclick="exportToCSV()" style="background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Job Log CSV</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+          <button onclick="exportToCSV()" s
