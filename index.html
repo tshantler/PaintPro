@@ -766,6 +766,11 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
 /* ── Toast notification ── */
 #float-save-msg { font-size: 12.5px !important; font-weight: 600 !important; border-radius: 8px !important; padding: 7px 14px !important; }
 
+/* ── Pre-call checklist checked state ── */
+.pck-label:has(.pck-cb:checked) { background: #f0fdf4 !important; border-color: #86efac !important; }
+
+
+
 </style>
 </head>
 <body>
@@ -847,35 +852,35 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
 
     <!-- Call Checklist -->
     <div class="card">
-      <div class="card-title" style="color:#0369a1">📞 On The Call — Check Each One Off</div>
-      <div style="display:flex;flex-direction:column;gap:8px" id="pre-checklist">
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-1" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">Confirmed full name, address and job type</div><div style="font-size:12px;color:#64748b">Interior / Exterior / Deck — confirm it's residential</div></div>
+      <div class="card-title" style="color:#0369a1">On The Call — Check Each One Off</div>
+      <div style="display:flex;flex-direction:column;gap:6px" id="pre-checklist">
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-1" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">Confirmed full name, address and job type</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">Interior / Exterior / Deck — confirm it's residential</div></div>
         </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-2" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">How did they hear about you?</div><div style="font-size:12px;color:#64748b">Google / Facebook / Referral / Ad — note it below</div></div>
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-2" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">How did they hear about you?</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">Google / Facebook / Referral / Ad — note it below</div></div>
         </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-3" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">Dropped ballpark — they didn't flinch</div><div style="font-size:12px;color:#64748b">Enter the range you gave them below</div></div>
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-3" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">Dropped ballpark — they didn't flinch</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">Enter the range you gave them below</div></div>
         </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-4" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">Getting other quotes?</div><div style="font-size:12px;color:#64748b">If yes — when are they deciding?</div></div>
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-4" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">Getting other quotes?</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">If yes — when are they deciding?</div></div>
         </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-5" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">Any timeline or deadline?</div><div style="font-size:12px;color:#64748b">Selling the house, event, HOA deadline</div></div>
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-5" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">Any timeline or deadline?</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">Selling the house, event, HOA deadline</div></div>
         </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-6" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">Homeowner? Decision maker will be there?</div><div style="font-size:12px;color:#64748b">Never present to someone who can't say yes</div></div>
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-6" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">Homeowner? Decision maker will be there?</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">Never present to someone who can't say yes</div></div>
         </label>
-        <label style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:#f8fafc;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer">
-          <input type="checkbox" id="pck-7" style="margin-top:2px;width:16px;height:16px;accent-color:#0369a1;flex-shrink:0">
-          <div><div style="font-size:13px;font-weight:700;color:#1e293b">Confirmed estimate date, time and address</div><div style="font-size:12px;color:#64748b">Repeat it back before hanging up</div></div>
+        <label class="pck-label" style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:white;border-radius:8px;border:1px solid #e5e7eb;cursor:pointer;transition:background 0.15s,border-color 0.15s">
+          <input type="checkbox" id="pck-7" class="pck-cb" style="margin-top:2px;width:16px;height:16px;accent-color:#059669;flex-shrink:0">
+          <div><div style="font-size:13px;font-weight:600;color:#1e293b">Confirmed estimate date, time and address</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">Repeat it back before hanging up</div></div>
         </label>
       </div>
     </div>
@@ -911,13 +916,13 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
         <div>
           <label class="lbl">Job Type</label>
           <select id="pre-jobtype" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px;font-weight:700">
-            <option value="interior">🏠 Interior</option>
-            <option value="exterior">🏡 Exterior</option>
-            <option value="deck">🪵 Deck</option>
-            <option value="interior-exterior">🏠🏡 Int + Ext</option>
-            <option value="interior-deck">🏠🪵 Int + Deck</option>
-            <option value="exterior-deck">🏡🪵 Ext + Deck</option>
-            <option value="full">🏠🏡🪵 Full Job</option>
+            <option value="interior">Interior</option>
+            <option value="exterior">Exterior</option>
+            <option value="deck">Deck</option>
+            <option value="interior-exterior">Int + Ext</option>
+            <option value="interior-deck">Int + Deck</option>
+            <option value="exterior-deck">Ext + Deck</option>
+            <option value="full">Full Job</option>
           </select>
         </div>
       </div>
@@ -937,8 +942,8 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
           <div>
-            <label class="lbl">Appointment Date</label>
-            <input id="pre-appt" type="date" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px">
+            <label class="lbl">Appointment Date &amp; Time</label>
+            <input id="pre-appt" type="datetime-local" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:13px">
           </div>
           <div>
             <label class="lbl">Lead Source</label>
@@ -1000,13 +1005,14 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
   </div>
 
   <!-- Filter tabs -->
-  <div style="display:flex;gap:0;background:white;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:14px;width:fit-content">
-    <button onclick="setLeadFilter('New')"           id="lf-New"          style="padding:7px 14px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid #e5e7eb">New</button>
-    <button onclick="setLeadFilter('Appt Set')"      id="lf-Appt Set"     style="padding:7px 14px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid #e5e7eb">Appt Set</button>
-    <button onclick="setLeadFilter('Ready to Bid')"  id="lf-Ready to Bid" style="padding:7px 14px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid #e5e7eb">Ready to Bid</button>
-    <button onclick="setLeadFilter('Quoted')"        id="lf-Quoted"       style="padding:7px 14px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid #e5e7eb">Quoted</button>
-    <button onclick="setLeadFilter('Won')"           id="lf-Won"          style="padding:7px 14px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid #e5e7eb">Won</button>
-    <button onclick="setLeadFilter('Lost')"          id="lf-Lost"         style="padding:7px 14px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer">Lost</button>
+  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+    <button onclick="setLeadFilter('New')"       id="lf-New"       style="padding:7px 16px;border:1px solid #2563eb;background:#2563eb;color:white;font-size:12px;font-weight:700;cursor:pointer;border-radius:20px">New</button>
+    <button onclick="setLeadFilter('Appt Set')"  id="lf-Appt Set"  style="padding:7px 16px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-radius:20px">Appt Set</button>
+    <button onclick="setLeadFilter('Quoted')"    id="lf-Quoted"    style="padding:7px 16px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-radius:20px">Quoted</button>
+    <button onclick="setLeadFilter('Won')"       id="lf-Won"       style="padding:7px 16px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-radius:20px">Won</button>
+    <button onclick="setLeadFilter('Lost')"      id="lf-Lost"      style="padding:7px 16px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-radius:20px">Lost</button>
+    <button onclick="setLeadFilter('No Answer')" id="lf-No Answer" style="padding:7px 16px;border:1px solid #e5e7eb;background:white;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-radius:20px">No Answer</button>
+    <button id="lf-Ready to Bid" style="display:none"></button>
   </div>
 
   <div id="leads-empty" class="card" style="text-align:center;padding:40px;color:#94a3b8">
@@ -1016,8 +1022,6 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
   </div>
 
   <div id="leads-list" style="display:flex;flex-direction:column;gap:10px"></div>
-
-  <!-- No Answer section in pipeline -->
   <div id="pipeline-na-section"></div>
 
 </div>
@@ -1242,7 +1246,7 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
   </div>
 
   <!-- Step tabs inside overlay -->
-  <div id="est-step-tabs" style="background:#1e40af;display:flex;overflow-x:auto;flex-shrink:0;padding:0 8px">
+  <div id="est-step-tabs" style="background:white;border-bottom:1px solid #e5e7eb;display:flex;overflow-x:auto;flex-shrink:0;padding:0 8px">
   </div>
 
   <!-- Scrollable content area -->
@@ -1263,13 +1267,13 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
       <div style="min-width:200px;flex:1;max-width:280px">
         <div style="font-size:10px;opacity:0.7;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">Job Type</div>
         <select id="job-type" onchange="applyJobType()" style="width:100%;padding:7px 10px;border-radius:7px;border:none;font-size:13px;font-weight:700;background:rgba(255,255,255,0.15);color:white;cursor:pointer">
-          <option value="interior">🏠 Interior Only</option>
-          <option value="exterior">🏡 Exterior Only</option>
-          <option value="deck">🪵 Deck Only</option>
-          <option value="interior-exterior">🏠🏡 Interior + Exterior</option>
-          <option value="interior-deck">🏠🪵 Interior + Deck</option>
-          <option value="exterior-deck">🏡🪵 Exterior + Deck</option>
-          <option value="full">🏠🏡🪵 Full Job — All Three</option>
+          <option value="interior">Interior Only</option>
+          <option value="exterior">Exterior Only</option>
+          <option value="deck">Deck Only</option>
+          <option value="interior-exterior">Interior + Exterior</option>
+          <option value="interior-deck">Interior + Deck</option>
+          <option value="exterior-deck">Exterior + Deck</option>
+          <option value="full">Full Job — All Three</option>
         </select>
       </div>
     </div>
@@ -1794,9 +1798,6 @@ Select all paint colors prior to start date</textarea>
 
   <!-- Stats bar -->
   <div id="fu-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px"></div>
-
-  <!-- NO ANSWER PIPELINE -->
-  <div id="na-pipeline-section" style="margin-bottom:16px"></div>
 
   <!-- Quoted Follow Ups table -->
   <div style="background:white;border-radius:10px;border:1px solid #e5e7eb;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.05)">
@@ -2471,13 +2472,26 @@ function showPage(p) {
   if (pageEl) pageEl.classList.add('active');
   if(p==='wo')         { refreshWoPhotoSummary(); refreshWOFeeler(); buildWOWonList(); }
   if(p==='dash')       buildDashboard();
-  if(p==='fu')         { buildFollowUps(); buildNASection(); }
+  if(p==='fu')         { buildFollowUps(); }
   if(p==='history')    buildHistory();
   if(p==='commission') buildCommission();
   var floatSave = document.getElementById('float-save');
   if (floatSave) floatSave.style.display = 'none';
   if(p==='active')  buildActiveJobs();
-  if(p==='leads')   { buildLeads(); buildPipelineNASection(); }
+  if(p==='leads') {
+    // Hide NA section — only shows when pill is tapped
+    var naEl = document.getElementById('pipeline-na-section');
+    if (naEl) { naEl.innerHTML = ''; naEl.style.display = 'none'; }
+    // Update No Answer pill count
+    try {
+      var _cbs = JSON.parse(localStorage.getItem('hb_callbacks')||'[]').filter(function(c){ return c.status!=='booked'&&c.status!=='dead'; });
+      var naBtn = document.getElementById('lf-No Answer');
+      if (naBtn) naBtn.textContent = 'No Answer' + (_cbs.length ? ' ' + _cbs.length : '');
+    } catch(e) {}
+    _leadFilter = 'New';
+    buildLeads();
+    setLeadFilter('New');
+  }
   if(p==='sales')   { _salesTab = _salesTab || 'process'; buildSalesTab(); }
   if(p==='log')     { showPage('history'); return; }
   var floatBar = document.getElementById('float-bar');
@@ -2517,13 +2531,13 @@ function showEstStep(step) {
       btn.textContent = s.label;
       btn.style.padding = '10px 14px';
       btn.style.border = 'none';
-      btn.style.background = active ? 'white' : 'transparent';
-      btn.style.color = active ? '#1a3a8a' : 'rgba(255,255,255,0.75)';
+      btn.style.background = 'transparent';
+      btn.style.color = active ? '#2563eb' : '#6b7280';
       btn.style.fontSize = '12px';
-      btn.style.fontWeight = active ? '900' : '600';
+      btn.style.fontWeight = active ? '700' : '500';
       btn.style.cursor = 'pointer';
       btn.style.whiteSpace = 'nowrap';
-      btn.style.borderBottom = active ? '3px solid #1a3a8a' : '3px solid transparent';
+      btn.style.borderBottom = active ? '2px solid #2563eb' : '2px solid transparent';
       btn.style.flexShrink = '0';
       btn.style.alignSelf = 'stretch';
       btn.onclick = (function(k){ return function(){ showEstStep(k); }; })(s.key);
@@ -2537,14 +2551,14 @@ function showEstStep(step) {
 
     // Present button pinned to right of tab bar
     var presentBtn = document.createElement('button');
-    presentBtn.textContent = '🖥️ Present';
-    presentBtn.style.background = '#f59e0b';
+    presentBtn.textContent = 'Present →';
+    presentBtn.style.background = '#2563eb';
     presentBtn.style.border = 'none';
     presentBtn.style.color = 'white';
-    presentBtn.style.padding = '7px 14px';
+    presentBtn.style.padding = '6px 14px';
     presentBtn.style.borderRadius = '7px';
     presentBtn.style.fontSize = '12px';
-    presentBtn.style.fontWeight = '800';
+    presentBtn.style.fontWeight = '700';
     presentBtn.style.cursor = 'pointer';
     presentBtn.style.whiteSpace = 'nowrap';
     presentBtn.style.flexShrink = '0';
@@ -2562,7 +2576,7 @@ function showEstStep(step) {
   });
 
   // Run recalcs
-  if (step==='quote')   buildQuote();
+  if (step==='quote')   { buildQuote(); updateQuoteLeadBar(); }
   if (step==='rooms')   applyCondition();
   if (step==='ext')     calcExt();
   if (step==='deck')    calcDeck();
@@ -6481,7 +6495,7 @@ function sendDepositRequest() {
 
 
 var leads = JSON.parse(localStorage.getItem('hb_leads') || '[]');
-var _leadFilter = 'all';
+var _leadFilter = 'New';
 
 var LEAD_STATUS_COLORS = {
   'New':          '#7c3aed',
@@ -6605,8 +6619,8 @@ function preLoadLead(id) {
   if (!lead) return;
 
   // Clear search
-  document.getElementById('pre-search').value = '';
-  document.getElementById('pre-search-results').innerHTML = '';
+  var psEl = document.getElementById('pre-search'); if (psEl) psEl.value = '';
+  var psrEl = document.getElementById('pre-search-results'); if (psrEl) psrEl.innerHTML = '';
 
   // Show loaded banner
   var banner = document.getElementById('pre-loaded-banner');
@@ -6619,8 +6633,8 @@ function preLoadLead(id) {
 }
 
 function clearPreSearch() {
-  document.getElementById('pre-search').value = '';
-  document.getElementById('pre-search-results').innerHTML = '';
+  var psEl = document.getElementById('pre-search'); if (psEl) psEl.value = '';
+  var psrEl = document.getElementById('pre-search-results'); if (psrEl) psrEl.innerHTML = '';
 }
 
 function clearPreLoaded() {
@@ -6631,15 +6645,27 @@ function clearPreLoaded() {
 }
 
 function setLeadFilter(f) {
-  _leadFilter = (_leadFilter === f) ? 'all' : f;
-  ['New','Appt Set','Ready to Bid','Quoted','Won','Lost'].forEach(function(s) {
+  _leadFilter = f;
+  ['New','Appt Set','Quoted','Won','Lost','No Answer'].forEach(function(s) {
     var btn = document.getElementById('lf-' + s);
     if (!btn) return;
     var active = (s === _leadFilter);
-    btn.style.background = active ? '#2563eb' : 'white';
-    btn.style.color      = active ? 'white'   : '#6b7280';
-    btn.style.fontWeight = active ? '600'     : '500';
+    btn.style.background  = active ? '#2563eb' : 'white';
+    btn.style.color       = active ? 'white'   : '#6b7280';
+    btn.style.fontWeight  = active ? '700'     : '500';
+    btn.style.borderColor = active ? '#2563eb' : '#e5e7eb';
   });
+  // Show NA section only when No Answer pill is active
+  var naSection = document.getElementById('pipeline-na-section');
+  if (naSection) {
+    if (f === 'No Answer') {
+      buildPipelineNASection();
+      naSection.style.display = '';
+    } else {
+      naSection.innerHTML = '';
+      naSection.style.display = 'none';
+    }
+  }
   buildLeads();
 }
 
@@ -6656,11 +6682,11 @@ function checkReturningClient() {
     var jobCount = leads.filter(function(l){ return l.name.toLowerCase() === match.name.toLowerCase(); }).length;
     banner.style.display = 'block';
     info.textContent = match.name + ' · ' + (match.phone||'no phone') + ' · ' + (match.address||'no address') + (jobCount > 0 ? ' · ' + jobCount + ' previous job'+(jobCount!==1?'s':'') : '');
-    document.getElementById('ld-repeat-flag').value = '1';
+    document.getElementById('ld-repeat-flag') && (document.getElementById('ld-repeat-flag').value = '1');
     window._returningMatch = match;
   } else {
     banner.style.display = 'none';
-    document.getElementById('ld-repeat-flag').value = '0';
+    document.getElementById('ld-repeat-flag') && (document.getElementById('ld-repeat-flag').value = '0');
     window._returningMatch = null;
   }
 }
@@ -6692,6 +6718,10 @@ function showAddLead() {
   document.getElementById('lead-modal-title').textContent = '📋 New Lead';
   document.getElementById('returning-client-banner').style.display = 'none';
   if (document.getElementById('ld-repeat-flag')) document.getElementById('ld-repeat-flag').value = '0';
+  // New lead — hide edit-only fields
+  var sw = document.getElementById('ld-status-wrap');   if(sw) sw.style.display = 'none';
+  var aw = document.getElementById('ld-appt-wrap');     if(aw) aw.style.display = 'none';
+  var bw = document.getElementById('ld-ballpark-wrap'); if(bw) bw.style.display = 'none';
   var modal = document.getElementById('lead-modal');
   modal.style.display = 'flex';
 }
@@ -6712,6 +6742,10 @@ function editLead(id) {
   document.getElementById('ld-source').value  = lead.source  || '';
   document.getElementById('ld-edit-id').value = id;
   document.getElementById('lead-modal-title').textContent = '✏️ Edit Lead';
+  // Edit mode — show all fields
+  var sw = document.getElementById('ld-status-wrap');   if(sw) sw.style.display = '';
+  var aw = document.getElementById('ld-appt-wrap');     if(aw) aw.style.display = '';
+  var bw = document.getElementById('ld-ballpark-wrap'); if(bw) bw.style.display = '';
   var modal = document.getElementById('lead-modal');
   modal.style.display = 'flex';
 }
@@ -6893,9 +6927,6 @@ function loadLeadIntoEstimator(id) {
   renderRooms();
   recalcAll();
   buildQuote();
-
-  // Update lead status to Ready to Bid
-  updateLeadStatus(id, 'Ready to Bid');
 
   // Update client banner
   document.getElementById('banner-client-name').textContent = lead.name || 'New Job';
@@ -7154,7 +7185,9 @@ function buildLeads() {
 
   var filtered = _leadFilter === 'all'
     ? leads.filter(function(l){ return l.status !== 'No Answer'; })
-    : leads.filter(function(l){ return l.status === _leadFilter; });
+    : _leadFilter === 'No Answer'
+      ? []  // NA section handles its own render
+      : leads.filter(function(l){ return l.status === _leadFilter; });
 
   var ORDER = {'New':0,'Appt Set':1,'Ready to Bid':2,'Quoted':3,'Won':4,'Lost':5};
   filtered.sort(function(a,b){
@@ -7169,7 +7202,11 @@ function buildLeads() {
 
   if (filtered.length === 0) {
     list.innerHTML = '';
-    empty.style.display = '';
+    if (_leadFilter === 'No Answer') {
+      empty.style.display = 'none';
+    } else {
+      empty.style.display = '';
+    }
     return;
   }
   empty.style.display = 'none';
@@ -7198,7 +7235,7 @@ function buildLeads() {
       'Lost':         { icon:'❌', color:'#dc2626' },
     };
     var header = '';
-    if (l.status !== _prevStatus) {
+    if (_leadFilter === 'all' && l.status !== _prevStatus) {
       _prevStatus = l.status;
       var _sm = STATUS_META[l.status] || { icon:'', color:'#64748b' };
       var _cnt = filtered.filter(function(x){ return x.status === l.status; }).length;
@@ -7231,7 +7268,7 @@ function buildLeads() {
     if (l.status === 'New') {
       primaryBtn = '<button onclick="startPreCall('+l.id+')" style="background:#2563eb;color:white;border:none;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Pre-Call</button>';
     } else if (l.status === 'Appt Set') {
-      primaryBtn = '<button onclick="updateLeadStatus('+l.id+',\'Ready to Bid\')" style="background:#d97706;color:white;border:none;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Ready to Bid</button>';
+      primaryBtn = '<button onclick="loadLeadIntoEstimator('+l.id+')" style="background:#7c3aed;color:white;border:none;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Bid Now</button>';
     } else if (l.status === 'Ready to Bid') {
       primaryBtn = '<button onclick="loadLeadIntoEstimator('+l.id+')" style="background:#7c3aed;color:white;border:none;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Bid Now</button>';
     } else if (l.status === 'Quoted') {
@@ -7240,9 +7277,9 @@ function buildLeads() {
       primaryBtn = '<button onclick="loadLeadIntoWorkOrder('+l.id+')" style="background:#059669;color:white;border:none;padding:5px 11px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Work Order</button>';
     }
 
-    // Progress bar — clean segmented line, no icons
-    var STEPS = ['Pre-Call','Appt Set','Bid','Quoted','Won','W.O.'];
-    var stepIndex = {'New':0,'Appt Set':1,'Ready to Bid':2,'Quoted':3,'Won':4,'Lost':-1}[l.status];
+    // Progress bar — 5 steps, Ready to Bid merged into Appt Set
+    var STEPS = ['Pre-Call','Appt Set','Quoted','Won','W.O.'];
+    var stepIndex = {'New':0,'Appt Set':1,'Ready to Bid':1,'Quoted':2,'Won':3,'Lost':-1}[l.status];
     if (stepIndex === undefined) stepIndex = 0;
 
     var progressBar = '<div style="display:flex;align-items:center;gap:2px;margin:8px 0 2px">';
@@ -7263,8 +7300,10 @@ function buildLeads() {
     });
     progressBar += '</div>';
 
-    // Key meta
-    var meta = [jobtypeLabel, l.phone, apptStr ? 'Appt ' + apptStr : '', l.ballpark ? l.ballpark : '', l.quoteAmt > 0 ? '$' + Number(l.quoteAmt).toLocaleString() : ''].filter(Boolean).join(' · ');
+    // Key meta — phone as tap-to-call link
+    var phoneHtml = l.phone ? '<a href="tel:'+l.phone+'" style="color:#2563eb;text-decoration:none;font-weight:600">'+l.phone+'</a>' : '';
+    var metaParts = [jobtypeLabel, apptStr ? 'Appt ' + apptStr : '', l.ballpark ? l.ballpark : '', l.quoteAmt > 0 ? '$' + Number(l.quoteAmt).toLocaleString() : ''].filter(Boolean);
+    var metaHtml = (phoneHtml ? phoneHtml + (metaParts.length ? ' · ' + metaParts.join(' · ') : '') : metaParts.join(' · '));
 
     // Badges
     var badges = '';
@@ -7302,7 +7341,7 @@ function buildLeads() {
             + badges
           + '</div>'
           + '<div style="font-size:11px;color:#9ca3af;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
-            + (l.address ? l.address + (l.city ? ', ' + l.city : '') + (meta ? ' · ' + meta : '') : meta)
+            + (l.address ? l.address + (l.city ? ', ' + l.city : '') + (metaParts.length || l.phone ? ' · ' + metaHtml : '') : metaHtml)
           + '</div>'
         + '</div>'
         + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
@@ -7314,7 +7353,7 @@ function buildLeads() {
       + '</div>'
 
       + (l.status !== 'Lost' ? progressBar : lostBanner)
-      + (l.status === 'Appt Set' ? '<div style="font-size:10px;color:#d97706;font-weight:600;margin-top:4px">Appt' + (apptStr ? ' · ' + apptStr : '') + ' — mark Ready to Bid when on site</div>' : '')
+      + (l.status === 'Appt Set' ? '<div style="font-size:10px;color:#7c3aed;font-weight:600;margin-top:4px">Appt' + (apptStr ? ' · ' + apptStr : '') + ' — tap Bid Now when on site</div>' : '')
 
       + '</div>';
   }).join('');
@@ -7471,6 +7510,8 @@ function openPresentMode() {
 }
 
 function showPresentCloseModal() {
+  var existing = document.getElementById('present-close-modal');
+  if (existing) existing.remove();
   var modal = document.createElement('div');
   modal.id = 'present-close-modal';
   modal.style.cssText = 'position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;padding:20px;';
@@ -7484,6 +7525,11 @@ function showPresentCloseModal() {
     + '</div>'
     + '</div>';
   document.body.appendChild(modal);
+}
+
+function closePresentCloseModal() {
+  var el = document.getElementById('present-close-modal');
+  if (el) el.remove();
 }
 
 
@@ -7725,7 +7771,7 @@ function openLeadProfile(id) {
       + '<div style="padding:0 16px 24px;display:flex;gap:6px;flex-wrap:wrap">'
         + '<button onclick="closeLeadProfile();editLead('+lead.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px">Edit</button>'
         + (lead.status==='New'||lead.status==='Appt Set' ? '<button onclick="closeLeadProfile();startPreCall('+lead.id+')" style="flex:1;background:#2563eb;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px">Pre-Call</button>' : '')
-        + (lead.status==='Appt Set'||lead.status==='Ready to Bid' ? '<button onclick="closeLeadProfile();loadLeadIntoEstimator('+lead.id+')" style="flex:1;background:#7c3aed;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px">Estimate</button>' : '')
+        + (lead.status==='Appt Set'||lead.status==='Ready to Bid' ? '<button onclick="closeLeadProfile();loadLeadIntoEstimator('+lead.id+')" style="flex:1;background:#7c3aed;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px">Bid Now</button>' : '')
         + (lead.status==='Quoted' ? '<button onclick="closeLeadProfile();pushLeadToFollowUps('+lead.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px">Follow Up</button>' : '')
         + (lead.status==='Quoted' ? '<button onclick="closeLeadProfile();acceptLead('+lead.id+')" style="flex:1;background:#059669;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;min-width:80px">Mark Won</button>' : '')
       + '</div>'
@@ -7768,29 +7814,28 @@ function closeLeadProfile() {
           <div>
             <label class="lbl">Job Type</label>
             <select id="ld-jobtype" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;font-weight:700">
-              <option value="interior">🏠 Interior</option>
-              <option value="exterior">🏡 Exterior</option>
-              <option value="deck">🪵 Deck</option>
-              <option value="interior-exterior">🏠🏡 Int + Ext</option>
-              <option value="interior-deck">🏠🪵 Int + Deck</option>
-              <option value="exterior-deck">🏡🪵 Ext + Deck</option>
-              <option value="full">🏠🏡🪵 Full Job</option>
+              <option value="interior">Interior</option>
+              <option value="exterior">Exterior</option>
+              <option value="deck">Deck</option>
+              <option value="interior-exterior">Int + Ext</option>
+              <option value="interior-deck">Int + Deck</option>
+              <option value="exterior-deck">Ext + Deck</option>
+              <option value="full">Full Job</option>
             </select>
           </div>
-          <div>
+          <div id="ld-status-wrap">
             <label class="lbl">Status</label>
             <select id="ld-status" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;font-weight:700">
               <option value="New">New</option>
               <option value="Appt Set">Appt Set</option>
-              <option value="Ready to Bid">Ready to Bid</option>
               <option value="Quoted">Quoted</option>
               <option value="Won">Won</option>
               <option value="Lost">Lost</option>
             </select>
           </div>
         </div>
-        <div><label class="lbl">Appointment Date</label><input id="ld-appt" type="date" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:14px"></div>
-        <div><label class="lbl">Ballpark Given on Call</label><input id="ld-ballpark" placeholder="e.g. $3,000–$5,000" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:14px"></div>
+        <div id="ld-appt-wrap"><label class="lbl">Appointment Date &amp; Time</label><input id="ld-appt" type="datetime-local" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:14px"></div>
+        <div id="ld-ballpark-wrap"><label class="lbl">Ballpark Given on Call</label><input id="ld-ballpark" placeholder="e.g. $3,000–$5,000" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:14px"></div>
         <div><label class="lbl">Call Notes</label><textarea id="ld-notes" rows="3" placeholder="What did they say? Scope, concerns, timeline, who else is bidding..." style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;resize:none"></textarea></div>
         <div><label class="lbl">Source</label>
           <select id="ld-source" style="width:100%;padding:9px 12px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px">
@@ -7806,7 +7851,7 @@ function closeLeadProfile() {
       </div>
       <input type="hidden" id="ld-edit-id" value="">
       <div style="display:flex;gap:8px;margin-top:16px">
-        <button onclick="saveLead()" style="flex:1;background:#7c3aed;color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Save Lead</button>
+        <button onclick="saveLead()" style="flex:1;background:#2563eb;color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Save Lead</button>
         <button onclick="closeLeadModal()" style="flex:1;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;padding:12px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Cancel</button>
       </div>
     </div>
@@ -8514,7 +8559,6 @@ function buildFollowUps() {
   });
 
   buildFUStats();
-  buildNASection();
 
   // Apply filter
   var today = new Date(); today.setHours(0,0,0,0);
