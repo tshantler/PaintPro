@@ -516,6 +516,8 @@ nav button.active {
   <button onclick="showPage('wo')"     style="background:#fff7ed;color:#c2410c">🔨 Work Order</button>
   <button onclick="showPage('active')" style="background:#f0f9ff;color:#0369a1">🚧 Active Jobs</button>
   <button onclick="showPage('history')" style="background:#f0fdf4;color:#166534">📁 History</button>
+  <button onclick="showPage('commission')" style="background:#fff7ed;color:#c2410c">💰 Commission</button>
+  <button onclick="showPage('onboard')" style="background:#f0f9ff;color:#0369a1">📘 Onboarding</button>
 </nav>
 
 <!-- Toast message (used for confirmations throughout app) -->
@@ -722,6 +724,7 @@ nav button.active {
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button onclick="showAddLead()" style="background:#7c3aed;color:white;border:none;padding:7px 16px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ New Lead</button>
+        <button onclick="showDataManager()" title="Backup/Restore Data" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">💾</button>
         <button onclick="showPage('setup')" title="Settings" style="background:white;color:#64748b;border:1.5px solid #e2e8f0;width:34px;height:34px;border-radius:8px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">⚙️</button>
       </div>
     </div>
@@ -729,7 +732,6 @@ nav button.active {
 
   <!-- Filter pills -->
   <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 0 12px">
-    <button onclick="setLeadFilter('all')"          id="lf-all"          style="padding:6px 16px;border-radius:20px;border:2px solid #1e293b;background:#1e293b;color:white;font-size:12px;font-weight:700;cursor:pointer">All</button>
     <button onclick="setLeadFilter('New')"           id="lf-New"          style="padding:6px 16px;border-radius:20px;border:2px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:700;cursor:pointer">New</button>
     <button onclick="setLeadFilter('Appt Set')"      id="lf-Appt Set"     style="padding:6px 16px;border-radius:20px;border:2px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:700;cursor:pointer">Appt Set</button>
     <button onclick="setLeadFilter('Ready to Bid')"  id="lf-Ready to Bid" style="padding:6px 16px;border-radius:20px;border:2px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:700;cursor:pointer">Ready to Bid</button>
@@ -751,6 +753,19 @@ nav button.active {
 <!-- END LEAD PIPELINE PAGE -->
 
 <div class="page active" id="page-setup">
+
+  <!-- Data Backup -->
+  <div class="card" style="border-left:4px solid #dc2626;background:#fff5f5;padding:14px 16px">
+    <div style="font-size:13px;font-weight:800;color:#dc2626;margin-bottom:2px">💾 Data Backup &amp; Restore</div>
+    <div style="font-size:11px;color:#64748b;margin-bottom:12px">Export everything to a JSON file and keep it somewhere safe. If you ever clear your browser or switch devices, import the file to restore all your data instantly.</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="exportData()" style="flex:1;min-width:120px;background:#dc2626;color:white;border:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">📥 Export Backup</button>
+      <button onclick="document.getElementById('import-file-input').click()" style="flex:1;min-width:120px;background:white;color:#dc2626;border:2px solid #dc2626;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">📤 Import Backup</button>
+      <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+    <div id="backup-status" style="display:none;margin-top:10px;font-size:12px;font-weight:700;padding:8px 12px;border-radius:6px"></div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:10px;line-height:1.6">⚠️ Backs up: leads, active jobs, job log, follow ups, sub roster, and all settings. Import overwrites existing data — make sure you want to restore before importing.</div>
+  </div>
 
   <!-- GHL Link Generator -->
   <div class="card" style="border-left:4px solid #0f9d58;background:#f0fdf4;padding:14px 16px">
@@ -1505,16 +1520,29 @@ Select all paint colors prior to start date</textarea>
 
 <!-- FOLLOW UPS PAGE -->
 <div class="page" id="page-fu">
+  <!-- Stats bar -->
+  <div id="fu-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px"></div>
+
   <div class="card" style="border-left:4px solid #dc2626;background:#fff5f5;padding:14px 16px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div>
-        <div style="font-size:13px;font-weight:800;color:#dc2626">🔔 Follow Up Tracker — Sent Not Signed</div>
-        <div style="font-size:11px;color:#64748b;margin-top:2px">Every quoted lead that hasn't accepted. Goes red the next day — follow up fast.</div>
+        <div style="font-size:13px;font-weight:800;color:#dc2626">🔔 Follow Up Tracker</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px">Every quoted lead that hasn't accepted. Goes red next day — follow up fast.</div>
       </div>
-      <button onclick="buildFollowUps()" style="background:#dc2626;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">↺ Refresh</button>
+      <div style="display:flex;gap:6px">
+        <button onclick="addFUManual()" style="background:#1a3a8a;color:white;border:none;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">+ Manual</button>
+        <button onclick="buildFollowUps()" style="background:#dc2626;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">↺ Refresh</button>
+      </div>
+    </div>
+    <!-- Filter pills -->
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <button id="fu-f-all"    onclick="setFUFilter('all')"    style="padding:4px 12px;border-radius:16px;border:1.5px solid #1e293b;background:#1e293b;color:white;font-size:11px;font-weight:700;cursor:pointer">All</button>
+      <button id="fu-f-hot"    onclick="setFUFilter('hot')"    style="padding:4px 12px;border-radius:16px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:11px;font-weight:700;cursor:pointer">🔥 Hot (3+ days)</button>
+      <button id="fu-f-today"  onclick="setFUFilter('today')"  style="padding:4px 12px;border-radius:16px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:11px;font-weight:700;cursor:pointer">Today</button>
+      <button id="fu-f-snoozed" onclick="setFUFilter('snoozed')" style="padding:4px 12px;border-radius:16px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:11px;font-weight:700;cursor:pointer">💤 Snoozed</button>
     </div>
     <div id="followup-empty" style="text-align:center;padding:20px;color:#94a3b8;font-size:13px;display:none">
-      ✅ No overdue follow ups — you're on top of it.
+      ✅ No follow ups in this view.
     </div>
     <div id="followup-list" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
@@ -1800,6 +1828,112 @@ Select all paint colors prior to start date</textarea>
   </div>
 </div>
 
+<!-- COMMISSION PAGE -->
+<div class="page" id="page-commission">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div>
+      <div style="font-size:16px;font-weight:900;color:#1e293b">💰 Commission Tracker</div>
+      <div style="font-size:12px;color:#64748b;margin-top:2px">15% of Gross Profit per closed job — tracks what your partner is owed</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button onclick="exportCommissionCSV()" style="background:#f1f5f9;color:#475569;border:none;padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">⬇ Export CSV</button>
+    </div>
+  </div>
+  <!-- Commission stats -->
+  <div id="comm-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
+  <!-- Settings row -->
+  <div class="card" style="padding:12px 16px;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div style="font-size:12px;font-weight:700;color:#475569">Partner Name:</div>
+      <input id="comm-partner-name" placeholder="e.g. Mike" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;width:140px">
+      <div style="font-size:12px;font-weight:700;color:#475569">Rate:</div>
+      <input id="comm-rate" type="number" value="15" min="1" max="50" style="padding:6px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;width:60px">
+      <span style="font-size:12px;color:#64748b">%</span>
+      <button onclick="saveCommSettings()" style="background:#1a3a8a;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Save</button>
+    </div>
+  </div>
+  <!-- Jobs list -->
+  <div class="card" style="padding:14px 16px">
+    <div id="comm-list"><div style="color:#94a3b8;font-size:13px;text-align:center;padding:20px">No closed jobs yet — commission will show here once jobs are won.</div></div>
+  </div>
+</div>
+
+<!-- ONBOARDING PAGE -->
+<div class="page" id="page-onboard">
+  <div style="font-size:16px;font-weight:900;color:#1e293b;margin-bottom:12px">📘 Onboarding Guide</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+
+    <!-- Section: Pre-Call -->
+    <div class="card" style="padding:14px 16px;border-left:4px solid #7c3aed">
+      <div style="font-size:13px;font-weight:800;color:#7c3aed;margin-bottom:8px">📞 Pre-Call Checklist</div>
+      <div style="font-size:13px;color:#1e293b;line-height:1.7">
+        1. Answer within 3 rings — speed to lead is everything<br>
+        2. Confirm the address and what they need painted<br>
+        3. Ask: <em>"Is this interior, exterior, or both?"</em><br>
+        4. Ask: <em>"Any specific colors in mind?"</em><br>
+        5. Log ballpark budget if they offer it<br>
+        6. Book the on-site appointment — give them 2 times to choose<br>
+        7. Confirm your phone number and send a text after: <em>"Hi [Name], it's Thomas from Gould Painting. Looking forward to meeting you [day] at [time]! — (716) 221-6418"</em>
+      </div>
+    </div>
+
+    <!-- Section: On-Site Estimate -->
+    <div class="card" style="padding:14px 16px;border-left:4px solid #d97706">
+      <div style="font-size:13px;font-weight:800;color:#d97706;margin-bottom:8px">📐 On-Site Estimate</div>
+      <div style="font-size:13px;color:#1e293b;line-height:1.7">
+        1. Walk every room before measuring — understand the full scope<br>
+        2. Measure walls (L × H), ceiling, and all trim<br>
+        3. Note number of doors, windows, and coat counts<br>
+        4. Take photos of every room (for reference + scope disputes)<br>
+        5. Check Numbers tab to review labor, GP, and profit margin<br>
+        6. Target: <strong>40%+ GP margin</strong>. Below 30% — reconsider or adjust scope<br>
+        7. Present quote clearly — don't apologize for the price
+      </div>
+    </div>
+
+    <!-- Section: Closing -->
+    <div class="card" style="padding:14px 16px;border-left:4px solid #16a34a">
+      <div style="font-size:13px;font-weight:800;color:#16a34a;margin-bottom:8px">🏆 Closing the Job</div>
+      <div style="font-size:13px;color:#1e293b;line-height:1.7">
+        1. After sending quote, follow up in 24 hrs: <em>"Hey [Name], just wanted to make sure you got the quote. Happy to answer any questions!"</em><br>
+        2. Second follow up at 3 days if no response<br>
+        3. If they say yes — collect 30% deposit immediately<br>
+        4. Mark Won → Build Work Order → Confirm sub<br>
+        5. Never start a job without a deposit in hand
+      </div>
+    </div>
+
+    <!-- Section: Sub Management -->
+    <div class="card" style="padding:14px 16px;border-left:4px solid #0369a1">
+      <div style="font-size:13px;font-weight:800;color:#0369a1;margin-bottom:8px">🔨 Sub Management</div>
+      <div style="font-size:13px;color:#1e293b;line-height:1.7">
+        1. Send feeler texts 1–2 weeks before start date<br>
+        2. Labor rate: <strong>$45/hr flat</strong> — no exceptions<br>
+        3. Confirm sub 48 hrs before start — text them the address and start time<br>
+        4. Text client day before: <em>"Our crew will be there tomorrow at [time] — any questions?"</em><br>
+        5. Punch list must be completed before final payment released<br>
+        6. Pay sub within 3 days of receiving final payment
+      </div>
+    </div>
+
+    <!-- Section: Business Numbers -->
+    <div class="card" style="padding:14px 16px;border-left:4px solid #1a3a8a">
+      <div style="font-size:13px;font-weight:800;color:#1a3a8a;margin-bottom:8px">📊 Business Benchmarks</div>
+      <div style="font-size:13px;color:#1e293b;line-height:1.7">
+        <strong>Gould Painting WNY</strong> · Buffalo/Amherst, NY<br>
+        Phone: (716) 221-6418 · office@gouldpaintingwny.com<br><br>
+        Target close rate: <strong>40%+</strong><br>
+        Target GP margin: <strong>40%+</strong><br>
+        Standard deposit: <strong>30%</strong><br>
+        Labor rate to subs: <strong>$45/hr</strong><br>
+        Partner commission: <strong>15% of GP</strong><br>
+        Follow up window: <strong>next day, then 3 days</strong>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <div class="page" id="page-dash">
 
   <!-- Morning Briefing Header -->
@@ -1811,6 +1945,12 @@ Select all paint colors prior to start date</textarea>
 
   <!-- ACTION ITEMS — things that need attention today -->
   <div id="dash-actions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px"></div>
+
+  <!-- MTD Financial Strip -->
+  <div id="dash-mtd" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px"></div>
+
+  <!-- Pipeline Velocity -->
+  <div id="dash-velocity" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px"></div>
 
   <!-- KPI Row -->
   <div id="dash-kpis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px"></div>
@@ -1828,6 +1968,18 @@ Select all paint colors prior to start date</textarea>
       <button onclick="exportToCSV()" style="background:#f1f5f9;color:#475569;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">⬇ Export CSV</button>
     </div>
     <div id="dash-closed-list"><div style="color:#94a3b8;font-size:13px">No closed jobs yet</div></div>
+  </div>
+
+  <!-- Lead Source Breakdown -->
+  <div class="card" style="padding:14px 16px;margin-bottom:0">
+    <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:10px">📊 Lead Sources</div>
+    <div id="dash-sources" style="font-size:13px;color:#94a3b8">No data yet</div>
+  </div>
+
+  <!-- Google Calendar Embed -->
+  <div class="card" id="dash-gcal-card" style="padding:14px 16px;margin-bottom:0;display:none">
+    <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:10px">📅 Schedule</div>
+    <div id="dash-gcal-embed"></div>
   </div>
 
   <!-- GP Trend Chart -->
@@ -2012,14 +2164,15 @@ function showPage(p) {
   if (overlay) overlay.style.display = 'none';
 
   document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-  var pages=['leads','fu','wo','active','history','log','dash'];
+  var pages=['dash','leads','fu','wo','active','history','commission','onboard'];
   document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
   var pageEl = document.getElementById('page-'+p);
   if (pageEl) pageEl.classList.add('active');
-  if(p==='wo')      { refreshWoPhotoSummary(); refreshWOFeeler(); buildWOWonList(); }
-  if(p==='dash')    buildDashboard();
-  if(p==='fu')      buildFollowUps();
-  if(p==='history') buildHistory();
+  if(p==='wo')         { refreshWoPhotoSummary(); refreshWOFeeler(); buildWOWonList(); }
+  if(p==='dash')       buildDashboard();
+  if(p==='fu')         buildFollowUps();
+  if(p==='history')    buildHistory();
+  if(p==='commission') buildCommission();
   var floatSave = document.getElementById('float-save');
   if (floatSave) floatSave.style.display = 'none';
   if(p==='active')  buildActiveJobs();
@@ -2227,7 +2380,7 @@ function savePreCall() {
 
   // Update GHL contact with latest info (fire and forget — don't block on errors)
   var updatedLead = leads.find(function(l){ return l.id === _preCallLeadId; });
-  if (updatedLead) {
+  if (updatedLead && updatedLead.phone) {
     try { ghlTrigger('contact_updated', { name: updatedLead.name, phone: updatedLead.phone, email: updatedLead.email || '', address: updatedLead.address }); } catch(e) {}
     if (appt) {
       try { ghlTrigger('appt_confirmed', { name: updatedLead.name, phone: updatedLead.phone, email: updatedLead.email || '', appt: appt }); } catch(e) {}
@@ -2773,6 +2926,7 @@ function buildQuote() {
   var _totalHrsAll = calcs.reduce(function(s,x){return s+x.calc.hours;},0) + (getExtCalc().totalHrs||0) + (getDeckCalc().totalHrs||0);
   window._lastGrandTotal = Math.round(total * 100) / 100;
   window._lastSubPay     = Math.round(_totalHrsAll * _laborRate * 100) / 100;
+  window._lastBidHours   = Math.round(_totalHrsAll * 10) / 10;
   var totalHrs=calcs.reduce(function(s,x){return s+x.calc.hours;},0);
   var totalWallGals=calcs.reduce(function(s,x){return s+x.calc.wallGals;},0);
   var totalTrimGals=calcs.reduce(function(s,x){return s+x.calc.trimGals;},0);
@@ -3287,7 +3441,7 @@ async function ghlTrigger(trigger, data) {
     return contactId;
 
   } catch(e) {
-    console.warn('ghlTrigger failed:', trigger, e);
+    console.log('ghlTrigger skipped (no network):', trigger);
   }
 }
 
@@ -3779,7 +3933,7 @@ async function sendToGHL() {
           }
         }
         if (sentLead && sentLead.status !== 'Won' && sentLead.status !== 'Lost') {
-          leads = leads.map(function(l){ return l.id === sentLead.id ? Object.assign({},l,{status:'Quoted', quoteAmt: window._lastGrandTotal||0}) : l; });
+          leads = leads.map(function(l){ return l.id === sentLead.id ? Object.assign({},l,{status:'Quoted', quoteAmt: window._lastGrandTotal||0, bidHours: window._lastBidHours||0}) : l; });
           saveLeads();
           _activeLeadId = null; // clear after quote sent
         }
@@ -4822,6 +4976,12 @@ async function buildDashboard() {
   var url = localStorage.getItem(SHEETS_URL_KEY) || '';
   if (url) { var su = document.getElementById('sheets-url'); if(su) su.value = url; }
 
+  // New dashboard sections
+  buildDashMTD();
+  buildDashVelocity();
+  buildDashSources();
+  buildGCalEmbed();
+
   var today     = new Date(); today.setHours(0,0,0,0);
   var todayStr  = today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   var endOfWeek = new Date(today); endOfWeek.setDate(today.getDate() + 7);
@@ -5365,23 +5525,29 @@ function sendWOAndActivate() {
   if (!client) { alert('Load a job first — tap Load → on a won job above'); return; }
   if (!subName) { alert('Enter the sub name in Step 2'); return; }
 
+  // Pull extra fields from the linked lead
+  var _woLead = window._woLeadId ? leads.find(function(l){ return l.id === window._woLeadId; }) : null;
   var job = {
-    id:       Date.now(),
-    client:   client,
-    address:  addr,
-    type:     jobType,
-    sub:      subName,
-    start:    start,
-    quote:    parseFloat(quoteAmt) || 0,
-    subpay:   window._lastSubPay || 0,
-    notes:    '',
-    colors:   [(document.getElementById('wo-wall-color')&&document.getElementById('wo-wall-color').value?'Walls: '+document.getElementById('wo-wall-color').value:''),(document.getElementById('wo-trim-color')&&document.getElementById('wo-trim-color').value?'Trim: '+document.getElementById('wo-trim-color').value:'')].filter(Boolean).join(' / ') || '',
-    status:   'Scheduled',
-    subPaid:  false,
-    invoiced: false,
-    deposit:  false,
-    checkIns: [],
-    created:  new Date().toISOString()
+    id:         Date.now(),
+    leadId:     window._woLeadId || null,
+    client:     client,
+    address:    addr,
+    type:       jobType,
+    sub:        subName,
+    subPhone:   (document.getElementById('wo-sub-phone') && document.getElementById('wo-sub-phone').value.trim()) || '',
+    phone:      (document.getElementById('wo-client-phone') && document.getElementById('wo-client-phone').value.trim()) || (_woLead && _woLead.phone) || '',
+    start:      start,
+    quote:      parseFloat(quoteAmt) || 0,
+    subpay:     window._lastSubPay || 0,
+    bidHours:   window._lastBidHours || (_woLead && _woLead.bidHours) || 0,
+    notes:      '',
+    colors:     [(document.getElementById('wo-wall-color')&&document.getElementById('wo-wall-color').value?'Walls: '+document.getElementById('wo-wall-color').value:''),(document.getElementById('wo-trim-color')&&document.getElementById('wo-trim-color').value?'Trim: '+document.getElementById('wo-trim-color').value:'')].filter(Boolean).join(' / ') || '',
+    status:     'Scheduled',
+    subPaid:    false,
+    invoiced:   false,
+    deposit:    (_woLead && _woLead.depositPaid) ? true : false,
+    checkIns:   [],
+    created:    new Date().toISOString()
   };
   activeJobs.unshift(job);
   saveActiveJobs();
@@ -5488,7 +5654,7 @@ function ajConfirmSub(id) {
   var date = job.start ? new Date(job.start).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'the scheduled date';
   var msg = 'Hey ' + (job.sub||'') + ' — confirming you are set for ' + (job.client||'the job') + ' at ' + (job.address||'the address') + ' starting ' + date + '. Let me know if anything changes. — Thomas';
   if (confirm('Text this to sub? ' + msg)) {
-    var subPhone = prompt('Sub phone number:', '');
+    var subPhone = job.subPhone || prompt('Sub phone number (or cancel if not needed):', '');
     if (subPhone) {
       window.open('sms:' + subPhone.replace(/\D/g,'') + '?body=' + encodeURIComponent(msg));
     }
@@ -5622,6 +5788,17 @@ function addAJCheckIn(id) {
   });
   saveActiveJobs();
   buildActiveJobs();
+}
+
+function ajSaveNotes(id) {
+  var el = document.getElementById('aj-notes-' + id);
+  if (!el) return;
+  var notes = el.value.trim();
+  activeJobs = activeJobs.map(function(j) {
+    return j.id === id ? Object.assign({},j,{ jobNotes: notes }) : j;
+  });
+  saveActiveJobs();
+  showToast('📝 Notes saved');
 }
 
 function closeAJJob(id) {
@@ -5802,7 +5979,13 @@ function buildActiveJobs() {
       ? '<div style="margin-bottom:10px">' + (j.checkIns||[]).map(function(c){
           return '<div style="font-size:11px;color:#64748b;padding:4px 0;border-bottom:1px solid #e0f2fe">📍 ' + c.date + ' — ' + c.note + '</div>';
         }).join('') + '</div>' : '';
+    var savedJobNote = j.jobNotes || '';
     var s2Body = checkInHtml
+      + '<div style="margin-bottom:10px">'
+        + '<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:4px">📝 Job Notes</div>'
+        + '<textarea id="aj-notes-' + j.id + '" placeholder="Sub called out, rescheduled... colors changed... scope added..." style="width:100%;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;min-height:56px;resize:vertical">' + savedJobNote + '</textarea>'
+        + '<button onclick="ajSaveNotes(' + j.id + ')" style="margin-top:4px;padding:5px 12px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Save Notes</button>'
+      + '</div>'
       + '<div style="display:flex;gap:8px">'
       + '<button onclick="addAJCheckIn(' + j.id + ')" style="flex:1;background:white;color:#0369a1;border:1.5px solid #0369a1;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">📍 Log Check-In</button>'
       + '<button onclick="ajMoveToPunchList(' + j.id + ')" style="flex:2;background:#7c3aed;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer">📋 Work Done — Punch List →</button>'
@@ -6004,6 +6187,78 @@ var LEAD_STATUS_COLORS = {
   'Lost':         '#dc2626'
 };
 
+function exportData() {
+  var KEYS = [
+    'hb_leads', 'hb_activejobs', 'hb_followups', 'hb_feelersubs',
+    'paintpro_job_log', 'paintpro_sheets_url',
+    'hb_cal_estimate', 'hb_cal_job', 'hb_gcal_embed',
+    'hb_ghl_api_key', 'gould-painting-settings'
+  ];
+  var backup = { version: 2, exported: new Date().toISOString(), data: {} };
+  KEYS.forEach(function(k) {
+    var v = localStorage.getItem(k);
+    if (v) backup.data[k] = v;
+  });
+  var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  var d    = new Date();
+  var ds   = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  a.href     = url;
+  a.download = 'hustler-bids-backup-' + ds + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  var el = document.getElementById('backup-status');
+  if (el) {
+    el.style.display = '';
+    el.style.background = '#f0fdf4';
+    el.style.color = '#16a34a';
+    el.style.border = '1px solid #bbf7d0';
+    el.textContent = '✅ Backup downloaded — save it somewhere safe (Google Drive, email it to yourself, etc.)';
+    setTimeout(function(){ el.style.display = 'none'; }, 5000);
+  }
+}
+
+function importData(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var el = document.getElementById('backup-status');
+    try {
+      var backup = JSON.parse(e.target.result);
+      if (!backup.data) throw new Error('Invalid backup file');
+      var count = 0;
+      Object.keys(backup.data).forEach(function(k) {
+        localStorage.setItem(k, backup.data[k]);
+        count++;
+      });
+      // Reload all live variables
+      leads      = JSON.parse(localStorage.getItem('hb_leads')      || '[]');
+      activeJobs = JSON.parse(localStorage.getItem('hb_activejobs') || '[]');
+      feelerSubs = JSON.parse(localStorage.getItem('hb_feelersubs') || '[]');
+      if (el) {
+        el.style.display = '';
+        el.style.background = '#f0fdf4';
+        el.style.color = '#16a34a';
+        el.style.border = '1px solid #bbf7d0';
+        el.textContent = '✅ Restored ' + count + ' data keys from backup dated ' + (backup.exported ? backup.exported.slice(0,10) : 'unknown') + '. Reloading app…';
+      }
+      setTimeout(function(){ location.reload(); }, 1800);
+    } catch(err) {
+      if (el) {
+        el.style.display = '';
+        el.style.background = '#fff5f5';
+        el.style.color = '#dc2626';
+        el.style.border = '1px solid #fecaca';
+        el.textContent = '❌ Failed to import: ' + err.message + '. Make sure you selected a valid Hustler Bids backup file.';
+      }
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
 function saveLeads() {
   try { localStorage.setItem('hb_leads', JSON.stringify(leads)); } catch(e) {}
 }
@@ -6071,11 +6326,12 @@ function clearPreLoaded() {
 }
 
 function setLeadFilter(f) {
-  _leadFilter = f;
-  ['all','New','Appt Set','Ready to Bid','Quoted','Won','Lost'].forEach(function(s) {
+  // Toggle off if same filter clicked again
+  _leadFilter = (_leadFilter === f) ? 'all' : f;
+  ['New','Appt Set','Ready to Bid','Quoted','Won','Lost'].forEach(function(s) {
     var btn = document.getElementById('lf-' + s);
     if (!btn) return;
-    var active = (s === f);
+    var active = (s === _leadFilter);
     btn.style.background  = active ? '#1e293b' : 'white';
     btn.style.color       = active ? 'white'   : '#64748b';
     btn.style.borderColor = active ? '#1e293b' : '#e2e8f0';
@@ -6382,6 +6638,7 @@ function loadLeadIntoWorkOrder(id) {
   setWO('wo-client-address', (lead.address||'') + (lead.city ? ', ' + lead.city : ''));
   setWO('wo-client-jobtype', jobtypeMap[lead.jobtype] || lead.jobtype || '');
   setWO('wo-client-quote',   lead.quoteAmt ? '$' + Number(lead.quoteAmt).toLocaleString() : '');
+  window._woLeadId = id;
 
   showPage('wo');
 
@@ -6592,14 +6849,13 @@ function buildLeads() {
   if (!list) return;
 
   var filtered = _leadFilter === 'all'
-    ? leads
+    ? leads.slice()
     : leads.filter(function(l){ return l.status === _leadFilter; });
 
-  // Sort: active first (non-Won/Lost), then Won, then Lost
+  var ORDER = {'New':0,'Appt Set':1,'Ready to Bid':2,'Quoted':3,'Won':4,'Lost':5};
   filtered.sort(function(a,b){
-    var order = {'New':0,'Appt Set':1,'Ready to Bid':2,'Quoted':3,'Won':4,'Lost':5};
-    var ao = order[a.status] !== undefined ? order[a.status] : 2;
-    var bo = order[b.status] !== undefined ? order[b.status] : 2;
+    var ao = ORDER[a.status] !== undefined ? ORDER[a.status] : 2;
+    var bo = ORDER[b.status] !== undefined ? ORDER[b.status] : 2;
     if (ao !== bo) return ao - bo;
     if (a.appt && b.appt) return a.appt.localeCompare(b.appt);
     if (a.appt) return -1;
@@ -6614,9 +6870,41 @@ function buildLeads() {
   }
   empty.style.display = 'none';
 
+  // Group by status — inject headers between groups
+  var STATUS_META = {
+    'New':          { icon:'🆕', color:'#0369a1' },
+    'Appt Set':     { icon:'📅', color:'#7c3aed' },
+    'Ready to Bid': { icon:'📐', color:'#d97706' },
+    'Quoted':       { icon:'💵', color:'#2563eb' },
+    'Won':          { icon:'🏆', color:'#16a34a' },
+    'Lost':         { icon:'❌', color:'#dc2626' },
+  };
+
+
   var STATUSES = ['New','Appt Set','Ready to Bid','Quoted','Won','Lost'];
 
+  var _prevStatus = null;
   list.innerHTML = filtered.map(function(l) {
+    var STATUS_META = {
+      'New':          { icon:'🆕', color:'#0369a1' },
+      'Appt Set':     { icon:'📅', color:'#7c3aed' },
+      'Ready to Bid': { icon:'📐', color:'#d97706' },
+      'Quoted':       { icon:'💵', color:'#2563eb' },
+      'Won':          { icon:'🏆', color:'#16a34a' },
+      'Lost':         { icon:'❌', color:'#dc2626' },
+    };
+    var header = '';
+    if (l.status !== _prevStatus) {
+      _prevStatus = l.status;
+      var _sm = STATUS_META[l.status] || { icon:'', color:'#64748b' };
+      var _cnt = filtered.filter(function(x){ return x.status === l.status; }).length;
+      header = '<div style="display:flex;align-items:center;gap:8px;padding:10px 2px 6px">'
+        + '<span style="font-size:12px">' + _sm.icon + '</span>'
+        + '<span style="font-size:11px;font-weight:900;color:' + _sm.color + ';text-transform:uppercase;letter-spacing:0.06em">' + l.status + '</span>'
+        + '<span style="font-size:11px;font-weight:700;color:' + _sm.color + ';background:' + _sm.color + '22;padding:1px 8px;border-radius:10px">' + _cnt + '</span>'
+        + '<div style="flex:1;height:1px;background:' + _sm.color + '33"></div>'
+        + '</div>';
+    }
     var color  = LEAD_STATUS_COLORS[l.status] || '#64748b';
     var STATUS_BG = { 'New':'#f5f3ff','Appt Set':'#eff6ff','Ready to Bid':'#fef3c7','Quoted':'#f0fdf4','Won':'#dcfce7','Lost':'#fee2e2' };
     var bg = STATUS_BG[l.status] || '#f8fafc';
@@ -6716,7 +7004,7 @@ function buildLeads() {
       ? '<div style="background:#fee2e2;border:1px solid #fecaca;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;color:#dc2626;margin-top:4px">Lost' + (l.lostReason ? ' — '+l.lostReason : '') + '</div>'
       : '';
 
-    return '<div style="background:white;border-radius:10px;border:1px solid #e2e8f0;border-left:3px solid '+color+';padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.05)">'
+    return header + '<div style="background:white;border-radius:10px;border:1px solid #e2e8f0;border-left:3px solid '+color+';padding:12px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.05)">'
 
       // Row 1 — name + badges + actions
       + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
@@ -7050,6 +7338,31 @@ function closePresentModeToLead() {
   var el = document.getElementById('present-mode-overlay');
   if (el) el.remove();
   document.body.style.overflow = '';
+
+  // Auto-add to Follow Ups so it doesn't fall through the cracks
+  if (_activeLeadId) {
+    var lead = leads.find(function(l){ return l.id === _activeLeadId; });
+    if (lead) {
+      var fuList = [];
+      try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+      var already = fuList.find(function(f){ return f.leadId === lead.id; });
+      if (!already) {
+        fuList.unshift({
+          id:     'lead-' + lead.id,
+          leadId: lead.id,
+          name:   lead.name,
+          phone:  lead.phone || '',
+          amount: lead.quoteAmt || window._lastGrandTotal || 0,
+          sent:   new Date().toISOString().slice(0,10),
+          notes:  'Quote sent ' + new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+          done:   false,
+          auto:   true
+        });
+        try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+      }
+    }
+  }
+
   // Close estimator and open the lead profile card
   closeEstimator();
   if (_activeLeadId) {
@@ -7228,6 +7541,7 @@ function openLeadProfile(id) {
         + '<button onclick="closeLeadProfile();editLead('+lead.id+')" style="flex:1;background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">✏️ Edit</button>'
         + (lead.status==='New'||lead.status==='Appt Set' ? '<button onclick="closeLeadProfile();startPreCall('+lead.id+')" style="flex:1;background:#0369a1;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">📞 Pre-Call</button>' : '')
         + (lead.status==='Appt Set'||lead.status==='Ready to Bid' ? '<button onclick="closeLeadProfile();loadLeadIntoEstimator('+lead.id+')" style="flex:1;background:#7c3aed;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">📐 Estimate</button>' : '')
+        + (lead.status==='Quoted' ? '<button onclick="closeLeadProfile();pushLeadToFollowUps('+lead.id+')" style="flex:1;background:#dc2626;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">🔔 Follow Up</button>' : '')
         + (lead.status==='Quoted' ? '<button onclick="closeLeadProfile();acceptLead('+lead.id+')" style="flex:1;background:#16a34a;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">✅ Mark Won</button>' : '')
       + '</div>'
 
@@ -7574,6 +7888,408 @@ function fuSafeDate(raw) {
   return new Date().toISOString().slice(0,10);
 }
 
+// ══════════════════════════════════════════════════════════════
+// DATA EXPORT / IMPORT / BACKUP
+// ══════════════════════════════════════════════════════════════
+function showDataManager() {
+  document.getElementById('data-manager-modal').style.display = 'flex';
+}
+
+function exportAllData() {
+  var keys = ['hb_leads','hb_followups','hb_activejobs','hb_feelersubs',
+              'hb_cal_estimate','hb_cal_job','hb_gcal_embed',
+              'paintpro_sheets_url','gould-joblog-v1',
+              'hb_comm_settings','hb_comm_entries'];
+  var backup = { exported: new Date().toISOString(), version: 1, data: {} };
+  keys.forEach(function(k) {
+    var v = localStorage.getItem(k);
+    if (v) backup.data[k] = v;
+  });
+  var blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'hustlerbids-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Backup exported!');
+}
+
+function importAllData(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var backup = JSON.parse(e.target.result);
+      if (!backup.data) throw new Error('Invalid backup format');
+      if (!confirm('This will REPLACE all current data. Are you sure?')) return;
+      Object.keys(backup.data).forEach(function(k) {
+        localStorage.setItem(k, backup.data[k]);
+      });
+      // Reload leads
+      try { leads = JSON.parse(localStorage.getItem('hb_leads') || '[]'); } catch(ex) {}
+      try { activeJobs = JSON.parse(localStorage.getItem('hb_activejobs') || '[]'); } catch(ex) {}
+      document.getElementById('data-manager-modal').style.display = 'none';
+      buildLeads();
+      showToast('✅ Data restored from backup!');
+    } catch(err) {
+      alert('Import failed: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportLeadsCSV() {
+  var rows = [['Name','Phone','Email','Address','City','Type','Status','Quote','Ballpark','Source','Created']];
+  leads.forEach(function(l) {
+    rows.push([l.name||'',l.phone||'',l.email||'',l.address||'',l.city||'',
+               l.jobtype||'',l.status||'',l.quoteAmt||'',l.ballpark||'',
+               l.source||'',l.created||'']);
+  });
+  downloadCSV(rows, 'leads-' + new Date().toISOString().slice(0,10) + '.csv');
+}
+
+function downloadCSV(rows, filename) {
+  var csv = rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c).replace(/"/g,'""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════════════════════
+// COMMISSION TRACKER
+// ══════════════════════════════════════════════════════════════
+function getCommSettings() {
+  try { return JSON.parse(localStorage.getItem('hb_comm_settings') || '{"name":"Partner","rate":15}'); }
+  catch(e) { return {name:'Partner', rate:15}; }
+}
+function saveCommSettings() {
+  var name = (document.getElementById('comm-partner-name') && document.getElementById('comm-partner-name').value.trim()) || 'Partner';
+  var rate = parseFloat((document.getElementById('comm-rate') && document.getElementById('comm-rate').value) || 15);
+  localStorage.setItem('hb_comm_settings', JSON.stringify({name:name, rate:rate}));
+  buildCommission();
+  showToast('✅ Commission settings saved');
+}
+
+function buildCommission() {
+  var cfg = getCommSettings();
+  var rateEl = document.getElementById('comm-rate');
+  var nameEl = document.getElementById('comm-partner-name');
+  if (rateEl) rateEl.value = cfg.rate;
+  if (nameEl) nameEl.value = cfg.name;
+
+  // Build from job log (won jobs)
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem('gould-joblog-v1') || '[]'); } catch(e) {}
+  var wonJobs = log.filter(function(e){ return e.status === 'Won'; });
+
+  // Also grab any active jobs that are complete
+  var completedAJ = activeJobs.filter(function(j){ return j.status === 'Complete'; });
+
+  // Merge — prefer job log
+  var allJobs = wonJobs.slice();
+  completedAJ.forEach(function(aj) {
+    var inLog = allJobs.find(function(l){ return l.client === aj.client; });
+    if (!inLog) {
+      allJobs.push({
+        client: aj.client, address: aj.address, type: aj.type,
+        quote: aj.quote || aj.quoteAmt || 0,
+        gp: aj.quote - (aj.subpay || 0) - (aj.materialsCost || 0),
+        status: 'Won', date: aj.created
+      });
+    }
+  });
+
+  var rate = cfg.rate / 100;
+  var totalComm = 0;
+  var paidComm = 0;
+
+  // Get paid commissions
+  var commPaid = {};
+  try { commPaid = JSON.parse(localStorage.getItem('hb_comm_entries') || '{}'); } catch(e) {}
+
+  var statsEl = document.getElementById('comm-stats');
+  var listEl  = document.getElementById('comm-list');
+  if (!listEl) return;
+
+  if (allJobs.length === 0) {
+    listEl.innerHTML = '<div style="color:#94a3b8;font-size:13px;text-align:center;padding:20px">No closed jobs yet — commission will show here once jobs are won.</div>';
+    if (statsEl) statsEl.innerHTML = '';
+    return;
+  }
+
+  var rows = allJobs.map(function(j) {
+    var gp   = j.gp || 0;
+    var comm = Math.round(gp * rate);
+    totalComm += comm;
+    var isPaid = commPaid[j.client + (j.date||'')] || false;
+    if (isPaid) paidComm += comm;
+    var dateStr = j.date ? new Date(j.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+    var entryKey = j.client + (j.date||'');
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #f1f5f9">'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:800;color:#1e293b">' + (j.client||'—') + '</div>'
+        + '<div style="font-size:11px;color:#64748b">' + dateStr + (j.type ? ' · ' + j.type : '') + '</div>'
+        + '<div style="font-size:11px;color:#475569;margin-top:2px">GP: <span style="font-weight:800;color:#16a34a">$' + Math.round(gp).toLocaleString() + '</span> × ' + cfg.rate + '% = <span style="font-weight:900;color:#1a3a8a">$' + comm.toLocaleString() + '</span></div>'
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+        + '<span style="font-size:15px;font-weight:900;color:' + (isPaid?'#16a34a':'#d97706') + '">$' + comm.toLocaleString() + '</span>'
+        + '<button onclick="toggleCommPaid(\'' + entryKey.replace(/'/g,"\\'") + '\')" style="padding:5px 10px;border-radius:6px;border:1.5px solid ' + (isPaid?'#16a34a':'#e2e8f0') + ';background:' + (isPaid?'#f0fdf4':'#f8fafc') + ';color:' + (isPaid?'#16a34a':'#64748b') + ';font-size:11px;font-weight:700;cursor:pointer">' + (isPaid?'✓ Paid':'Mark Paid') + '</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+
+  listEl.innerHTML = rows;
+
+  var owed = totalComm - paidComm;
+  if (statsEl) statsEl.innerHTML = [
+    { label:'Total Earned', val:'$' + totalComm.toLocaleString(), color:'#1a3a8a', icon:'💰' },
+    { label:'Paid Out',     val:'$' + paidComm.toLocaleString(), color:'#16a34a', icon:'✅' },
+    { label:'Still Owed',   val:'$' + owed.toLocaleString(),     color: owed > 0 ? '#dc2626':'#16a34a', icon:'⏳' },
+  ].map(function(s) {
+    return '<div style="background:white;border-radius:10px;padding:12px 14px;border:1px solid #e2e8f0;border-top:3px solid '+s.color+'">'
+      + '<div style="font-size:18px;margin-bottom:2px">'+s.icon+'</div>'
+      + '<div style="font-size:20px;font-weight:900;color:'+s.color+'">'+s.val+'</div>'
+      + '<div style="font-size:10px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.06em">'+s.label+'</div>'
+      + '</div>';
+  }).join('');
+}
+
+function toggleCommPaid(key) {
+  var commPaid = {};
+  try { commPaid = JSON.parse(localStorage.getItem('hb_comm_entries') || '{}'); } catch(e) {}
+  commPaid[key] = !commPaid[key];
+  localStorage.setItem('hb_comm_entries', JSON.stringify(commPaid));
+  buildCommission();
+}
+
+function exportCommissionCSV() {
+  var cfg = getCommSettings();
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem('gould-joblog-v1') || '[]'); } catch(e) {}
+  var wonJobs = log.filter(function(e){ return e.status === 'Won'; });
+  var commPaid = {};
+  try { commPaid = JSON.parse(localStorage.getItem('hb_comm_entries') || '{}'); } catch(e) {}
+  var rows = [['Client','Date','Type','Quote','GP','GP%','Commission (' + cfg.rate + '%)','Paid']];
+  wonJobs.forEach(function(j) {
+    var gp = j.gp || 0;
+    var comm = Math.round(gp * cfg.rate / 100);
+    var key = j.client + (j.date||'');
+    rows.push([j.client||'',j.date||'',j.type||'',j.quote||'',Math.round(gp),j.gpPct||'',comm,commPaid[key]?'Yes':'No']);
+  });
+  downloadCSV(rows, 'commission-' + new Date().toISOString().slice(0,10) + '.csv');
+}
+
+// ══════════════════════════════════════════════════════════════
+// FOLLOW UPS — upgraded with filter + snooze + manual add
+// ══════════════════════════════════════════════════════════════
+var _fuFilter = 'all';
+
+function setFUFilter(f) {
+  _fuFilter = f;
+  ['all','hot','today','snoozed'].forEach(function(id) {
+    var btn = document.getElementById('fu-f-' + id);
+    if (!btn) return;
+    var active = id === f;
+    btn.style.background   = active ? '#1e293b' : 'white';
+    btn.style.color        = active ? 'white'   : '#64748b';
+    btn.style.borderColor  = active ? '#1e293b' : '#e2e8f0';
+  });
+  buildFollowUps();
+}
+
+function snoozeFU(fuId, days) {
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  var f = fuList.find(function(x){ return x.id == fuId; });
+  if (f) {
+    var snoozeUntil = new Date();
+    snoozeUntil.setDate(snoozeUntil.getDate() + days);
+    f.snoozedUntil = snoozeUntil.toISOString().slice(0,10);
+  }
+  try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+  buildFollowUps();
+  showToast('💤 Snoozed ' + days + ' day' + (days > 1 ? 's' : ''));
+}
+
+function addFUManual() {
+  var name  = prompt('Client name:');
+  if (!name) return;
+  var phone = prompt('Phone (optional):') || '';
+  var amt   = parseFloat(prompt('Quote amount (optional):') || '0') || 0;
+  var notes = prompt('Notes (optional):') || '';
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  fuList.unshift({ id: Date.now(), name: name.trim(), phone: phone.trim(), amount: amt, notes: notes.trim(), sent: new Date().toISOString().slice(0,10), done: false, manual: true });
+  try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+  buildFollowUps();
+}
+
+function logFUContact(fuId, method) {
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  var f = fuList.find(function(x){ return x.id == fuId; });
+  if (f) {
+    if (!f.contactLog) f.contactLog = [];
+    f.contactLog.push({ method: method, date: new Date().toISOString().slice(0,10) });
+    f.lastContact = new Date().toISOString().slice(0,10);
+  }
+  try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+  showToast('📝 Contact logged — ' + method);
+}
+
+// ══════════════════════════════════════════════════════════════
+// DASHBOARD — MTD stats + velocity + source breakdown
+// ══════════════════════════════════════════════════════════════
+function buildDashMTD() {
+  var now = new Date();
+  var mtdStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+  // MTD from job log (won jobs this month)
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem('gould-joblog-v1') || '[]'); } catch(e) {}
+  var mtdJobs = log.filter(function(j) {
+    if (j.status !== 'Won' || !j.date) return false;
+    return new Date(j.date) >= mtdStart;
+  });
+  var mtdRev = mtdJobs.reduce(function(s,j){ return s + (j.quote||0); }, 0);
+  var mtdGP  = mtdJobs.reduce(function(s,j){ return s + (j.gp||0); }, 0);
+  var mtdGPPct = mtdRev > 0 ? Math.round(mtdGP/mtdRev*100) : 0;
+
+  // Pipeline this month
+  var mtdLeads = leads.filter(function(l){ return l.created && new Date(l.created) >= mtdStart; }).length;
+
+  var monthName = now.toLocaleDateString('en-US',{month:'long'});
+  var mtdEl = document.getElementById('dash-mtd');
+  if (!mtdEl) return;
+  var stats = [
+    { icon:'💵', val: mtdRev > 0 ? '$' + Math.round(mtdRev).toLocaleString() : '—', label: monthName + ' Revenue', color:'#1a3a8a' },
+    { icon:'💰', val: mtdGP  > 0 ? '$' + Math.round(mtdGP).toLocaleString()  : '—', label: mtdGPPct + '% GP Margin', color:'#16a34a' },
+    { icon:'🏆', val: mtdJobs.length, label: 'Jobs Won MTD', color:'#7c3aed' },
+    { icon:'📋', val: mtdLeads, label: 'New Leads MTD', color:'#d97706' },
+  ];
+  mtdEl.innerHTML = stats.map(function(s) {
+    return '<div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;border-left:4px solid ' + s.color + '">'
+      + '<div style="font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em">' + s.label + '</div>'
+      + '<div style="font-size:20px;font-weight:900;color:' + s.color + ';margin-top:2px">' + s.icon + ' ' + s.val + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function buildDashVelocity() {
+  var el = document.getElementById('dash-velocity');
+  if (!el) return;
+  var now = new Date(); now.setHours(0,0,0,0);
+  var week = new Date(now); week.setDate(now.getDate() - 7);
+
+  var newThisWeek  = leads.filter(function(l){ return l.created && new Date(l.created) >= week; }).length;
+  var apptThisWeek = leads.filter(function(l){ return l.preCallDate && new Date(l.preCallDate) >= week; }).length;
+  var total        = leads.length;
+  var won          = leads.filter(function(l){ return l.status === 'Won'; }).length;
+  var quoted       = leads.filter(function(l){ return l.status === 'Quoted' || l.status === 'Won' || l.status === 'Lost'; }).length;
+  var closeRate    = quoted > 0 ? Math.round(won/quoted*100) : 0;
+  var pipeVal      = leads.filter(function(l){ return l.status === 'Quoted'; }).reduce(function(s,l){ return s+(l.quoteAmt||0); },0);
+
+  var stats = [
+    { icon:'📥', val: newThisWeek, label:'New This Week', color:'#0369a1' },
+    { icon:'📅', val: apptThisWeek, label:'Appts This Week', color:'#7c3aed' },
+    { icon:'🎯', val: closeRate + '%', label:'All-Time Close Rate', color:'#16a34a' },
+    { icon:'💼', val: pipeVal > 0 ? '$' + Math.round(pipeVal/1000) + 'k' : '—', label:'Pipeline Value', color:'#d97706' },
+  ];
+  el.innerHTML = stats.map(function(s) {
+    return '<div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;border-left:4px solid ' + s.color + '">'
+      + '<div style="font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em">' + s.label + '</div>'
+      + '<div style="font-size:20px;font-weight:900;color:' + s.color + ';margin-top:2px">' + s.icon + ' ' + s.val + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function buildDashSources() {
+  var el = document.getElementById('dash-sources');
+  if (!el) return;
+  var sourceCounts = {};
+  var sourceRevenue = {};
+  leads.forEach(function(l) {
+    var src = l.source || 'Unknown';
+    sourceCounts[src] = (sourceCounts[src] || 0) + 1;
+    if (l.status === 'Won' && l.quoteAmt) {
+      sourceRevenue[src] = (sourceRevenue[src] || 0) + l.quoteAmt;
+    }
+  });
+  var sources = Object.keys(sourceCounts).sort(function(a,b){ return sourceCounts[b]-sourceCounts[a]; });
+  if (sources.length === 0) { el.innerHTML = '<div style="color:#94a3b8;font-size:13px">No leads with source data yet</div>'; return; }
+  var colors = ['#1a3a8a','#7c3aed','#16a34a','#d97706','#dc2626','#0369a1'];
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px">'
+    + sources.map(function(src, i) {
+      var count = sourceCounts[src];
+      var rev = sourceRevenue[src] || 0;
+      var pct = Math.round(count / leads.length * 100);
+      var color = colors[i % colors.length];
+      return '<div style="display:flex;align-items:center;gap:8px">'
+        + '<div style="font-size:12px;font-weight:700;color:#1e293b;width:100px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + src + '</div>'
+        + '<div style="flex:1;height:8px;background:#f1f5f9;border-radius:4px;overflow:hidden">'
+          + '<div style="height:100%;background:' + color + ';width:' + pct + '%;border-radius:4px"></div>'
+        + '</div>'
+        + '<div style="font-size:11px;font-weight:700;color:' + color + ';width:28px;text-align:right">' + count + '</div>'
+        + (rev > 0 ? '<div style="font-size:11px;color:#16a34a;font-weight:700;width:60px;text-align:right">$' + Math.round(rev/1000*10)/10 + 'k</div>' : '<div style="width:60px"></div>')
+        + '</div>';
+    }).join('')
+  + '</div>';
+}
+
+function buildFUStats() {
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  var quotedLeads = leads.filter(function(l){ return l.status === 'Quoted'; });
+  var el = document.getElementById('fu-stats');
+  if (!el) return;
+  var active   = fuList.filter(function(f){ return !f.done; }).length + quotedLeads.length;
+  var hot      = quotedLeads.filter(function(l){
+    var d = l.proposalDate || l.created;
+    if (!d) return false;
+    var days = Math.round((new Date() - new Date(d)) / 86400000);
+    return days >= 3;
+  }).length;
+  var pipeVal  = quotedLeads.reduce(function(s,l){ return s+(l.quoteAmt||0); },0);
+  var stats = [
+    { icon:'📋', val: quotedLeads.length, label:'Quotes Out', color:'#1a3a8a' },
+    { icon:'🔥', val: hot, label:'Hot (3+ days)', color:'#dc2626' },
+    { icon:'💼', val: pipeVal > 0 ? '$' + Math.round(pipeVal).toLocaleString() : '—', label:'Revenue at Stake', color:'#16a34a' },
+    { icon:'💤', val: fuList.filter(function(f){ return !f.done && f.snoozedUntil && new Date(f.snoozedUntil) > new Date(); }).length, label:'Snoozed', color:'#94a3b8' },
+  ];
+  el.innerHTML = stats.map(function(s) {
+    return '<div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid #e2e8f0;border-left:4px solid ' + s.color + '">'
+      + '<div style="font-size:9px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em">' + s.label + '</div>'
+      + '<div style="font-size:20px;font-weight:900;color:' + s.color + ';margin-top:2px">' + s.icon + ' ' + s.val + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function buildGCalEmbed() {
+  var gcalUrl = localStorage.getItem('hb_gcal_embed') || '';
+  var card = document.getElementById('dash-gcal-card');
+  var embedEl = document.getElementById('dash-gcal-embed');
+  if (!card || !embedEl) return;
+  if (!gcalUrl) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  embedEl.innerHTML = '<iframe src="' + gcalUrl + '" style="width:100%;height:300px;border:none;border-radius:8px" frameborder="0"></iframe>';
+}
+
+function showToast(msg) {
+  var el = document.getElementById('float-save-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = '#16a34a';
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.display='none'; }, 3000);
+}
+
 function buildFollowUps() {
   var listEl  = document.getElementById('followup-list');
   var emptyEl = document.getElementById('followup-empty');
@@ -7603,8 +8319,23 @@ function buildFollowUps() {
     }
   });
 
-  // Active = not done, sort oldest first
-  var active = fuList.filter(function(f){ return !f.done; });
+  buildFUStats();
+
+  // Apply filter
+  var today = new Date(); today.setHours(0,0,0,0);
+  var active = fuList.filter(function(f) {
+    if (f.done) return false;
+    var safeDate = fuSafeDate(f.sent);
+    var sentDate = new Date(safeDate + 'T12:00:00');
+    var days = Math.round((today - sentDate) / 86400000);
+    if (isNaN(days)) days = 0;
+    var isSnoozed = f.snoozedUntil && new Date(f.snoozedUntil + 'T23:59:00') >= today;
+    if (_fuFilter === 'snoozed') return isSnoozed;
+    if (isSnoozed) return false; // hide snoozed from other views
+    if (_fuFilter === 'hot') return days >= 3;
+    if (_fuFilter === 'today') return days === 0;
+    return true;
+  });
   active.sort(function(a,b){ return fuSafeDate(a.sent).localeCompare(fuSafeDate(b.sent)); });
 
   if (active.length === 0) {
@@ -7614,23 +8345,23 @@ function buildFollowUps() {
   }
   if (emptyEl) emptyEl.style.display = 'none';
 
-  var today = new Date(); today.setHours(0,0,0,0);
-
   listEl.innerHTML = active.map(function(f) {
     var safeDate = fuSafeDate(f.sent);
     var sentDate = new Date(safeDate + 'T12:00:00');
     var days = Math.round((today - sentDate) / 86400000);
     if (isNaN(days)) days = 0;
-    var urgent = days >= 1;
-    var borderColor = urgent ? '#dc2626' : '#d97706';
-    var bg          = urgent ? '#fff5f5' : '#fffbeb';
-    var daysLabel   = days === 0 ? 'Today' : days === 1 ? '1 day ago' : days + ' days ago';
+    var isSnoozed = f.snoozedUntil && new Date(f.snoozedUntil + 'T23:59:00') >= today;
+    var isHot = days >= 3;
+    var borderColor = isSnoozed ? '#94a3b8' : (isHot ? '#dc2626' : days >= 1 ? '#d97706' : '#16a34a');
+    var bg          = isSnoozed ? '#f8fafc'  : (isHot ? '#fff5f5' : days >= 1 ? '#fffbeb' : '#f0fdf4');
+    var daysLabel   = isSnoozed ? '💤 Snoozed until ' + f.snoozedUntil : (days === 0 ? 'Sent today' : days === 1 ? '1 day ago' : days + ' days ago');
+    var urgencyBadge = isSnoozed ? '💤 SNOOZED' : (isHot ? '🔥 HOT' : days >= 1 ? '⚡ FOLLOW UP' : '✅ SENT TODAY');
     var sentDisplay = sentDate.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-
     var firstName = f.name ? f.name.split(' ')[0] : 'there';
     var textScript = 'Hey ' + firstName + ', just wanted to follow up on the painting quote I sent. Any questions? Ready to move forward when you are! — Thomas / Gould Painting';
+    var contactCount = f.contactLog ? f.contactLog.length : 0;
 
-    var html = '<div style="background:' + bg + ';border-left:4px solid ' + borderColor + ';border-radius:8px;padding:12px 14px;margin-bottom:8px">';
+    var html = '<div style="background:' + bg + ';border-left:4px solid ' + borderColor + ';border-radius:8px;padding:12px 14px">';
     html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px">';
     html += '<div style="flex:1;min-width:0">';
     html += '<div style="font-size:14px;font-weight:800;color:#1e293b">' + (f.name || 'Unknown') + '</div>';
@@ -7638,17 +8369,25 @@ function buildFollowUps() {
     if (f.amount > 0) html += '<span style="color:#16a34a;font-weight:700">$' + Number(f.amount).toLocaleString() + '</span> &middot; ';
     html += 'Quoted ' + sentDisplay;
     if (f.phone) html += ' &middot; ' + f.phone;
+    if (contactCount > 0) html += ' &middot; <span style="color:#7c3aed;font-weight:700">' + contactCount + ' contact' + (contactCount>1?'s':'') + ' logged</span>';
     html += '</div>';
     if (f.notes) html += '<div style="font-size:11px;color:#475569;margin-top:4px;font-style:italic">' + f.notes + '</div>';
     html += '</div>';
-    html += '<span style="flex-shrink:0;font-size:11px;font-weight:800;color:' + borderColor + ';background:white;border:1px solid ' + borderColor + ';padding:3px 10px;border-radius:10px;white-space:nowrap">' + (urgent ? 'HOT' : '') + ' ' + daysLabel + '</span>';
+    html += '<span style="flex-shrink:0;font-size:10px;font-weight:800;color:' + borderColor + ';background:white;border:1px solid ' + borderColor + ';padding:3px 8px;border-radius:10px;white-space:nowrap">' + urgencyBadge + '</span>';
     html += '</div>';
+    // Day counter
+    html += '<div style="font-size:11px;color:#94a3b8;margin-bottom:8px">' + daysLabel + '</div>';
+    // Action buttons
     html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
-    if (f.phone) html += '<a href="sms:' + f.phone + '?body=' + encodeURIComponent(textScript) + '" style="padding:6px 12px;background:#dc2626;color:white;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none">Text</a>';
-    if (f.phone) html += '<a href="tel:' + f.phone + '" style="padding:6px 12px;background:#0369a1;color:white;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none">Call</a>';
-    if (f.leadId) html += '<button onclick="showPage(\'leads\')" style="padding:6px 12px;background:#f8fafc;color:#1e293b;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Pipeline</button>';
-    html += '<button onclick="markFUWon(\'' + f.id + '\')" style="padding:6px 12px;background:#16a34a;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Won</button>';
-    html += '<button onclick="markFULost(\'' + f.id + '\')" style="padding:6px 12px;background:#f1f5f9;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Lost</button>';
+    if (f.phone) html += '<a href="sms:' + f.phone + '?body=' + encodeURIComponent(textScript) + '" onclick="logFUContact(' + f.id + ',&quot;text&quot;)" style="padding:6px 12px;background:#dc2626;color:white;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none">📱 Text</a>';
+    if (f.phone) html += '<a href="tel:' + f.phone + '" onclick="logFUContact(' + f.id + ',&quot;call&quot;)" style="padding:6px 12px;background:#0369a1;color:white;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none">📞 Call</a>';
+    if (!isSnoozed) {
+      html += '<button onclick="snoozeFU(' + f.id + ',2)" style="padding:6px 12px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">💤 2d</button>';
+      html += '<button onclick="snoozeFU(' + f.id + ',5)" style="padding:6px 12px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">💤 5d</button>';
+    }
+    if (f.leadId) html += '<button onclick="showPage(\'leads\')" style="padding:6px 10px;background:#f8fafc;color:#1e293b;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Pipeline</button>';
+    html += '<button onclick="markFUWon(\'' + f.id + '\')" style="padding:6px 12px;background:#16a34a;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">🏆 Won</button>';
+    html += '<button onclick="markFULost(\'' + f.id + '\')" style="padding:6px 10px;background:#f1f5f9;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Lost</button>';
     html += '</div></div>';
     return html;
   }).join('');
@@ -7702,6 +8441,35 @@ function markFULost(id) {
   buildFollowUps();
 }
 </script>
+
+
+<!-- DATA MANAGER MODAL -->
+<div id="data-manager-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:2000;align-items:center;justify-content:center">
+  <div style="background:white;border-radius:16px;padding:24px;width:420px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:900;color:#1e293b">💾 Backup & Restore</div>
+      <button onclick="document.getElementById('data-manager-modal').style.display='none'" style="background:#f1f5f9;border:none;width:30px;height:30px;border-radius:6px;font-size:16px;cursor:pointer">✕</button>
+    </div>
+    <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:16px">
+      ⚠️ localStorage can be cleared by the browser. <strong>Export a backup weekly</strong> to avoid losing data.
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button onclick="exportAllData()" style="background:#16a34a;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer">⬇ Export All Data (JSON)</button>
+      <label style="background:#1a3a8a;color:white;padding:12px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;text-align:center">
+        ⬆ Import / Restore Data
+        <input type="file" accept=".json" onchange="importAllData(event)" style="display:none">
+      </label>
+      <div style="border-top:1px solid #e2e8f0;padding-top:10px">
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px;text-transform:uppercase">Quick Exports</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="exportLeadsCSV()" style="background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Leads CSV</button>
+          <button onclick="exportCommissionCSV()" style="background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Commission CSV</button>
+          <button onclick="exportToCSV()" style="background:#f1f5f9;color:#1e293b;border:1px solid #e2e8f0;padding:7px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Job Log CSV</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
