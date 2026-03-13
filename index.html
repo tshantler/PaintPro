@@ -3764,7 +3764,7 @@ async function autoSyncToSheets() {
     var deckHrs   = getDeckCalc().totalHrs   || 0;
     var sub       = roomSub + liTotal + extTotal + deckTotal - closeDiscount;
     var totalHours= calcs.reduce(function(s,x){ return s+x.calc.hours; },0) + extHrs + deckHrs;
-    var totalMats = calcs.reduce(function(s,x){ return s+x.calc.mats; },0);
+    var totalMats = calcs.reduce(function(s,x){ return s+(x.calc.materials||0); },0);
     var paySub    = totalHours * laborRate;
     var gp        = sub - totalMats - paySub;
     var gpPct     = sub > 0 ? (gp/sub*100) : 0;
@@ -3902,6 +3902,29 @@ async function updateJobOutcome(id, field, value) {
   localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
   syncOneToSheets(entry);
   buildDashboard();
+
+  // When status changes to Won — fire GHL + prompt to move to Work Order
+  if (field === 'status' && value === 'Won') {
+    ghlTrigger('job_won', { name: entry.client, phone: entry.phone || '', email: '' });
+    var goWO = confirm(
+      '🎉 Marked Won — nice!\n\n' +
+      'Ready to set up the Work Order for ' + entry.client + '?\n\n' +
+      'Tap OK to go to Work Order now.'
+    );
+    if (goWO) {
+      // Pre-fill client info from job log entry
+      var nameEl  = document.getElementById('cl-name');
+      var addrEl  = document.getElementById('cl-address');
+      if (nameEl && entry.client) nameEl.value = entry.client;
+      if (addrEl && entry.address) addrEl.value = entry.address;
+      showPage('wo');
+    }
+  }
+
+  // When status changes to Lost — fire GHL lost trigger
+  if (field === 'status' && value === 'Lost') {
+    ghlTrigger('job_lost', { name: entry.client, phone: entry.phone || '', email: '', reason: entry.dashNotes || 'Marked lost from Job Log' });
+  }
 }
 
 async function buildDashboard() {
@@ -3924,7 +3947,7 @@ async function buildDashboard() {
       window._lastGrandTotal > 0 ? Math.round((window._lastGrandTotal - (window._lastSubPay||0)) / window._lastGrandTotal * 100) : 0,
       (getExtCalc().totalHrs||0) + (getDeckCalc().totalHrs||0) + rooms.reduce(function(s,r){return s+calcRoom(r).hours;},0),
       window._lastSubPay||0,
-      rooms.reduce(function(s,r){return s+calcRoom(r).mats;},0)
+      rooms.reduce(function(s,r){return s+calcRoom(r).materials;},0)
     );
   }
   var log = await loadJobLog();
@@ -5019,7 +5042,7 @@ async function saveToJobLog() {
   var sub       = roomSub + liTotal + extTotal + deckTotal - closeDiscount;
   var total     = sub * (1 + txPct / 100);
   var totalHours = calcs.reduce(function(s, x) { return s + x.calc.hours; }, 0) + extHrs + deckHrs;
-  var totalMats  = calcs.reduce(function(s, x) { return s + x.calc.mats; }, 0);
+  var totalMats  = calcs.reduce(function(s, x) { return s + (x.calc.materials || x.calc.mats || 0); }, 0);
   var paySub     = totalHours * laborRate;
   var gp         = sub - totalMats - paySub;
   var gpPct      = sub > 0 ? (gp / sub * 100) : 0;
@@ -5059,14 +5082,32 @@ async function saveToJobLog() {
         name: x.room.name,
         hours: Math.round(x.calc.hours * 10) / 10,
         price: Math.round(x.calc.total * 100) / 100,
-        mats: Math.round(x.calc.mats * 100) / 100,
-        gp: Math.round((x.calc.total - x.calc.mats - x.calc.hours * laborRate) * 100) / 100
+        mats: Math.round((x.calc.materials || 0) * 100) / 100,
+        gp: Math.round((x.calc.total - (x.calc.materials||0) - x.calc.hours * laborRate) * 100) / 100
       };
     })
   };
 
   var log = await loadJobLog();
-  log.unshift(entry);
+  // Upsert — update existing entry for same client+address, don't create duplicates
+  var clientKey = (entry.client || '').toLowerCase().trim();
+  var addrKey   = (entry.address || '').toLowerCase().trim();
+  var existIdx  = log.findIndex(function(e) {
+    return (e.client||'').toLowerCase().trim() === clientKey
+        && (e.address||'').toLowerCase().trim() === addrKey
+        && e.status !== 'Won' && e.status !== 'Lost';
+  });
+  if (existIdx >= 0) {
+    // Preserve outcome fields, update everything else
+    entry.id          = log[existIdx].id;
+    entry.date        = log[existIdx].date;
+    entry.status      = log[existIdx].status || 'Open';
+    entry.actualHours = log[existIdx].actualHours || '';
+    entry.dashNotes   = log[existIdx].dashNotes   || '';
+    log[existIdx] = entry;
+  } else {
+    log.unshift(entry);
+  }
   localStorage.setItem(JOB_LOG_STORAGE_KEY, JSON.stringify(log));
   syncOneToSheets(entry);
   var msg = document.getElementById('save-log-msg');
