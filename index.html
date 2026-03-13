@@ -1904,6 +1904,8 @@ function showPage(p) {
   if(p==='active')  buildActiveJobs();
   if(p==='leads')   buildLeads();
   if(p==='log')     renderJobLog();
+  var floatBar = document.getElementById('float-bar');
+  if (floatBar) floatBar.classList.remove('show');
 }
 
 function showEstStep(step) {
