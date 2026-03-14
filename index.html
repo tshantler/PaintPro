@@ -1852,7 +1852,7 @@ Select all paint colors prior to start date</textarea>
       <div id="accept-dep-confirm" style="display:none;font-size:12px;font-weight:600;color:#059669;margin-top:8px;text-align:center">✓ Deposit marked received</div>
     </div>
 
-    <button onclick="document.getElementById('accept-modal').style.display='none'; showPage('wo'); buildWOWonList();"
+    <button onclick="(function(){ var lid=window._acceptModalLeadId; document.getElementById('accept-modal').style.display='none'; showPage('wo'); buildWOWonList(); if(lid){ setTimeout(function(){ loadLeadIntoWorkOrder(lid); },150); } })()"
       style="width:100%;background:#1e3a5f;color:white;border:none;padding:12px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px">
       Build Work Order →
     </button>
@@ -1881,146 +1881,168 @@ Select all paint colors prior to start date</textarea>
 <div class="page" id="page-wo">
 
   <!-- WON JOBS LIST -->
-  <div class="card" style="padding:14px 16px;margin-bottom:4px">
-    <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:3px">Jobs Ready to Schedule</div>
-    <div style="font-size:11px;color:#9ca3af;margin-bottom:10px">Select a won job to load it into the work order below.</div>
+  <div class="card" style="padding:14px 16px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Jobs Ready to Schedule</div>
     <div id="wo-won-list" style="display:flex;flex-direction:column;gap:6px"></div>
-    <div id="wo-won-empty" style="font-size:12px;color:#9ca3af;text-align:center;padding:12px;display:none">No won jobs yet — close a quote from the Lead Pipeline first.</div>
+    <div id="wo-won-empty" style="font-size:12px;color:#9ca3af;text-align:center;padding:12px 0;display:none">No won jobs yet — close a quote from the Lead Pipeline first.</div>
   </div>
 
-  <!-- STAGE 1: Job Loaded -->
-  <div id="wo-stage1" style="display:none">
-    <div style="display:flex;align-items:center;gap:10px;margin:16px 0 10px">
-      <div style="background:#2563eb;color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">1</div>
-      <div style="font-size:13px;font-weight:600;color:#111827">Job Loaded</div>
-      <div style="flex:1;height:1px;background:#e5e7eb"></div>
-    </div>
+  <!-- COMPACT SINGLE FLOW — shown after Load → tapped -->
+  <div id="wo-main-flow" style="display:none">
 
-    <!-- Client info banner -->
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:10px">
-      <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Client Job Info</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div><label class="lbl">Client Name</label><input id="wo-client-name" placeholder="Auto-filled from pipeline" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white"></div>
-        <div><label class="lbl">Client Phone</label><input id="wo-client-phone" placeholder="Auto-filled from pipeline" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white"></div>
-        <div style="grid-column:span 2"><label class="lbl">Job Address</label><input id="wo-client-address" placeholder="Auto-filled from pipeline" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white"></div>
-        <div><label class="lbl">Job Type</label><input id="wo-client-jobtype" placeholder="Interior / Exterior / Deck" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white"></div>
-        <div><label class="lbl">Quote Amount</label><input id="wo-client-quote" placeholder="$0.00" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;background:white"></div>
+    <!-- Dark navy client banner -->
+    <div id="wo-client-banner" style="background:#0a1628;border-radius:10px;padding:16px 18px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div id="wo-banner-name" style="font-size:17px;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.3px"></div>
+        <div id="wo-banner-quote" style="font-size:16px;font-weight:700;color:#4ade80"></div>
       </div>
+      <div id="wo-banner-addr" style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:2px"></div>
+      <div id="wo-banner-meta" style="font-size:11px;color:rgba(255,255,255,0.35)"></div>
     </div>
 
-    <!-- Auto-generated job description -->
-    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:10px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em">Auto-Generated Job Description</div>
-        <button onclick="regenJobDesc()" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">↺ Regen</button>
-      </div>
-      <textarea id="wo-job-desc" rows="4" style="width:100%;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;resize:none;background:white;line-height:1.6"></textarea>
-      <div style="font-size:11px;color:#9ca3af;margin-top:6px">This becomes the feeler text in Stage 2 — edit if needed.</div>
+    <!-- Hidden fields for downstream functions -->
+    <input type="hidden" id="wo-client-name">
+    <input type="hidden" id="wo-client-phone">
+    <input type="hidden" id="wo-client-address">
+    <input type="hidden" id="wo-client-jobtype">
+    <input type="hidden" id="wo-client-quote">
+    <input type="hidden" id="wo-wall-color" value="">
+    <input type="hidden" id="wo-trim-color" value="">
+    <input type="hidden" id="wo-color-notes" value="">
+
+    <!-- Start Date — shown first, feeds into feeler message -->
+    <div class="card" style="padding:14px 16px;margin-bottom:12px">
+      <label class="lbl">Tentative Start Date</label>
+      <input id="wo-start-date" type="date" oninput="regenJobDesc()" style="width:100%;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:15px;font-weight:500">
     </div>
 
-    <button onclick="woUnlockStage2()" style="width:100%;background:#2563eb;color:white;border:none;padding:10px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px">Find a Sub →</button>
-  </div>
-
-  <!-- STAGE 2: Find a Sub (locked until Stage 1) -->
-  <div id="wo-stage2" style="display:none">
-    <div style="display:flex;align-items:center;gap:10px;margin:16px 0 10px">
-      <div id="wo-stage2-num" style="background:#e5e7eb;color:#9ca3af;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">2</div>
-      <div style="font-size:13px;font-weight:600;color:#111827">Find a Sub</div>
-      <div style="flex:1;height:1px;background:#e5e7eb"></div>
-    </div>
-
-    <!-- RESPONSE SCOREBOARD -->
-    <div id="feeler-scoreboard" style="display:none;background:white;border-radius:10px;border:1px solid #e5e7eb;padding:12px 14px;margin-bottom:10px">
-      <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Response Tracker</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
-        <div style="text-align:center;background:#f9fafb;border-radius:7px;padding:10px 6px;border:1px solid #e5e7eb">
-          <div id="sb-count-sent" style="font-size:20px;font-weight:700;color:#d97706">0</div>
-          <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:2px">Waiting</div>
+    <!-- Feeler Texts — expanded by default, this is the core action -->
+    <div class="card" style="padding:0;margin-bottom:12px;overflow:hidden;border:1.5px solid #e5e7eb">
+      <!-- Header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f3f4f6">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;font-weight:700;color:#111827">📲 Send Feeler Texts</span>
+          <span id="wo-feeler-badge" style="font-size:10px;font-weight:700;color:#059669;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 7px;border-radius:8px;display:none">SENT</span>
         </div>
-        <div style="text-align:center;background:#f9fafb;border-radius:7px;padding:10px 6px;border:1px solid #e5e7eb">
-          <div id="sb-count-interested" style="font-size:20px;font-weight:700;color:#2563eb">0</div>
-          <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:2px">Interested</div>
-        </div>
-        <div style="text-align:center;background:#f9fafb;border-radius:7px;padding:10px 6px;border:1px solid #e5e7eb">
-          <div id="sb-count-yes" style="font-size:20px;font-weight:700;color:#059669">0</div>
-          <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:2px">Confirmed</div>
-        </div>
-        <div style="text-align:center;background:#f9fafb;border-radius:7px;padding:10px 6px;border:1px solid #e5e7eb">
-          <div id="sb-count-no" style="font-size:20px;font-weight:700;color:#dc2626">0</div>
-          <div style="font-size:10px;font-weight:600;color:#6b7280;margin-top:2px">Passed</div>
-        </div>
+        <button onclick="woToggleFeeler()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:12px;padding:2px 6px" id="wo-feeler-chevron">▲</button>
       </div>
-      <!-- Quick-tap response row — shows after feelers sent -->
-      <div id="sb-quick-response" style="display:none">
-        <div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:7px">TAP AS THEY RESPOND</div>
-        <div id="sb-quick-list" style="display:flex;flex-direction:column;gap:6px"></div>
-      </div>
-      <!-- Winner banner -->
-      <div id="sb-winner-banner" style="display:none;background:#f0fdf4;border:2px solid #16a34a;border-radius:8px;padding:10px 14px;margin-top:8px;text-align:center">
-        <div style="font-size:12px;font-weight:600;color:#059669" id="sb-winner-text"></div>
-        <div style="font-size:11px;color:#166534;margin-top:4px">Send their contract then hit Build Work Order on their card below ↓</div>
+
+      <div id="wo-feeler-body" style="padding:14px 16px">
+
+        <!-- Scoreboard — hidden until feelers sent -->
+        <div id="feeler-scoreboard" style="display:none;margin-bottom:14px">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
+            <div style="text-align:center;background:#fffbeb;border-radius:7px;padding:8px 4px;border:1px solid #fde68a">
+              <div id="sb-count-sent" style="font-size:18px;font-weight:700;color:#d97706">0</div>
+              <div style="font-size:10px;font-weight:600;color:#6b7280">Waiting</div>
+            </div>
+            <div style="text-align:center;background:#eff6ff;border-radius:7px;padding:8px 4px;border:1px solid #bfdbfe">
+              <div id="sb-count-interested" style="font-size:18px;font-weight:700;color:#2563eb">0</div>
+              <div style="font-size:10px;font-weight:600;color:#6b7280">Interested</div>
+            </div>
+            <div style="text-align:center;background:#f0fdf4;border-radius:7px;padding:8px 4px;border:1px solid #bbf7d0">
+              <div id="sb-count-yes" style="font-size:18px;font-weight:700;color:#059669">0</div>
+              <div style="font-size:10px;font-weight:600;color:#6b7280">Confirmed</div>
+            </div>
+            <div style="text-align:center;background:#fef2f2;border-radius:7px;padding:8px 4px;border:1px solid #fecaca">
+              <div id="sb-count-no" style="font-size:18px;font-weight:700;color:#dc2626">0</div>
+              <div style="font-size:10px;font-weight:600;color:#6b7280">Passed</div>
+            </div>
+          </div>
+          <div id="sb-quick-response" style="display:none">
+            <div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Tap as they respond</div>
+            <div id="sb-quick-list" style="display:flex;flex-direction:column;gap:5px"></div>
+          </div>
+          <div id="sb-winner-banner" style="display:none;background:#f0fdf4;border:2px solid #16a34a;border-radius:8px;padding:12px 14px;margin-top:4px">
+            <div style="font-size:13px;font-weight:700;color:#059669" id="sb-winner-text"></div>
+            <div style="font-size:11px;color:#166534;margin-top:4px">✓ Now send them the contract below, then Move to Active Jobs.</div>
+          </div>
+        </div>
+
+        <!-- Sub list with checkboxes + feeler send per sub -->
+        <div id="feeler-sub-list" style="display:flex;flex-direction:column;gap:0;margin-bottom:12px"></div>
+
+        <!-- Add sub inline -->
+        <div style="margin-bottom:14px">
+          <button onclick="woToggleAddSub()" style="background:none;border:none;color:#2563eb;font-size:12px;font-weight:600;cursor:pointer;padding:0">+ Add Sub to Crew</button>
+          <div id="wo-add-sub-form" style="display:none;margin-top:10px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input id="feeler-sub-name" placeholder="Name" style="flex:1;min-width:90px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
+              <input id="feeler-sub-phone" placeholder="Phone" style="flex:1;min-width:110px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
+              <select id="feeler-sub-rating" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
+                <option value="">Rating</option>
+                <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐ A-List</option>
+                <option value="⭐⭐⭐⭐">⭐⭐⭐⭐ Solid</option>
+                <option value="⭐⭐⭐">⭐⭐⭐ OK</option>
+                <option value="⭐⭐">⭐⭐ Use if needed</option>
+                <option value="⭐">⭐ Last resort</option>
+              </select>
+              <input id="feeler-sub-notes" placeholder="Notes" style="flex:2;min-width:130px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
+              <button onclick="addFeelerSub()" style="background:#0f9d58;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feeler message text -->
+        <div style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em">Feeler Message</div>
+            <button onclick="regenJobDesc()" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">↺ Regen</button>
+          </div>
+          <textarea id="wo-job-desc" rows="4" style="width:100%;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;resize:none;background:#f9fafb;line-height:1.6" oninput="buildFeelerPreview()"></textarea>
+        </div>
+
+        <!-- Send button — prominent -->
+        <button id="feeler-send-btn" onclick="sendAllFeelers()" style="width:100%;background:#0a1628;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">📲 Send Feeler Texts</button>
+        <div id="feeler-status" style="font-size:12px;color:#059669;margin-top:8px;text-align:center;display:none"></div>
+        <div id="feeler-preview" style="display:none"></div>
       </div>
     </div>
 
-    <div class="card" style="border-left:4px solid #0f9d58;padding:14px 16px">
-      <div id="feeler-sub-list" style="display:flex;flex-direction:column;gap:0;margin-bottom:12px"></div>
-      <!-- Add sub form -->
-      <details style="margin-bottom:10px">
-        <summary style="font-size:12px;font-weight:700;color:#0f9d58;cursor:pointer;padding:6px 0;list-style:none">+ Add Sub to Crew</summary>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
-          <input id="feeler-sub-name" placeholder="Sub name" style="flex:1;min-width:100px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-          <input id="feeler-sub-phone" placeholder="Phone (10 digits)" style="flex:1;min-width:120px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-          <select id="feeler-sub-rating" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-            <option value="">Rating</option>
-            <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐ A-List</option>
-            <option value="⭐⭐⭐⭐">⭐⭐⭐⭐ Solid</option>
-            <option value="⭐⭐⭐">⭐⭐⭐ OK</option>
-            <option value="⭐⭐">⭐⭐ Use if needed</option>
-            <option value="⭐">⭐ Last resort</option>
-          </select>
-          <input id="feeler-sub-notes" placeholder="Notes (reliable, slow, great finish...)" style="flex:2;min-width:160px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-          <button onclick="addFeelerSub()" style="background:#0f9d58;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ Add</button>
-        </div>
-      </details>
-      <div id="feeler-preview" style="display:none"></div>
-      <button id="feeler-send-btn" style="display:none"></button>
-      <div id="feeler-status" style="display:none"></div>
-    </div>
-  </div>
+    <!-- Sub pills hidden — kept for woRenderSubPills compat but not shown -->
+    <div id="wo-sub-pills" style="display:none"></div>
+    <div id="wo-sub-none" style="display:none"></div>
 
-  <!-- STAGE 3: Send Work Order (locked until sub confirmed) -->
-  <div id="wo-stage3" style="display:none">
-    <div style="display:flex;align-items:center;gap:10px;margin:16px 0 10px">
-      <div id="wo-stage3-num" style="background:#e5e7eb;color:#9ca3af;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">3</div>
-      <div style="font-size:13px;font-weight:600;color:#111827">Send Work Order</div>
-      <div style="flex:1;height:1px;background:#e5e7eb"></div>
-    </div>
-    <div class="card" style="padding:14px 16px">
-      <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Sub Details</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-        <div><label class="lbl">Sub Name</label><input id="wo-sub-name" placeholder="e.g. Carlos" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px"></div>
-        <div><label class="lbl">Sub Phone</label><input id="wo-sub-phone" placeholder="7165551234" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px"></div>
-        <div><label class="lbl">Sub Email</label><input id="wo-sub-email" placeholder="sub@email.com" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px"></div>
-        <div><label class="lbl">Start Date</label><input id="wo-start-date" type="date" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px"></div>
-        <input type="hidden" id="wo-wall-color" value="">
-        <input type="hidden" id="wo-trim-color" value="">
-        <input type="hidden" id="wo-color-notes" value="">
+    <!-- Sub Contract (collapsed until someone confirms) -->
+    <div class="card" style="padding:0;margin-bottom:12px;overflow:hidden">
+      <button onclick="woToggleContract()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:none;border:none;cursor:pointer;font-family:inherit">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:13px;font-weight:600;color:#111827">📄 Sub Contract</span>
+          <span id="wo-contract-badge" style="font-size:10px;font-weight:700;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;padding:1px 7px;border-radius:8px;display:none">SENT</span>
+        </div>
+        <span id="wo-contract-chevron" style="font-size:12px;color:#9ca3af">▼</span>
+      </button>
+      <div id="wo-contract-body" style="display:none;border-top:1px solid #f3f4f6;padding:14px 16px">
+        <div id="wo-preview" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;line-height:1.7;font-family:monospace;margin-bottom:12px"></div>
+        <div id="wo-contract-status" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:7px;font-size:13px;font-weight:600"></div>
+        <div style="display:flex;gap:8px">
+          <button onclick="previewWorkOrder()" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Preview</button>
+          <button onclick="sendSubContract()" style="flex:1;background:#7c3aed;color:white;border:none;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Send Contract →</button>
+        </div>
       </div>
-      <div id="wo-preview" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;line-height:1.7;font-family:monospace;margin-bottom:12px"></div>
-      <div id="wo-contract-status" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:7px;font-size:13px;font-weight:600"></div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button onclick="previewWorkOrder()" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Preview</button>
-        <button onclick="sendSubContract()" style="flex:1;background:#7c3aed;color:white;border:none;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Send Contract</button>
-      </div>
-      <button onclick="sendWOAndActivate()" style="width:100%;background:#2563eb;color:white;border:none;padding:11px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">Move to Active Jobs →</button>
     </div>
+
+    <!-- Move to Active Jobs CTA -->
+    <button onclick="sendWOAndActivate()" style="width:100%;background:#059669;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:-0.2px;box-shadow:0 2px 8px rgba(5,150,105,0.35)">Move to Active Jobs →</button>
+
+    <!-- Hidden stage divs kept for compatibility with existing JS -->
+    <div id="wo-stage1" style="display:none"></div>
+    <div id="wo-stage2" style="display:none"></div>
+    <div id="wo-stage3" style="display:none"></div>
+    <div id="wo-stage2-num" style="display:none"></div>
+    <div id="wo-stage3-num" style="display:none"></div>
+    <!-- Hidden sub name/phone/email for sendWOAndActivate -->
+    <input type="hidden" id="wo-sub-name">
+    <input type="hidden" id="wo-sub-phone">
+    <input type="hidden" id="wo-sub-email">
+
   </div>
 
 </div>
 
 <!-- ACTIVE JOBS PAGE -->
 <div class="page" id="page-active">
-  <div id="sub-perf-section" class="card" style="padding:14px 16px;margin-bottom:12px">
+  <div id="sub-perf-section" class="card" style="display:none;padding:14px 16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
       <div style="font-size:12px;font-weight:600;color:#374151">Sub Performance</div>
       <button onclick="buildSubPerformance()" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">↺ Refresh</button>
@@ -2470,7 +2492,7 @@ function showPage(p) {
   document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
   var pageEl = document.getElementById('page-'+p);
   if (pageEl) pageEl.classList.add('active');
-  if(p==='wo')         { refreshWoPhotoSummary(); refreshWOFeeler(); buildWOWonList(); }
+  if(p==='wo')         { refreshWoPhotoSummary(); refreshWOFeeler(); buildWOWonList(); woRenderSubPills(); }
   if(p==='dash')       buildDashboard();
   if(p==='fu')         { buildFollowUps(); }
   if(p==='history')    buildHistory();
@@ -5185,37 +5207,90 @@ function buildHistory() {
   var stats   = document.getElementById('history-stats');
   if (!list) return;
 
-  var search  = (document.getElementById('history-search') || {}).value || '';
+  var search = (document.getElementById('history-search') || {}).value || '';
   var sq = search.toLowerCase().trim();
 
-  // Pull from leads — show Quoted, Won, Lost
+  // ── Merge leads + job log into one unified record per job ──
+  var jobLog = [];
+  try { jobLog = JSON.parse(localStorage.getItem(JOB_LOG_KEY) || '[]'); } catch(e) {}
+
+  // Start with leads that are Quoted/Won/Lost
   var eligible = leads.filter(function(l) {
     return ['Quoted','Won','Lost'].indexOf(l.status) !== -1;
   });
 
-  // Filter by status
-  var filtered = _historyFilter === 'all' ? eligible
-    : eligible.filter(function(l){ return l.status === _historyFilter; });
+  // Build unified records — prefer lead data, enrich with job log actuals
+  var records = eligible.map(function(l) {
+    var logEntry = jobLog.find(function(e) {
+      return e.leadId === l.id || (e.client||'').toLowerCase().trim() === (l.name||'').toLowerCase().trim();
+    }) || {};
+    return {
+      id:          l.id,
+      name:        l.name,
+      phone:       l.phone || '',
+      email:       l.email || '',
+      address:     (l.address||'') + (l.city ? ', ' + l.city : ''),
+      jobtype:     l.jobtype || logEntry.job || '',
+      status:      l.status,
+      quoteAmt:    l.quoteAmt || logEntry.quote || 0,
+      source:      l.source || '',
+      notes:       l.notes || '',
+      ballpark:    l.ballpark || '',
+      lostReason:  l.lostReason || '',
+      proposalHTML: l.proposalHTML || '',
+      bidHours:    logEntry.hours || 0,
+      actualHours: logEntry.actualHours || 0,
+      materials:   logEntry.mats || logEntry.materialsCost || 0,
+      subPay:      logEntry.paySub || 0,
+      gp:          logEntry.gp || 0,
+      gpPct:       logEntry.gpPct || 0,
+      date:        logEntry.date || (l.created ? new Date(l.created).toLocaleDateString() : ''),
+      closedDate:  (l.closedDate) || logEntry.closedDate || '',
+      closed:      false,
+      _lead:       l
+    };
+  });
 
-  // Search
+  // Add closed job log entries that DON'T have a matching lead (manually closed)
+  jobLog.forEach(function(e) {
+    if (e.status !== 'Won') return;
+    var alreadyIn = records.find(function(r) {
+      return r.id === e.leadId || r.name.toLowerCase().trim() === (e.client||'').toLowerCase().trim();
+    });
+    if (!alreadyIn) {
+      records.push({
+        id: e.id, name: e.client || '—', phone: e.phone || '', email: '',
+        address: (e.address||'') + (e.city ? ', '+e.city : ''),
+        jobtype: e.job || '', status: 'Won',
+        quoteAmt: e.quote || 0, source: '', notes: '', ballpark: '', lostReason: '',
+        proposalHTML: '', bidHours: e.hours || 0, actualHours: e.actualHours || 0,
+        materials: e.mats || 0, subPay: e.paySub || 0,
+        gp: e.gp || 0, gpPct: e.gpPct || 0,
+        date: e.date || '', closedDate: e.closedDate || '',
+        closed: true, _lead: null
+      });
+    }
+  });
+
+  // Filter
+  var filtered = _historyFilter === 'all' ? records
+    : records.filter(function(r){ return r.status === _historyFilter; });
   if (sq) {
-    filtered = filtered.filter(function(l) {
-      return (l.name||'').toLowerCase().includes(sq)
-          || (l.address||'').toLowerCase().includes(sq)
-          || (l.city||'').toLowerCase().includes(sq)
-          || (l.jobtype||'').toLowerCase().includes(sq);
+    filtered = filtered.filter(function(r) {
+      return (r.name||'').toLowerCase().includes(sq)
+          || (r.address||'').toLowerCase().includes(sq)
+          || (r.jobtype||'').toLowerCase().includes(sq);
     });
   }
+  filtered.sort(function(a,b){ return b.id - a.id; });
 
-  // Sort newest first (by id, which is timestamp-based)
-  filtered = filtered.slice().sort(function(a,b){ return b.id - a.id; });
-
-  // Stats bar
-  var won = eligible.filter(function(l){ return l.status==='Won'; });
-  var wonRev = won.reduce(function(s,l){ return s + (l.quoteAmt||0); }, 0);
-  var closeRate = eligible.length > 0 ? Math.round(won.length / eligible.filter(function(l){ return l.status !== 'Quoted'; }).length * 100) : 0;
-  stats.innerHTML = [
-    { label: 'Total Jobs', val: eligible.length, color: '#111827' },
+  // Stats
+  var won = records.filter(function(r){ return r.status==='Won'; });
+  var wonRev = won.reduce(function(s,r){ return s+(r.quoteAmt||0); }, 0);
+  var quoted = records.filter(function(r){ return ['Quoted','Won','Lost'].indexOf(r.status)!==-1; });
+  var closeRate = quoted.length > 0 ? Math.round(won.length/quoted.length*100) : 0;
+  if (stats) stats.innerHTML = [
+    { label: 'Total Jobs', val: records.length, color: '#111827' },
     { label: 'Won', val: won.length, color: '#059669' },
     { label: 'Revenue', val: wonRev > 0 ? '$' + wonRev.toLocaleString() : '—', color: '#059669' },
     { label: 'Close Rate', val: isNaN(closeRate) ? '—' : closeRate + '%', color: closeRate >= 50 ? '#059669' : '#d97706' },
@@ -5226,58 +5301,222 @@ function buildHistory() {
       + '</div>';
   }).join('');
 
-  if (filtered.length === 0) {
-    list.innerHTML = '';
-    empty.style.display = '';
+  if (filtered.length === 0) { list.innerHTML = ''; if(empty) empty.style.display=''; return; }
+  if (empty) empty.style.display = 'none';
+
+  var STATUS_COLOR = { 'Quoted':'#2563eb', 'Won':'#059669', 'Lost':'#dc2626' };
+  var JT_LABEL = { 'interior':'Interior','exterior':'Exterior','deck':'Deck','interior-exterior':'Int+Ext','interior-deck':'Int+Deck','exterior-deck':'Ext+Deck','full':'Full' };
+
+  list.innerHTML = filtered.map(function(r) {
+    var color  = STATUS_COLOR[r.status] || '#9ca3af';
+    var jtLabel = JT_LABEL[r.jobtype] || r.jobtype || '';
+    var laborCost = r.actualHours ? r.actualHours*45 : (r.bidHours ? r.bidHours*45 : 0);
+    var gp     = r.quoteAmt > 0 && laborCost > 0 ? r.quoteAmt - laborCost - (r.materials||0) : (r.gp || 0);
+    var gpPct  = r.quoteAmt > 0 && gp !== 0 ? Math.round(gp/r.quoteAmt*100) : (r.gpPct || null);
+
+    var meta = [jtLabel, r.closedDate ? 'Closed '+r.closedDate : r.date, r.source].filter(Boolean).join(' · ');
+
+    return '<div onclick="openJobDetail('+JSON.stringify(r.id)+')" style="background:white;border-radius:10px;border:1px solid #e5e7eb;border-left:4px solid '+color+';padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 2px 8px rgba(0,0,0,0.08)\'" onmouseout="this.style.boxShadow=\'\'">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+            + '<span style="font-size:14px;font-weight:700;color:#111827">' + r.name + '</span>'
+            + '<span style="font-size:10px;font-weight:600;color:'+color+';background:'+color+'18;padding:2px 8px;border-radius:10px">' + r.status + '</span>'
+            + (r.lostReason ? '<span style="font-size:10px;color:#9ca3af">'+r.lostReason+'</span>' : '')
+          + '</div>'
+          + '<div style="font-size:11px;color:#9ca3af;margin-top:3px">' + (r.address||'—') + '</div>'
+          + (meta ? '<div style="font-size:11px;color:#d1d5db;margin-top:2px">' + meta + '</div>' : '')
+        + '</div>'
+        + '<div style="text-align:right;flex-shrink:0;padding-left:12px">'
+          + (r.quoteAmt > 0 ? '<div style="font-size:15px;font-weight:700;color:#111827;font-variant-numeric:tabular-nums">$'+r.quoteAmt.toLocaleString()+'</div>' : '')
+          + (gpPct !== null ? '<div style="font-size:11px;font-weight:600;color:'+(gp>=0?'#059669':'#dc2626')+'">GP '+gpPct+'%</div>' : '')
+          + (r.bidHours || r.actualHours ? '<div style="font-size:10px;color:#d1d5db;margin-top:2px">'+(r.actualHours||r.bidHours)+'h</div>' : '')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function openJobDetail(id) {
+  // Find record from leads or job log
+  var lead = leads.find(function(l){ return l.id === id; });
+  var jobLog = [];
+  try { jobLog = JSON.parse(localStorage.getItem(JOB_LOG_KEY)||'[]'); } catch(e) {}
+  var logEntry = lead
+    ? jobLog.find(function(e){ return e.leadId===id || (e.client||'').toLowerCase()===( lead.name||'').toLowerCase(); })
+    : jobLog.find(function(e){ return e.id === id; });
+  logEntry = logEntry || {};
+
+  var name      = lead ? lead.name : (logEntry.client||'—');
+  var phone     = lead ? (lead.phone||'') : '';
+  var email     = lead ? (lead.email||'') : '';
+  var address   = lead ? ((lead.address||'')+(lead.city?', '+lead.city:'')) : (logEntry.address||'');
+  var jobtype   = lead ? (lead.jobtype||logEntry.job||'') : (logEntry.job||'');
+  var status    = lead ? lead.status : 'Won';
+  var quoteAmt  = lead ? (lead.quoteAmt||logEntry.quote||0) : (logEntry.quote||0);
+  var source    = lead ? (lead.source||'') : '';
+  var notes     = lead ? (lead.notes||'') : '';
+  var ballpark  = lead ? (lead.ballpark||'') : '';
+  var lostReason = lead ? (lead.lostReason||'') : '';
+  var proposalHTML = lead ? (lead.proposalHTML||'') : '';
+  var bidHours  = logEntry.hours       || 0;
+  var actHours  = (lead && lead.actualHours)   || logEntry.actualHours || 0;
+  var mats      = (lead && lead.materialsCost) || logEntry.mats || logEntry.materialsCost || 0;
+  var subPay    = (lead && lead.subPay)        || logEntry.paySub || 0;
+  var gp        = logEntry.gp || 0;
+  var gpPct     = logEntry.gpPct || 0;
+  var date      = logEntry.date || (lead && lead.created ? new Date(lead.created).toLocaleDateString() : '');
+  var closedDate = (lead && lead.closedDate) || logEntry.closedDate || '';
+
+  var laborCost = actHours ? actHours*45 : (bidHours ? bidHours*45 : 0);
+  if (quoteAmt > 0 && laborCost > 0) {
+    gp    = quoteAmt - laborCost - mats;
+    gpPct = Math.round(gp/quoteAmt*100);
+  }
+
+  var STATUS_COLOR = {'Quoted':'#2563eb','Won':'#059669','Lost':'#dc2626'};
+  var sColor = STATUS_COLOR[status] || '#9ca3af';
+  var JT_LABEL = {'interior':'Interior','exterior':'Exterior','deck':'Deck','interior-exterior':'Int+Ext','interior-deck':'Int+Deck','exterior-deck':'Ext+Deck','full':'Full'};
+
+  var modal = document.createElement('div');
+  modal.id = 'job-detail-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;display:flex;align-items:flex-end;justify-content:center';
+  modal.onclick = function(e){ if(e.target===modal) closeJobDetail(); };
+
+  var profitBar = '';
+  if (quoteAmt > 0) {
+    var subPct  = Math.round(laborCost/quoteAmt*100);
+    var matPct  = Math.round(mats/quoteAmt*100);
+    var gpPct2  = Math.max(0, 100 - subPct - matPct);
+    profitBar = '<div style="margin-bottom:16px">'
+      + '<div style="display:flex;justify-content:space-between;margin-bottom:5px">'
+        + '<span style="font-size:11px;font-weight:600;color:#6b7280">Revenue Breakdown</span>'
+        + '<span style="font-size:11px;font-weight:700;color:'+(gp>=0?'#059669':'#dc2626')+'">GP $'+Math.round(gp).toLocaleString()+' ('+gpPct+'%)</span>'
+      + '</div>'
+      + '<div style="display:flex;height:10px;border-radius:6px;overflow:hidden;gap:1px">'
+        + '<div style="flex:'+subPct+';background:#7c3aed" title="Sub pay"></div>'
+        + '<div style="flex:'+matPct+';background:#f59e0b" title="Materials"></div>'
+        + '<div style="flex:'+gpPct2+';background:#059669" title="Gross Profit"></div>'
+      + '</div>'
+      + '<div style="display:flex;gap:12px;margin-top:5px">'
+        + '<span style="font-size:10px;color:#7c3aed">■ Sub $'+Math.round(laborCost).toLocaleString()+'</span>'
+        + (mats>0?'<span style="font-size:10px;color:#f59e0b">■ Mats $'+mats.toLocaleString()+'</span>':'')
+        + '<span style="font-size:10px;color:#059669">■ Profit $'+Math.round(Math.max(0,gp)).toLocaleString()+'</span>'
+      + '</div>'
+    + '</div>';
+  }
+
+  modal.innerHTML = '<div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto">'
+    // Header
+    + '<div style="background:#0a1628;padding:18px 20px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:flex-start">'
+      + '<div>'
+        + '<div style="font-size:18px;font-weight:700;color:white;margin-bottom:4px">' + name + '</div>'
+        + '<div style="font-size:12px;color:rgba(255,255,255,0.6)">' + address + '</div>'
+        + (phone ? '<a href="tel:'+phone+'" style="font-size:12px;color:#60a5fa;text-decoration:none;display:block;margin-top:2px">'+phone+'</a>' : '')
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="font-size:11px;font-weight:700;color:white;background:'+sColor+';padding:4px 12px;border-radius:10px">' + status + '</span>'
+        + '<button onclick="closeJobDetail()" style="background:rgba(255,255,255,0.15);border:none;color:white;width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer">×</button>'
+      + '</div>'
+    + '</div>'
+
+    // Body
+    + '<div style="padding:20px">'
+
+    // Key numbers row
+    + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">'
+      + _detailStat('Quote', quoteAmt > 0 ? '$'+quoteAmt.toLocaleString() : '—', '#111827')
+      + _detailStat('GP', gpPct ? gpPct+'%' : '—', gp>=0?'#059669':'#dc2626')
+      + _detailStat('Hours', actHours||bidHours ? (actHours||bidHours)+'h' : '—', '#374151')
+      + _detailStat('Source', source||'—', '#374151')
+    + '</div>'
+
+    // Profit bar
+    + profitBar
+
+    // Job details
+    + '<div style="background:#f9fafb;border-radius:10px;padding:14px;margin-bottom:14px">'
+      + '<div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Job Details</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">'
+        + (jobtype    ? '<div><span style="color:#9ca3af">Type</span><br><strong>'+(JT_LABEL[jobtype]||jobtype)+'</strong></div>' : '')
+        + (date       ? '<div><span style="color:#9ca3af">Quoted</span><br><strong>'+date+'</strong></div>' : '')
+        + (closedDate ? '<div><span style="color:#9ca3af">Closed</span><br><strong style="color:#059669">✓ '+closedDate+'</strong></div>' : '')
+        + (bidHours   ? '<div><span style="color:#9ca3af">Bid Hrs</span><br><strong>'+bidHours+'h</strong></div>' : '')
+        + (actHours   ? '<div><span style="color:#9ca3af">Actual Hrs</span><br><strong style="color:'+(actHours>bidHours?'#dc2626':'#059669')+'">'+actHours+'h'+(actHours>bidHours?' (over)':actHours<bidHours?' (under)':'')+'</strong></div>' : '')
+        + (mats>0     ? '<div><span style="color:#9ca3af">Materials</span><br><strong>$'+mats.toLocaleString()+'</strong></div>' : '')
+        + (subPay>0   ? '<div><span style="color:#9ca3af">Sub Pay</span><br><strong>$'+subPay.toLocaleString()+'</strong></div>' : '')
+        + (ballpark   ? '<div><span style="color:#9ca3af">Ballpark Given</span><br><strong>'+ballpark+'</strong></div>' : '')
+        + (lostReason ? '<div><span style="color:#9ca3af">Lost Reason</span><br><strong style="color:#dc2626">'+lostReason+'</strong></div>' : '')
+        + (source     ? '<div><span style="color:#9ca3af">Source</span><br><strong>'+source+'</strong></div>' : '')
+      + '</div>'
+    + '</div>'
+
+    // Notes
+    + (notes ? '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:14px">'
+      + '<div style="font-size:10px;font-weight:600;color:#d97706;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Pre-Call Notes</div>'
+      + '<div style="font-size:13px;color:#374151;line-height:1.6;white-space:pre-wrap">'+notes+'</div>'
+    + '</div>' : '')
+
+    // Proposal
+    + (proposalHTML
+      ? '<div style="border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;margin-bottom:14px">'
+          + '<div style="background:#f9fafb;padding:10px 14px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center">'
+            + '<span style="font-size:11px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.06em">Saved Proposal</span>'
+            + '<button onclick="openProposalView('+JSON.stringify(id)+')" style="background:#2563eb;color:white;border:none;padding:5px 12px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer">View / Print →</button>'
+          + '</div>'
+          + '<div style="padding:14px;max-height:180px;overflow:hidden;position:relative;font-size:12px;color:#374151;line-height:1.5">'
+            + proposalHTML.slice(0, 600)
+            + '<div style="position:absolute;bottom:0;left:0;right:0;height:60px;background:linear-gradient(transparent,white)"></div>'
+          + '</div>'
+        + '</div>'
+      : '<div style="background:#f9fafb;border:1px dashed #d1d5db;border-radius:10px;padding:14px;text-align:center;margin-bottom:14px">'
+          + '<div style="font-size:12px;color:#9ca3af">No proposal saved — proposals are stored when you tap <strong>Present</strong> in the estimator</div>'
+        + '</div>'
+    )
+
+    // Actions
+    + '<div style="display:flex;gap:8px">'
+      + (lead ? '<button onclick="closeJobDetail();editLead('+lead.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Edit Lead</button>' : '')
+      + (phone ? '<a href="tel:'+phone+'" style="flex:1;background:#2563eb;color:white;border:none;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;text-align:center;text-decoration:none">Call</a>' : '')
+    + '</div>'
+
+    + '</div>'
+  + '</div>';
+
+  document.body.appendChild(modal);
+}
+
+function _detailStat(label, val, color) {
+  return '<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;text-align:center;border:1px solid #e5e7eb">'
+    + '<div style="font-size:15px;font-weight:700;color:'+color+';font-variant-numeric:tabular-nums">' + val + '</div>'
+    + '<div style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-top:2px">' + label + '</div>'
+  + '</div>';
+}
+
+function openProposalView(leadId) {
+  var lead = leads.find(function(l){ return l.id === leadId; });
+  if (!lead || !lead.proposalHTML) {
+    showToast('No saved proposal — it gets saved when you tap Present in the estimator');
     return;
   }
-  empty.style.display = 'none';
+  closeJobDetail();
+  var el = document.createElement('div');
+  el.id = 'proposal-view-overlay';
+  el.style.cssText = 'position:fixed;inset:0;z-index:3000;background:white;display:flex;flex-direction:column;overflow:hidden';
+  el.innerHTML = '<div style="background:#0a1628;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">'
+    + '<div style="font-size:13px;font-weight:600">' + lead.name + ' — Proposal</div>'
+    + '<div style="display:flex;gap:8px">'
+      + '<button onclick="window.print()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Print / Save PDF</button>'
+      + '<button onclick="document.getElementById(\'proposal-view-overlay\').remove()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Close</button>'
+    + '</div>'
+  + '</div>'
+  + '<div style="flex:1;overflow-y:auto;padding:24px;max-width:860px;width:100%;margin:0 auto">' + lead.proposalHTML + '</div>';
+  document.body.appendChild(el);
+}
 
-  var STATUS_COLOR = { 'Quoted': '#2563eb', 'Won': '#059669', 'Lost': '#dc2626' };
-  var STATUS_LABEL = { 'Quoted': 'Quoted', 'Won': 'Won', 'Lost': 'Lost' };
-
-  list.innerHTML = filtered.map(function(l) {
-    var color = STATUS_COLOR[l.status] || '#9ca3af';
-    var quote = l.quoteAmt || 0;
-    var estHours  = l.bidHours || 0;
-    var actHours  = l.actualHours || 0;
-    var materials = l.materialsCost || 0;
-    var laborCost = actHours ? actHours * 45 : (estHours * 45);
-    var gp        = quote - laborCost - materials;
-    var gpPct     = quote > 0 ? Math.round(gp / quote * 100) : null;
-
-    var tags = [];
-    if (estHours) tags.push('<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:1px 6px;border-radius:3px;font-weight:500">Bid: ' + estHours + 'h</span>');
-    if (actHours) {
-      var over = estHours && actHours > estHours;
-      tags.push('<span style="font-size:10px;background:#f3f4f6;color:' + (over?'#dc2626':'#059669') + ';padding:1px 6px;border-radius:3px;font-weight:600">Actual: ' + actHours + 'h' + (over?' over':'') + '</span>');
-    }
-    if (materials) tags.push('<span style="font-size:10px;background:#f3f4f6;color:#6b7280;padding:1px 6px;border-radius:3px;font-weight:500">$' + materials.toLocaleString() + ' mats</span>');
-    var tagsHtml = tags.length ? '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">' + tags.join('') + '</div>' : '';
-
-    var noteSnippet = l.notes ? '<div style="font-size:11px;color:#9ca3af;margin-top:4px">' + l.notes.slice(0,100) + (l.notes.length>100?'…':'') + '</div>' : '';
-
-    return '<div class="card" style="padding:12px 14px;border-left:3px solid ' + color + ';margin-bottom:0">'
-      + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
-      + '<div style="flex:1">'
-      + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-      + '<span style="font-size:13px;font-weight:600;color:#111827">' + l.name + '</span>'
-      + '<span style="font-size:10px;font-weight:600;color:' + color + ';background:' + color + '18;padding:1px 7px;border-radius:3px">' + (STATUS_LABEL[l.status]||l.status) + '</span>'
-      + '</div>'
-      + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">'
-      + (l.address||'') + (l.city?' · '+l.city:'') + (l.jobtype?' · '+l.jobtype:'')
-      + '</div>'
-      + tagsHtml
-      + noteSnippet
-      + '</div>'
-      + '<div style="text-align:right;min-width:70px;padding-left:10px;flex-shrink:0">'
-      + (quote > 0 ? '<div style="font-size:14px;font-weight:700;color:#111827;font-variant-numeric:tabular-nums">$' + quote.toLocaleString() + '</div>' : '')
-      + (gpPct !== null && quote > 0 ? '<div style="font-size:11px;font-weight:600;color:' + (gp>=0?'#059669':'#dc2626') + '">GP ' + gpPct + '%</div>' : '')
-      + (l.source ? '<div style="font-size:10px;color:#d1d5db;margin-top:3px">' + l.source + '</div>' : '')
-      + '</div>'
-      + '</div>'
-      + '</div>';
-  }).join('');
+function closeJobDetail() {
+  var el = document.getElementById('job-detail-modal');
+  if (el) el.remove();
 }
 
 async function buildDashboard() {
@@ -5352,6 +5591,20 @@ async function buildDashboard() {
     if (!j.start || j.status === 'Complete') return false;
     var d = new Date(j.start + 'T12:00:00');
     return d >= today && d <= endOfWeek;
+  });
+
+  // 7. Colors needed — job within 7 days, no colors confirmed
+  var sevenDays = new Date(today); sevenDays.setDate(today.getDate() + 7);
+  activeJobs.forEach(function(j) {
+    if (j.colorsConfirmed || j.status === 'Complete' || !j.start) return;
+    var startD = new Date(j.start + 'T12:00:00');
+    var daysOut = Math.round((startD - today) / 86400000);
+    if (daysOut <= 7 && daysOut >= 0) {
+      var urgency = daysOut <= 2 ? '🚨' : '🎨';
+      var timeStr = daysOut === 0 ? 'today' : daysOut === 1 ? 'tomorrow' : 'in ' + daysOut + ' days';
+      actions.push({ color: daysOut <= 2 ? '#dc2626' : '#d97706', bg: daysOut <= 2 ? '#fef2f2' : '#fffbeb',
+        text: urgency + ' <b>' + j.client + '</b> — get paint colors (starts ' + timeStr + ')', btn: 'Active Jobs', page: 'active' });
+    }
   });
 
   // Render action items
@@ -5601,12 +5854,17 @@ function addFeelerSub() {
   if (document.getElementById('feeler-sub-rating')) document.getElementById('feeler-sub-rating').value = '';
   if (document.getElementById('feeler-sub-notes'))  document.getElementById('feeler-sub-notes').value  = '';
   buildFeelerSubList();
+  woRenderSubPills();
+  // Close add form after saving
+  var f = document.getElementById('wo-add-sub-form');
+  if (f) f.style.display = 'none';
 }
 
 function removeFeelerSub(id) {
   feelerSubs = feelerSubs.filter(function(s){ return s.id !== id; });
   saveFeelerSubs();
   buildFeelerSubList();
+  woRenderSubPills();
 }
 
 function setFeelerStatus(id, status) {
@@ -5655,18 +5913,28 @@ function buildFeelerSubList() {
   var html = '<div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Your Crew — select who gets this feeler</div>';
 
   html += feelerSubs.map(function(s) {
-    var selected = s.selected !== false;
+    // Confirmed subs are always "selected" — don't let toggle undo that
+    var isConfirmed = (s.status === 'yes');
+    var selected = isConfirmed ? true : (s.selected !== false);
     var c   = selected ? (statusColors[s.status] || '#64748b') : '#cbd5e1';
     var bg  = selected ? (statusBg[s.status]     || '#f8fafc') : '#f8fafc';
     var bdr = selected ? (statusBorder[s.status] || '#e2e8f0') : '#e2e8f0';
-    var checkBg  = selected ? '#1a3a8a' : 'white';
-    var checkBdr = selected ? '#1a3a8a' : '#cbd5e1';
+    // Confirmed = green check, selected = navy check, unselected = empty
+    var checkBg  = isConfirmed ? '#059669' : (selected ? '#1a3a8a' : 'white');
+    var checkBdr = isConfirmed ? '#059669' : (selected ? '#1a3a8a' : '#cbd5e1');
     var lbl = statusLabels[s.status] || 'Not Sent';
+    // Confirmed cards are not tappable to toggle
+    var cardClick = isConfirmed ? '' : 'onclick="toggleFeelerSubSelect(' + s.id + ')"';
+    var cardCursor = isConfirmed ? 'default' : 'pointer';
 
     var respRow = '';
     if (s.status === 'pending') {
+      var descEl2 = document.getElementById('wo-job-desc');
+      var feelerMsg2 = (descEl2 && descEl2.value.trim()) ? descEl2.value.trim() : getFeelerMessage();
+      var smsPhone2 = (s.phone || '').replace(/\D/g,'');
+      var smsHref2 = 'sms:' + smsPhone2 + '?body=' + encodeURIComponent(feelerMsg2);
       respRow = '<div style="display:flex;gap:6px;margin-top:7px">'
-        + '<button onclick="event.stopPropagation();setFeelerStatus(' + s.id + ',\'sent\')" style="padding:5px 14px;background:#1a3a8a;color:white;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">📲 Mark Feeler Sent</button>'
+        + '<a href="' + smsHref2 + '" onclick="event.stopPropagation();setTimeout(function(){setFeelerStatus(' + s.id + ',\'sent\')},400)" style="display:inline-block;padding:6px 16px;background:#0a1628;color:white;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none">📲 Send Feeler Text</a>'
         + '</div>';
     } else if (s.status === 'sent') {
       respRow = '<div style="display:flex;gap:6px;margin-top:7px;align-items:center">'
@@ -5690,14 +5958,14 @@ function buildFeelerSubList() {
     } else if (s.status === 'yes') {
       respRow = '<div style="margin-top:8px;background:#f0fdf4;border:1.5px solid #16a34a;border-radius:8px;padding:9px 12px">'
         + '<div style="font-size:12px;font-weight:600;color:#059669;margin-bottom:8px">Confirmed — ready to go!</div>'
-        + '<button onclick="event.stopPropagation();woUnlockStage3WithSub(' + s.id + ')" style="width:100%;background:#2563eb;color:white;border:none;padding:9px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Build Work Order →</button>'
+        + '<button onclick="event.stopPropagation();woUnlockStage3WithSub(' + s.id + ')" style="width:100%;background:#7c3aed;color:white;border:none;padding:9px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Send Contract →</button>'
         + '</div>';
     } else if (s.status === 'no') {
       respRow = '<div style="font-size:11px;color:#dc2626;font-weight:600;margin-top:5px">❌ Not available for this job</div>';
     }
 
 
-    return '<div onclick="toggleFeelerSubSelect(' + s.id + ')" style="padding:11px 13px;background:' + bg + ';border-radius:9px;border:2px solid ' + bdr + ';cursor:pointer;margin-bottom:7px">'
+    return '<div ' + cardClick + ' style="padding:11px 13px;background:' + bg + ';border-radius:9px;border:2px solid ' + bdr + ';cursor:' + cardCursor + ';margin-bottom:7px">'
       + '<div style="display:flex;align-items:center;gap:10px">'
       + '<div style="width:22px;height:22px;border-radius:5px;background:' + checkBg + ';border:1.5px solid ' + checkBdr + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:white;font-weight:600">' + (selected ? '&#10003;' : '') + '</div>'
       + '<div style="flex:1;min-width:0">'
@@ -5753,7 +6021,7 @@ function updateScoreboard() {
   var winnerText   = el('sb-winner-text');
   if (yes.length > 0 && winnerBanner) {
     winnerBanner.style.display = 'block';
-    if (winnerText) winnerText.textContent = '🎉 ' + yes[0].name + ' confirmed! Hit Build Work Order on their card below.';
+    if (winnerText) winnerText.textContent = '🎉 ' + yes[0].name + ' confirmed! Send them the contract below.';
   } else if (winnerBanner) {
     winnerBanner.style.display = 'none';
   }
@@ -5789,62 +6057,52 @@ function toggleFeelerSubSelect(id) {
   buildFeelerSubList();
 }
 
-async function sendAllFeelers() {
+function sendAllFeelers() {
   var descEl = document.getElementById('wo-job-desc');
   var msg    = (descEl && descEl.value.trim()) ? descEl.value.trim() : getFeelerMessage();
   var statusEl = document.getElementById('feeler-status');
-  var subs   = feelerSubs.filter(function(s){ return s.selected !== false && s.status !== 'yes'; });
+  var subs   = feelerSubs.filter(function(s){ return s.selected !== false && s.status !== 'yes' && s.status !== 'no'; });
   if (subs.length === 0) {
-    if (statusEl) statusEl.textContent = 'No subs selected — tap the cards above to select.';
+    if (statusEl) { statusEl.textContent = 'No subs selected — check the boxes above.'; statusEl.style.display = 'block'; statusEl.style.color = '#dc2626'; }
     return;
   }
-  if (statusEl) { statusEl.textContent = 'Sending via GHL...'; statusEl.style.color = '#d97706'; }
-  var sent = 0, failed = 0;
-  for (var i = 0; i < subs.length; i++) {
-    var sub = subs[i];
-    try {
-      var contactId = await findOrCreateContact(sub.name, '', sub.phone);
-      var convRes = await fetch('https://services.leadconnectorhq.com/conversations/', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-04-15' },
-        body: JSON.stringify({ contactId: contactId, locationId: GHL_LOCATION_ID })
-      });
-      var convData = await convRes.json();
-      var convId = convData.conversation && convData.conversation.id;
-      if (convId) {
-        await fetch('https://services.leadconnectorhq.com/conversations/messages', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-04-15' },
-          body: JSON.stringify({ type: 'SMS', conversationId: convId, message: msg })
-        });
-        setFeelerStatus(sub.id, 'sent');
-        sent++;
-      } else { failed++; }
-    } catch(e) {
-      console.log('Feeler failed for ' + sub.name, e);
-      failed++;
-    }
+  // Open SMS for each sub sequentially with a small delay
+  subs.forEach(function(s, i) {
+    setTimeout(function() {
+      var phone = (s.phone || '').replace(/\D/g,'');
+      if (phone) window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
+      setFeelerStatus(s.id, 'sent');
+    }, i * 600);
+  });
+  if (statusEl) {
+    statusEl.textContent = '📲 Opening SMS for ' + subs.length + ' sub' + (subs.length !== 1 ? 's' : '') + '...';
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#059669';
   }
-  var statusMsg = sent > 0 ? ('&#10003; Sent to ' + sent + ' sub' + (sent !== 1 ? 's' : '') + ' via GHL') : '';
-  if (failed > 0) statusMsg += (statusMsg ? ' &middot; ' : '') + failed + ' failed';
-  if (statusEl) { statusEl.innerHTML = statusMsg; statusEl.style.color = sent > 0 ? '#16a34a' : '#dc2626'; }
-  buildFeelerSubList();
-  updateScoreboard();
+  setTimeout(function(){ buildFeelerSubList(); updateScoreboard(); }, subs.length * 600 + 200);
 }
 
 function sendWOAndActivate() {
-  var client  = (document.getElementById('wo-client-name')    && document.getElementById('wo-client-name').value.trim())    || (document.getElementById('cl-name') && document.getElementById('cl-name').value) || '';
-  var addr    = (document.getElementById('wo-client-address') && document.getElementById('wo-client-address').value.trim()) || (document.getElementById('cl-address') && document.getElementById('cl-address').value) || '';
-  var jobType = (document.getElementById('wo-client-jobtype') && document.getElementById('wo-client-jobtype').value.trim()) || (document.getElementById('job-type') && document.getElementById('job-type').value) || '';
-  var subName = (document.getElementById('wo-sub-name')       && document.getElementById('wo-sub-name').value.trim())       || '';
-  var start   = (document.getElementById('wo-start-date')     && document.getElementById('wo-start-date').value)            || '';
-  var quoteAmt = (document.getElementById('wo-client-quote')  && document.getElementById('wo-client-quote').value.replace(/[^0-9.]/g,'')) || window._lastGrandTotal || 0;
+  var client   = (document.getElementById('wo-client-name')    && document.getElementById('wo-client-name').value.trim())    || (document.getElementById('cl-name') && document.getElementById('cl-name').value) || '';
+  var addr     = (document.getElementById('wo-client-address') && document.getElementById('wo-client-address').value.trim()) || (document.getElementById('cl-address') && document.getElementById('cl-address').value) || '';
+  var jobType  = (document.getElementById('wo-client-jobtype') && document.getElementById('wo-client-jobtype').value.trim()) || (document.getElementById('job-type') && document.getElementById('job-type').value) || '';
+  var subName  = (document.getElementById('wo-sub-name')       && document.getElementById('wo-sub-name').value.trim())       || '';
+  var start    = (document.getElementById('wo-start-date')     && document.getElementById('wo-start-date').value)            || '';
+  var quoteAmt = (document.getElementById('wo-client-quote')   && document.getElementById('wo-client-quote').value.replace(/[^0-9.]/g,'')) || window._lastGrandTotal || 0;
+  var wallColor  = (document.getElementById('wo-wall-color')   && document.getElementById('wo-wall-color').value.trim())  || '';
+  var trimColor  = (document.getElementById('wo-trim-color')   && document.getElementById('wo-trim-color').value.trim())  || '';
+  var colorNotes = (document.getElementById('wo-color-notes')  && document.getElementById('wo-color-notes').value.trim()) || '';
 
-  if (!client) { alert('Load a job first — tap Load → on a won job above'); return; }
-  if (!subName) { alert('Enter the sub name in Step 2'); return; }
+  if (!client)  { if (!confirm('No client loaded — activate anyway?')) return; client = 'Unknown'; }
+  if (!subName) { subName = 'TBD'; }
+  if (!start)   { if (!confirm('No start date set — activate anyway?')) return; }
 
-  // Pull extra fields from the linked lead
+  // Fix quote — strip currency symbol and commas
+  var quoteNum = parseFloat((quoteAmt||'').toString().replace(/[^0-9.]/g,'')) || 0;
+
   var _woLead = window._woLeadId ? leads.find(function(l){ return l.id === window._woLeadId; }) : null;
+  var colorsStr = [wallColor?'Walls: '+wallColor:'', trimColor?'Trim: '+trimColor:'', colorNotes?'Other: '+colorNotes:''].filter(Boolean).join('\n');
+
   var job = {
     id:         Date.now(),
     leadId:     window._woLeadId || null,
@@ -5855,11 +6113,14 @@ function sendWOAndActivate() {
     subPhone:   (document.getElementById('wo-sub-phone') && document.getElementById('wo-sub-phone').value.trim()) || '',
     phone:      (document.getElementById('wo-client-phone') && document.getElementById('wo-client-phone').value.trim()) || (_woLead && _woLead.phone) || '',
     start:      start,
-    quote:      parseFloat(quoteAmt) || 0,
+    quote:      quoteNum,
     subpay:     window._lastSubPay || 0,
     bidHours:   window._lastBidHours || (_woLead && _woLead.bidHours) || 0,
     notes:      '',
-    colors:     [(document.getElementById('wo-wall-color')&&document.getElementById('wo-wall-color').value?'Walls: '+document.getElementById('wo-wall-color').value:''),(document.getElementById('wo-trim-color')&&document.getElementById('wo-trim-color').value?'Trim: '+document.getElementById('wo-trim-color').value:'')].filter(Boolean).join(' / ') || '',
+    colors:     colorsStr,
+    wallColor:  wallColor,
+    trimColor:  trimColor,
+    colorNotes: colorNotes,
     status:     'Scheduled',
     subPaid:    false,
     invoiced:   false,
@@ -5871,6 +6132,86 @@ function sendWOAndActivate() {
   saveActiveJobs();
   showPage('active');
   buildActiveJobs();
+  showToast('✅ ' + client + ' moved to Active Jobs');
+}
+
+function ajRequestColors(id) {
+  var job = activeJobs.find(function(j){ return j.id === id; });
+  if (!job) return;
+  var firstName = (job.client||'').split(' ')[0];
+  var startStr  = job.start ? new Date(job.start+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'your scheduled start date';
+  var msg = 'Hi ' + firstName + '! Just a heads up — your painting project starts ' + startStr + '.\n\n'
+    + 'Before we begin, we need your final paint color selections. Please reply with:\n'
+    + '🎨 Walls:\n'
+    + '🎨 Trim/Ceilings:\n'
+    + '🎨 Accent/Other (if any):\n\n'
+    + 'We recommend choosing your colors at your local Sherwin-Williams or Benjamin Moore. Let us know if you need help!\n\n'
+    + '— Thomas, Gould Painting WNY · (716) 221-6418';
+  var phone = (job.phone||'').replace(/\D/g,'');
+  if (phone) {
+    window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(msg);
+    showToast('No phone on file — message copied to clipboard');
+  }
+}
+
+function ajLogColors(id) {
+  var job = activeJobs.find(function(j){ return j.id === id; });
+  if (!job) return;
+  var wall  = prompt('Walls:', job.wallColor  || '');
+  if (wall === null) return;
+  var trim  = prompt('Trim / Ceilings:', job.trimColor  || '');
+  if (trim === null) return;
+  var other = prompt('Accent / Other (leave blank if none):', job.colorNotes || '');
+  if (other === null) return;
+  var colorsStr = [wall?'Walls: '+wall:'', trim?'Trim: '+trim:'', other?'Other: '+other:''].filter(Boolean).join('\n');
+  activeJobs = activeJobs.map(function(j) {
+    return j.id !== id ? j : Object.assign({}, j, {
+      wallColor: wall, trimColor: trim, colorNotes: other,
+      colors: colorsStr, colorsConfirmed: true
+    });
+  });
+  saveActiveJobs();
+  buildActiveJobs();
+  showToast('Colors saved');
+}
+
+function ajConfirmColors(id) {
+  activeJobs = activeJobs.map(function(j){
+    return j.id !== id ? j : Object.assign({}, j, { colorsConfirmed: true });
+  });
+  saveActiveJobs();
+  buildActiveJobs();
+  showToast('Colors confirmed ✓');
+}
+
+function woTextColorsToSub() {
+  var subName  = (document.getElementById('wo-sub-name')  && document.getElementById('wo-sub-name').value.trim())  || '';
+  var subPhone = (document.getElementById('wo-sub-phone') && document.getElementById('wo-sub-phone').value.trim()) || '';
+  var client   = (document.getElementById('wo-client-name') && document.getElementById('wo-client-name').value.trim()) || '';
+  var addr     = (document.getElementById('wo-client-address') && document.getElementById('wo-client-address').value.trim()) || '';
+  var start    = (document.getElementById('wo-start-date') && document.getElementById('wo-start-date').value) || '';
+  var wall     = (document.getElementById('wo-wall-color') && document.getElementById('wo-wall-color').value.trim()) || '';
+  var trim     = (document.getElementById('wo-trim-color') && document.getElementById('wo-trim-color').value.trim()) || '';
+  var other    = (document.getElementById('wo-color-notes') && document.getElementById('wo-color-notes').value.trim()) || '';
+
+  if (!wall && !trim && !other) { alert('Enter at least one color first.'); return; }
+
+  var msg = 'Hey ' + (subName||'team') + ', here are the paint colors for '
+    + (client ? client + (addr ? ' at ' + addr : '') : 'the job')
+    + (start ? ' starting ' + start : '') + ':\n\n'
+    + (wall  ? '🎨 Walls: ' + wall  + '\n' : '')
+    + (trim  ? '🎨 Trim/Ceilings: ' + trim + '\n' : '')
+    + (other ? '🎨 Other: ' + other + '\n' : '')
+    + '\nLet me know if you have any questions. — Thomas / Gould Painting';
+
+  if (subPhone) {
+    window.open('sms:' + subPhone.replace(/\D/g,'') + '?body=' + encodeURIComponent(msg));
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(msg);
+    showToast('Copied to clipboard — no sub phone on file');
+  }
 }
 
 function refreshWOFeeler() {
@@ -6033,7 +6374,7 @@ function ajMoveToPunchList(id) {
 
 function ajMoveToPayment(id) {
   activeJobs = activeJobs.map(function(j){
-    return j.id === id ? Object.assign({}, j, { status: 'Punch List', punchDone: true }) : j;
+    return j.id === id ? Object.assign({}, j, { status: 'Final Payment', punchDone: true }) : j;
   });
   saveActiveJobs();
   buildActiveJobs();
@@ -6123,50 +6464,94 @@ function closeAJJob(id) {
   var aj = activeJobs.find(function(j){ return j.id === id; });
   if (!aj) return;
 
-  // Remove from active jobs immediately
-  activeJobs = activeJobs.filter(function(j){ return j.id !== id; });
-  saveActiveJobs();
-  buildActiveJobs();
+  // ── 1. Write actuals back to the lead so History has everything ──
+  if (aj.leadId) {
+    leads = leads.map(function(l) {
+      if (l.id !== aj.leadId) return l;
+      return Object.assign({}, l, {
+        status:        'Won',
+        actualHours:   aj.actualHours   || l.actualHours   || 0,
+        materialsCost: aj.materialsCost || l.materialsCost || 0,
+        subPay:        aj.subpay        || l.subPay        || 0,
+        closedDate:    new Date().toLocaleDateString(),
+        depositPaid:   aj.deposit || l.depositPaid || false,
+        jobNotes:      aj.jobNotes ? ((l.notes||'') + (aj.jobNotes ? '\n\nJob Notes: ' + aj.jobNotes : '')) : l.notes
+      });
+    });
+    saveLeads();
+  }
 
-  // Update Job Log with actuals
+  // ── 2. Update Job Log with actuals ──
   try {
     var raw = localStorage.getItem(JOB_LOG_KEY);
     var log = raw ? JSON.parse(raw) : [];
     var match = log.find(function(e){
-      return (e.client||'').toLowerCase().trim() === (aj.client||'').toLowerCase().trim()
-        && e.status !== 'Won' && e.status !== 'Lost';
+      return e.leadId === aj.leadId
+          || (e.client||'').toLowerCase().trim() === (aj.client||'').toLowerCase().trim();
     });
     if (match) {
-      match.status = 'Won';
-      if (aj.actualHours > 0) match.actualHours = aj.actualHours;
-      if (aj.materialsCost > 0) match.materialsCost = aj.materialsCost;
+      match.status       = 'Won';
+      match.actualHours  = aj.actualHours   || match.actualHours  || 0;
+      match.materialsCost= aj.materialsCost || match.materialsCost|| 0;
+      match.subPay       = aj.subpay        || match.paySub       || 0;
+      match.closedDate   = new Date().toLocaleDateString();
+      // Recalc GP with actuals
+      if (match.quote > 0 && match.actualHours > 0) {
+        var laborCostActual = match.actualHours * 45;
+        match.gp    = Math.round(match.quote - laborCostActual - (match.materialsCost||0));
+        match.gpPct = Math.round(match.gp / match.quote * 100);
+      }
       localStorage.setItem(JOB_LOG_KEY, JSON.stringify(log));
       syncOneToSheets(match);
-      ghlTrigger('job_won', { name: aj.client, phone: aj.phone || '', email: '' });
+    } else {
+      // No job log entry yet — create one from the active job
+      var newEntry = {
+        id:           Date.now(),
+        leadId:       aj.leadId || null,
+        date:         aj.start || new Date().toLocaleDateString(),
+        closedDate:   new Date().toLocaleDateString(),
+        client:       aj.client,
+        address:      aj.address,
+        city:         '',
+        job:          aj.type || '',
+        status:       'Won',
+        hours:        aj.bidHours || 0,
+        actualHours:  aj.actualHours || 0,
+        quote:        aj.quote || 0,
+        mats:         aj.materialsCost || 0,
+        paySub:       aj.subpay || 0,
+        gp:           aj.quote && aj.actualHours ? Math.round(aj.quote - (aj.actualHours*45) - (aj.materialsCost||0)) : 0,
+        gpPct:        aj.quote && aj.actualHours ? Math.round((aj.quote - (aj.actualHours*45) - (aj.materialsCost||0)) / aj.quote * 100) : 0
+      };
+      log.unshift(newEntry);
+      localStorage.setItem(JOB_LOG_KEY, JSON.stringify(log));
     }
   } catch(e) { console.warn('Job log update failed', e); }
 
+  // ── 3. Remove from active jobs ──
+  activeJobs = activeJobs.filter(function(j){ return j.id !== id; });
+  saveActiveJobs();
+  buildActiveJobs();
   buildDashboard();
 
-  // Navigate to Job Log — Won filter
-  setLogFilter('Won');
+  // ── 4. Navigate to History → Won so they see the closed record immediately ──
   showPage('history');
+  setHistoryFilter('Won');
+  showToast('✅ ' + aj.client + ' closed — view in History');
 
-  // Toast
-  var floatEl = document.getElementById('float-save-msg');
-  if (floatEl) {
-    floatEl.style.display='block';
-    floatEl.style.background='#166534';
-    floatEl.textContent='✅ ' + aj.client + ' closed & moved to Job Log!';
-    setTimeout(function(){ floatEl.style.display='none'; }, 4000);
-  }
-
-  // Review request — after UI updates
+  // ── 5. Review request ──
   setTimeout(function(){
-    if (aj.phone && confirm('Send ' + aj.client + ' a Google review request via GHL?')) {
-      ghlTrigger('review_request', { name: aj.client, phone: aj.phone || '', email: '' });
+    var reviewLink = 'https://g.page/r/YOUR_GOOGLE_REVIEW_LINK';
+    var firstName = (aj.client||'there').split(' ')[0];
+    var msg = 'Hi ' + firstName + ', it was great working with you! If you have 30 seconds, a Google review would mean a lot to us. ' + reviewLink + ' — Thomas, Gould Painting WNY';
+    if (aj.phone) {
+      if (confirm('Send ' + aj.client + ' a review request?\n\n' + msg)) {
+        ghlTrigger('review_request', { name: aj.client, phone: aj.phone, email: '', message: msg });
+        navigator.clipboard && navigator.clipboard.writeText(msg);
+        showToast('Review text copied to clipboard');
+      }
     }
-  }, 300);
+  }, 500);
 }
 
 function deleteAJJob(id) {
@@ -6220,7 +6605,6 @@ function buildActiveJobs() {
   var list  = document.getElementById('active-jobs-list');
   var empty = document.getElementById('active-jobs-empty');
   if (!list) return;
-  buildSubPerformance();
 
   var open   = activeJobs.filter(function(j){ return j.status !== 'Complete'; });
   var closed = activeJobs.filter(function(j){ return j.status === 'Complete'; });
@@ -6229,203 +6613,244 @@ function buildActiveJobs() {
   if (sorted.length === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
   empty.style.display = 'none';
 
-  var STATUS_STEP = { 'Scheduled':0, 'In Progress':1, 'Punch List':2, 'Complete':4 };
+  var STATUS_COLOR = { 'Scheduled':'#f59e0b', 'In Progress':'#2563eb', 'Punch List':'#7c3aed', 'Final Payment':'#059669', 'Complete':'#16a34a' };
+  var STAGES = ['Scheduled','In Progress','Punch List','Final Payment'];
 
   list.innerHTML = sorted.map(function(j) {
-    var isDone    = j.status === 'Complete';
-    var stepIndex = STATUS_STEP[j.status] !== undefined ? STATUS_STEP[j.status] : 0;
-    if (j.status === 'Punch List' && (j.punchDone || (j.punchList && j.punchList.length > 0 && j.punchList.every(function(x){ return x.done; })))) stepIndex = 3;
+    var sc = STATUS_COLOR[j.status] || '#9ca3af';
+    var depositAmt  = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
+    var finalAmt    = j.quote > 0 ? j.quote - depositAmt : 0;
+    var laborCost   = j.actualHours ? j.actualHours*45 : (j.bidHours ? j.bidHours*45 : 0);
+    var gp          = j.quote > 0 && laborCost > 0 ? j.quote - laborCost - (j.materialsCost||0) : null;
+    var gpPct       = gp !== null && j.quote > 0 ? Math.round(gp/j.quote*100) : null;
+    var punchItems  = j.punchList || [];
+    var punchDone   = punchItems.filter(function(x){ return x.done; }).length;
+    var allPunchDone = punchItems.length === 0 || punchDone === punchItems.length;
+    var stageIdx    = STAGES.indexOf(j.status); if (stageIdx < 0) stageIdx = 0;
 
-    var STEP_COLOR = ['#f59e0b','#0369a1','#7c3aed','#16a34a','#16a34a'];
-    var borderColor = STEP_COLOR[stepIndex] || '#64748b';
+    // ── COLLAPSED HEADER (always visible) ──
+    var progressDots = STAGES.map(function(s, i) {
+      var done    = i < stageIdx;
+      var current = i === stageIdx;
+      var bg = done ? '#059669' : current ? sc : '#e5e7eb';
+      return '<div style="flex:1;height:4px;border-radius:2px;background:'+bg+'"></div>';
+    }).join('');
 
-    var depositAmt = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
-    var finalAmt   = j.quote > 0 ? j.quote - depositAmt : 0;
-
-    // ── STAGE HELPER ──
-    function stage(icon, title, status, bodyHtml) {
-      var borderColor2 = status === 'done'   ? '#d1fae5'
-                       : status === 'active' ? borderColor
-                       : '#e5e7eb';
-      var titleColor = status === 'done'   ? '#059669'
-                     : status === 'active' ? borderColor
-                     : '#d1d5db';
-      var badge = status === 'done'
-        ? '<span style="font-size:10px;font-weight:600;color:#059669;background:#ecfdf5;padding:1px 7px;border-radius:3px">Done</span>'
-        : status === 'active'
-        ? '<span style="font-size:10px;font-weight:600;color:white;background:' + borderColor + ';padding:1px 7px;border-radius:3px">Active</span>'
-        : '';
-      return '<div style="border:1px solid ' + borderColor2 + ';border-radius:8px;background:white;margin-bottom:8px;overflow:hidden">'
-        + '<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 13px;' + (status === 'active' ? 'border-bottom:1px solid ' + borderColor2 + ';' : '') + '">'
-        + '<span style="font-size:12px;font-weight:600;color:' + titleColor + '">' + title + '</span>'
-        + badge
-        + '</div>'
-        + (status === 'active' ? '<div style="padding:11px 13px">' + bodyHtml + '</div>' : '')
-        + '</div>';
+    // Quick status hint
+    var hint = '';
+    if (j.status === 'Scheduled') {
+      var daysHint = '';
+      if (j.start) {
+        var sd = new Date(j.start+'T12:00:00'), td = new Date(); td.setHours(0,0,0,0);
+        var du = Math.round((sd-td)/86400000);
+        daysHint = du <= 0 ? 'Today' : du === 1 ? 'Tomorrow' : 'In '+du+'d';
+      }
+      hint = j.colorsConfirmed ? (daysHint ? daysHint+' · Colors ✓' : 'Colors ✓')
+           : j.start && (function(){ var sd=new Date(j.start+'T12:00:00'),td=new Date();td.setHours(0,0,0,0); return Math.round((sd-td)/86400000)<=7; }())
+               ? (daysHint ? daysHint+' · Get colors' : 'Get colors from client')
+               : (daysHint || 'Set start date');
     }
+    if (j.status === 'In Progress')   hint = (j.checkIns||[]).length + ' check-in' + ((j.checkIns||[]).length!==1?'s':'');
+    if (j.status === 'Punch List')    hint = punchDone + '/' + punchItems.length + ' items done';
+    if (j.status === 'Final Payment') hint = (!j.finalPaid ? 'Awaiting payment' : (!j.subPaid ? 'Pay sub' : 'Ready to close'));
+    var card = '<div id="aj-card-'+j.id+'" style="background:white;border-radius:10px;border:1px solid #e5e7eb;border-left:4px solid '+sc+';overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04)">'
+      // Tappable header row
+      + '<div onclick="toggleAJCard('+j.id+')" style="padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none">'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">'
+            + '<span style="font-size:14px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + j.client + '</span>'
+            + '<span style="font-size:10px;font-weight:700;color:'+sc+';background:'+sc+'18;padding:2px 8px;border-radius:8px;white-space:nowrap;flex-shrink:0">' + j.status + '</span>'
+          + '</div>'
+          + '<div style="display:flex;align-items:center;gap:6px">'
+            + '<span style="font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (j.sub ? j.sub + (j.type?' · '+j.type:'') : (j.address||'')) + '</span>'
+            + (hint ? '<span style="font-size:10px;color:'+sc+';font-weight:600;flex-shrink:0">· '+hint+'</span>' : '')
+          + '</div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
+          + (j.quote>0 ? '<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:#111827">$'+j.quote.toLocaleString()+'</div>'+(gpPct!==null?'<div style="font-size:10px;font-weight:600;color:'+(gp>=0?'#059669':'#dc2626')+'">GP '+gpPct+'%</div>':'')+'</div>' : '')
+          + '<div id="aj-chevron-'+j.id+'" style="color:#d1d5db;font-size:16px;transition:transform 0.2s">▼</div>'
+        + '</div>'
+      + '</div>'
+      // Progress bar (always visible, below header)
+      + '<div style="display:flex;gap:3px;padding:0 14px 10px">' + progressDots + '</div>';
 
-    // ── STAGE 1: SCHEDULED ──
-    var s1 = stage('', 'Scheduled', stepIndex === 0 ? 'active' : 'done',
-      '<div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:10px">Confirm start date with client + sub before day 1</div>'
-      + '<div style="display:flex;gap:8px;margin-bottom:10px">'
-      + '<div style="flex:1">'
-      + '<div style="font-size:11px;color:#9ca3af;margin-bottom:4px">Start Date</div>'
-      + '<input id="aj-start-' + j.id + '" type="date" value="' + (j.start||'') + '" onchange="ajSaveStart(' + j.id + ')" style="width:100%;padding:7px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px">'
-      + '</div>'
-      + '</div>'
-      + '<div style="display:flex;gap:8px;margin-bottom:10px">'
-      + (!j.clientConfirmed
-          ? '<button onclick="ajConfirmClient(' + j.id + ')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Text Client</button>'
-          : '<div style="flex:1;background:#f3f4f6;border:1px solid #d1fae5;border-radius:6px;padding:8px;font-size:12px;font-weight:600;color:#059669;text-align:center">Client confirmed</div>'
-        )
-      + (!j.subConfirmedDate
-          ? '<button onclick="ajConfirmSub(' + j.id + ')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Text Sub</button>'
-          : '<div style="flex:1;background:#f3f4f6;border:1px solid #d1fae5;border-radius:6px;padding:8px;font-size:12px;font-weight:600;color:#059669;text-align:center">Sub confirmed</div>'
-        )
-      + '</div>'
-      + '<button onclick="ajSubOnSite(' + j.id + ')" style="width:100%;background:#2563eb;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Sub On Site — Start Job →</button>'
-    );
+    // ── EXPANDED CONTENT (hidden by default) ──
+    var expandHtml = '<div id="aj-expand-'+j.id+'" style="display:none;border-top:1px solid #f3f4f6;padding:14px">';
 
-    // ── STAGE 2: IN PROGRESS ──
-    var checkInHtml = (j.checkIns||[]).length > 0
-      ? '<div style="margin-bottom:10px">' + (j.checkIns||[]).map(function(c){
-          return '<div style="font-size:11px;color:#64748b;padding:4px 0;border-bottom:1px solid #e0f2fe">📍 ' + c.date + ' — ' + c.note + '</div>';
-        }).join('') + '</div>' : '';
-    var savedJobNote = j.jobNotes || '';
-    var s2Body = checkInHtml
-      + '<div style="margin-bottom:10px">'
-        + '<div style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px">Job Notes</div>'
-        + '<textarea id="aj-notes-' + j.id + '" placeholder="Sub called out, rescheduled... colors changed... scope added..." style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;min-height:56px;resize:vertical">' + savedJobNote + '</textarea>'
-        + '<button onclick="ajSaveNotes(' + j.id + ')" style="margin-top:4px;padding:4px 10px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">Save Notes</button>'
-      + '</div>'
-      + '<div style="display:flex;gap:8px">'
-      + '<button onclick="addAJCheckIn(' + j.id + ')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Log Check-In</button>'
-      + '<button onclick="ajMoveToPunchList(' + j.id + ')" style="flex:2;background:#7c3aed;color:white;border:none;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Work Done — Punch List →</button>'
-      + '</div>';
-    var s2 = stage('🔨', 'In Progress', stepIndex === 1 ? 'active' : stepIndex > 1 ? 'done' : 'locked', s2Body);
+    // SCHEDULED
+    if (j.status === 'Scheduled') {
+      // Days until start
+      var daysUntil = null;
+      if (j.start) {
+        var startD = new Date(j.start + 'T12:00:00');
+        var todayD = new Date(); todayD.setHours(0,0,0,0);
+        daysUntil = Math.round((startD - todayD) / 86400000);
+      }
 
-    // ── STAGE 3: PUNCH LIST ──
-    var punchItems = j.punchList || [];
-    var allDone = punchItems.length === 0 || punchItems.every(function(x){ return x.done; });
-    var punchRows = punchItems.length > 0
-      ? punchItems.map(function(item, i){
-          return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f3e8ff">'
-            + '<input type="checkbox" ' + (item.done?'checked':'') + ' onchange="togglePunchItem(' + j.id + ',' + i + ')" style="accent-color:#7c3aed;width:16px;height:16px">'
-            + '<span style="font-size:13px;color:' + (item.done?'#a78bfa':'#374151') + ';' + (item.done?'text-decoration:line-through':'') + '">' + item.text + '</span>'
-            + '</div>';
-        }).join('')
-      : '<div style="font-size:12px;color:#a78bfa;padding:4px 0">No items — add one or skip to payment</div>';
-
-    var actualsHtml = '<div style="border-top:1px solid #ede9fe;margin-top:12px;padding-top:12px">'
-      + '<div style="font-size:10px;font-weight:600;color:#6b7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em">Log Actuals</div>'
-      + '<div style="display:flex;gap:8px;margin-bottom:8px">'
-      + '<div style="flex:1">'
-      + '<div style="font-size:11px;color:#64748b;margin-bottom:4px">Actual Hours' + (j.bidHours ? ' <span style="color:#a78bfa">(bid: '+j.bidHours+'h)</span>' : '') + '</div>'
-      + '<input id="aj-actual-hrs-' + j.id + '" type="number" min="0" step="0.5" value="' + (j.actualHours||'') + '" placeholder="e.g. 14" oninput="ajSaveActual(' + j.id + ')" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700">'
-      + '</div>'
-      + '<div style="flex:1">'
-      + '<div style="font-size:11px;color:#64748b;margin-bottom:4px">Materials ($)</div>'
-      + '<input id="aj-materials-' + j.id + '" type="number" min="0" step="1" value="' + (j.materialsCost||'') + '" placeholder="e.g. 320" oninput="ajSaveActual(' + j.id + ')" style="width:100%;padding:8px 10px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700">'
-      + '</div>'
-      + '</div>'
-      + (j.actualHours && j.bidHours ? (function(){
-          var diff = Math.round((j.actualHours - j.bidHours)*10)/10;
-          var pct  = Math.round(j.bidHours/j.actualHours*100);
-          var over = diff > 0;
-          return '<div style="background:' + (over?'#fef2f2':'#f0fdf4') + ';border-radius:7px;padding:7px 10px;font-size:12px;color:' + (over?'#dc2626':'#16a34a') + ';font-weight:700">'
-            + (over ? '⚠️ ' + diff + 'h OVER bid — ' + pct + '% accuracy' : '✅ Under bid by ' + Math.abs(diff) + 'h — ' + pct + '% accuracy')
-            + '</div>';
-        })(j) : '')
+      expandHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
+        + '<div><label style="font-size:10px;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px">START DATE</label>'
+          + '<input id="aj-start-'+j.id+'" type="date" value="'+(j.start||'')+'" onchange="ajSaveStart('+j.id+')" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px"></div>'
+        + '<div style="display:flex;flex-direction:column;gap:5px;justify-content:flex-end">'
+          + (!j.clientConfirmed
+              ? '<button onclick="ajConfirmClient('+j.id+')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Text Client</button>'
+              : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px;font-size:11px;font-weight:600;color:#059669;text-align:center">Client ✓</div>')
+          + (!j.subConfirmedDate
+              ? '<button onclick="ajConfirmSub('+j.id+')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Text Sub</button>'
+              : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px;font-size:11px;font-weight:600;color:#059669;text-align:center">Sub ✓</div>')
+        + '</div>'
       + '</div>';
 
-    var s3Body = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-      + '<span style="font-size:12px;font-weight:700;color:#6d28d9">' + punchItems.filter(function(x){return x.done;}).length + '/' + punchItems.length + ' items done</span>'
-      + '<button onclick="addPunchItem(' + j.id + ')" style="background:#7c3aed;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Add Item</button>'
-      + '</div>'
-      + punchRows
-      + actualsHtml
-      + (allDone ? '<button onclick="ajMoveToPayment(' + j.id + ')" style="width:100%;margin-top:12px;background:#059669;color:white;border:none;padding:10px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">' + (punchItems.length === 0 ? 'Collect Payment →' : 'All Fixed — Collect Payment →') + '</button>' : '');
-    var s3 = stage('📋', 'Punch List', stepIndex === 2 ? 'active' : stepIndex > 2 ? 'done' : stepIndex >= 1 ? 'active' : 'locked', s3Body);
-
-    // ── STAGE 4: PAYMENT ──
-    var gpBlock = '';
-    if (j.bidHours || j.materialsCost || j.actualHours) {
-      var laborCost   = j.actualHours ? j.actualHours * 45 : (j.bidHours ? j.bidHours * 45 : 0);
-      var gp          = (j.quote||0) - laborCost - (j.materialsCost||0);
-      var gpPct       = j.quote > 0 ? Math.round(gp/j.quote*100) : null;
-      var hrsColor    = (j.actualHours && j.bidHours) ? (j.actualHours > j.bidHours ? '#dc2626' : '#16a34a') : '#64748b';
-      gpBlock = '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:12px">'
-        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;margin-bottom:8px">'
-        + (j.bidHours    ? '<div><div style="font-size:9px;color:#9ca3af;font-weight:600">BID HRS</div><div style="font-size:14px;font-weight:600;color:#6b7280">' + j.bidHours + 'h</div></div>' : '<div></div>')
-        + (j.actualHours ? '<div><div style="font-size:9px;color:#9ca3af;font-weight:600">ACTUAL HRS</div><div style="font-size:14px;font-weight:600;color:' + hrsColor + '">' + j.actualHours + 'h</div></div>' : '<div></div>')
-        + (j.materialsCost ? '<div><div style="font-size:9px;color:#9ca3af;font-weight:600">MATERIALS</div><div style="font-size:14px;font-weight:600;color:#111827">$' + (j.materialsCost||0).toLocaleString() + '</div></div>' : '<div></div>')
-        + '</div>'
-        + (gpPct !== null ? '<div style="border-top:1px solid #e2e8f0;padding-top:8px;display:flex;justify-content:space-between;align-items:center">'
-          + '<span style="font-size:11px;color:#64748b">Gross Profit</span>'
-          + '<span style="font-size:14px;font-weight:700;color:' + (gp>=0?'#059669':'#dc2626') + ';font-variant-numeric:tabular-nums">$' + Math.round(gp).toLocaleString() + ' <span style="font-size:11px;font-weight:500">(' + gpPct + '%)</span></span>'
-          + '</div>' : '')
+      // Colors section — show request button when within 7 days of start
+      var colorsSection = '';
+      if (j.colors && j.colorsConfirmed) {
+        // Colors already confirmed — show them
+        colorsSection = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:10px">'
+          + '<div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px">Colors Confirmed ✓</div>'
+          + '<div style="font-size:12px;color:#374151;white-space:pre-line;line-height:1.7">'+j.colors+'</div>'
         + '</div>';
+      } else if (daysUntil !== null && daysUntil <= 7) {
+        // Within 1 week — time to get colors
+        var urgencyColor = daysUntil <= 2 ? '#dc2626' : '#d97706';
+        var urgencyBg    = daysUntil <= 2 ? '#fef2f2' : '#fffbeb';
+        var urgencyBorder= daysUntil <= 2 ? '#fecaca' : '#fde68a';
+        var urgencyText  = daysUntil <= 0 ? 'Job starts today' : daysUntil === 1 ? 'Job starts tomorrow' : 'Job starts in ' + daysUntil + ' days';
+        colorsSection = '<div style="background:'+urgencyBg+';border:1.5px solid '+urgencyBorder+';border-radius:8px;padding:12px;margin-bottom:10px">'
+          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+            + '<div>'
+              + '<div style="font-size:12px;font-weight:700;color:'+urgencyColor+'">Get paint colors from client</div>'
+              + '<div style="font-size:11px;color:#9ca3af;margin-top:1px">'+urgencyText+' — confirm before sub starts</div>'
+            + '</div>'
+          + '</div>'
+          + (j.colors
+              ? '<div style="font-size:12px;color:#374151;white-space:pre-line;line-height:1.6;margin-bottom:8px;background:white;border-radius:6px;padding:8px">'+j.colors+'</div>'
+              : '')
+          + '<div style="display:flex;gap:6px">'
+            + '<button onclick="ajRequestColors('+j.id+')" style="flex:2;background:'+urgencyColor+';color:white;border:none;padding:8px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Text Client for Colors</button>'
+            + '<button onclick="ajLogColors('+j.id+')" style="flex:1;background:white;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Log Colors</button>'
+          + '</div>'
+        + '</div>';
+      } else if (j.colors) {
+        // Has colors but not confirmed yet
+        colorsSection = '<div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:10px 12px;margin-bottom:10px">'
+          + '<div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px">Colors (unconfirmed)</div>'
+          + '<div style="font-size:12px;color:#374151;white-space:pre-line;line-height:1.6;margin-bottom:8px">'+j.colors+'</div>'
+          + '<button onclick="ajConfirmColors('+j.id+')" style="width:100%;background:#7c3aed;color:white;border:none;padding:7px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Mark Colors Confirmed</button>'
+        + '</div>';
+      } else if (daysUntil !== null && daysUntil <= 14) {
+        // 8–14 days out — soft reminder
+        colorsSection = '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">'
+          + '<div style="font-size:11px;color:#9ca3af">Colors needed in '+(daysUntil-7)+' days</div>'
+          + '<button onclick="ajLogColors('+j.id+')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer">Log Colors</button>'
+        + '</div>';
+      }
+
+      expandHtml += colorsSection;
+      expandHtml += '<button onclick="ajSubOnSite('+j.id+')" style="width:100%;background:#2563eb;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Sub On Site — Start Job →</button>';
     }
 
-    var s4Body = gpBlock
-      + '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
-      + '<span style="font-size:12px;color:#475569">30% Deposit</span>'
-      + '<span style="font-size:13px;font-weight:600;color:' + (j.deposit?'#059669':'#d97706') + '">' + (depositAmt>0?'$'+depositAmt.toLocaleString():'—') + (j.deposit?' ✓':' pending') + '</span>'
-      + '</div>'
-      + '<div style="display:flex;justify-content:space-between;align-items:center">'
-      + '<span style="font-size:12px;color:#475569">Final Balance (70%)</span>'
-      + '<span style="font-size:15px;font-weight:700;color:#059669;font-variant-numeric:tabular-nums">' + (finalAmt>0?'$'+finalAmt.toLocaleString():'—') + '</span>'
-      + '</div>'
+    // IN PROGRESS
+    if (j.status === 'In Progress') {
+      var checkInHtml = (j.checkIns||[]).length > 0
+        ? '<div style="margin-bottom:10px;background:#f0f9ff;border-radius:7px;padding:9px">'
+            + (j.checkIns||[]).slice(-3).map(function(c){ return '<div style="font-size:11px;color:#0369a1;padding:2px 0">'+c.date+' — '+c.note+'</div>'; }).join('')
+          + '</div>' : '';
+      expandHtml += checkInHtml
+        + '<textarea id="aj-notes-'+j.id+'" placeholder="Notes — colors, issues, scope changes..." style="width:100%;padding:9px;border:1px solid #e5e7eb;border-radius:7px;font-size:12px;height:56px;resize:none;margin-bottom:8px;box-sizing:border-box">'+( j.jobNotes||'')+'</textarea>'
+        + '<div style="display:flex;gap:8px;margin-bottom:8px">'
+          + '<button onclick="ajSaveNotes('+j.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Save Note</button>'
+          + '<button onclick="addAJCheckIn('+j.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Check-In</button>'
+        + '</div>'
+        + '<button onclick="ajMoveToPunchList('+j.id+')" style="width:100%;background:#7c3aed;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Work Done — Punch List →</button>';
+    }
+
+    // PUNCH LIST
+    if (j.status === 'Punch List') {
+      expandHtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+        + '<span style="font-size:12px;font-weight:700;color:#7c3aed">'+punchDone+'/'+punchItems.length+' done</span>'
+        + '<button onclick="addPunchItem('+j.id+')" style="background:#7c3aed;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>'
+      + '</div>';
+      if (punchItems.length > 0) {
+        expandHtml += '<div style="background:#faf5ff;border-radius:8px;padding:10px;margin-bottom:10px">';
+        punchItems.forEach(function(item,i){
+          expandHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #ede9fe">'
+            + '<input type="checkbox"'+(item.done?' checked':'')+' onchange="togglePunchItem('+j.id+','+i+')" style="accent-color:#7c3aed;width:16px;height:16px;flex-shrink:0">'
+            + '<span style="font-size:13px;color:'+(item.done?'#a78bfa':'#374151')+';'+(item.done?'text-decoration:line-through':'')+'">' + item.text + '</span>'
+          + '</div>';
+        });
+        expandHtml += '</div>';
+      }
+      expandHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
+        + '<div><label style="font-size:10px;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px">ACTUAL HRS'+(j.bidHours?' (bid: '+j.bidHours+'h)':'')+' </label>'
+          + '<input id="aj-actual-hrs-'+j.id+'" type="number" min="0" step="0.5" value="'+(j.actualHours||'')+'" placeholder="e.g. 14" oninput="ajSaveActual('+j.id+')" style="width:100%;padding:8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700"></div>'
+        + '<div><label style="font-size:10px;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px">MATERIALS ($)</label>'
+          + '<input id="aj-materials-'+j.id+'" type="number" min="0" step="1" value="'+(j.materialsCost||'')+'" placeholder="e.g. 320" oninput="ajSaveActual('+j.id+')" style="width:100%;padding:8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700"></div>'
+      + '</div>';
+      if (allPunchDone) {
+        expandHtml += '<button onclick="ajMoveToPayment('+j.id+')" style="width:100%;background:#059669;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">'+(punchItems.length===0?'No Punch List — Collect Payment →':'All Clear — Collect Payment →')+'</button>';
+      }
+    }
+
+    // FINAL PAYMENT
+    if (j.status === 'Final Payment') {
+      if (gp !== null) {
+        var hrsOver = j.actualHours && j.bidHours && j.actualHours > j.bidHours;
+        expandHtml += '<div style="background:#f8fafc;border-radius:8px;padding:11px;margin-bottom:11px">'
+          + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center;margin-bottom:8px">'
+          + (j.bidHours?'<div><div style="font-size:9px;color:#9ca3af;font-weight:600">BID</div><div style="font-size:14px;font-weight:700;color:#6b7280">'+j.bidHours+'h</div></div>':'<div></div>')
+          + (j.actualHours?'<div><div style="font-size:9px;color:#9ca3af;font-weight:600">ACTUAL</div><div style="font-size:14px;font-weight:700;color:'+(hrsOver?'#dc2626':'#059669')+'">'+j.actualHours+'h'+(hrsOver?' ⚠':'')+'</div></div>':'<div></div>')
+          + (j.materialsCost?'<div><div style="font-size:9px;color:#9ca3af;font-weight:600">MATS</div><div style="font-size:14px;font-weight:700;color:#111827">$'+j.materialsCost.toLocaleString()+'</div></div>':'<div></div>')
+          + '</div>'
+          + '<div style="border-top:1px solid #e2e8f0;padding-top:8px;display:flex;justify-content:space-between;align-items:center">'
+            + '<span style="font-size:11px;color:#64748b;font-weight:600">Gross Profit</span>'
+            + '<span style="font-size:16px;font-weight:800;color:'+(gp>=0?'#059669':'#dc2626')+';font-variant-numeric:tabular-nums">$'+Math.round(gp).toLocaleString()+'<span style="font-size:11px;font-weight:500"> ('+gpPct+'%)</span></span>'
+          + '</div>'
+        + '</div>';
+      }
+      expandHtml += '<div style="background:#f8fafc;border-radius:8px;padding:11px;margin-bottom:10px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">'
+          + '<span style="font-size:12px;color:#6b7280">30% Deposit</span>'
+          + '<span style="font-size:13px;font-weight:700;color:'+(j.deposit?'#059669':'#d97706')+'">'+(depositAmt>0?'$'+depositAmt.toLocaleString():'—')+(j.deposit?' ✓':' pending')+'</span>'
+        + '</div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center">'
+          + '<span style="font-size:12px;color:#6b7280">Final Balance</span>'
+          + '<span style="font-size:16px;font-weight:800;color:#059669;font-variant-numeric:tabular-nums">'+(finalAmt>0?'$'+finalAmt.toLocaleString():'—')+'</span>'
+        + '</div>'
       + '</div>'
       + (!j.invoiced
-        ? '<button onclick="sendFinalInvoice(' + j.id + ')" style="width:100%;background:#2563eb;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:8px">Send Final Invoice via GHL</button>'
-        : '<div style="font-size:12px;font-weight:600;color:#059669;padding:6px 0;margin-bottom:6px">Invoice sent</div>'
-      )
+          ? '<button onclick="sendFinalInvoice('+j.id+')" style="width:100%;background:#2563eb;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:7px">Send Final Invoice via GHL</button>'
+          : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#059669;margin-bottom:7px">Invoice sent ✓</div>'
+        )
       + (!j.finalPaid
-        ? '<button onclick="toggleAJPay(' + j.id + ',\'finalPaid\')" style="width:100%;background:#059669;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:12px">Mark Final Payment Received</button>'
-        : '<div style="font-size:12px;font-weight:600;color:#059669;padding:6px 0;margin-bottom:6px">Final payment received</div>'
-      )
-      + '<div style="border-top:1px solid #e5e7eb;padding-top:12px">'
-      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
-      + '<span style="font-size:12px;font-weight:600;color:#374151">Sub Pay</span>'
-      + '<span style="font-size:13px;font-weight:600;color:#111827">' + (j.actualHours ? j.actualHours+'h × $45 = ' : '') + '$' + (j.subpay||0).toLocaleString() + '</span>'
+          ? '<button onclick="toggleAJPay('+j.id+',\'finalPaid\')" style="width:100%;background:#059669;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:7px">Mark Final Payment Received</button>'
+          : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#059669;margin-bottom:7px">Final payment ✓</div>'
+        )
+      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #e5e7eb;margin-bottom:10px">'
+        + '<span style="font-size:12px;font-weight:600;color:#374151">Sub — '+j.sub+'</span>'
+        + '<span style="font-size:13px;font-weight:700;color:#7c3aed">'+(j.actualHours?j.actualHours+'h × $45 = ':'')+'$'+(j.subpay||0).toLocaleString()+'</span>'
       + '</div>'
       + (!j.subPaid
-        ? '<button onclick="toggleAJPay(' + j.id + ',\'subPaid\')" style="width:100%;background:#7c3aed;color:white;border:none;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Mark Sub Paid</button>'
-        : '<div style="font-size:12px;font-weight:600;color:#059669">Sub paid</div>'
-      )
-      + '</div>'
+          ? '<button onclick="toggleAJPay('+j.id+',\'subPaid\')" style="width:100%;background:#7c3aed;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px">Mark Sub Paid</button>'
+          : '<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#7c3aed;margin-bottom:10px">Sub paid ✓</div>'
+        )
       + (j.finalPaid && j.subPaid
-        ? '<button onclick="closeAJJob(' + j.id + ')" style="width:100%;margin-top:12px;background:#111827;color:white;border:none;padding:10px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer">Close Job & Request Review →</button>'
-        : '');
-    var s4 = stage('💵', 'Final Payment', stepIndex === 3 ? 'active' : 'locked', s4Body);
-
-    var header = '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'
-      + '<div>'
-      + '<div style="font-size:14px;font-weight:600;color:#111827">' + j.client + '</div>'
-      + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">' + (j.address||'') + (j.type?' · '+j.type:'') + '</div>'
-      + (j.sub ? '<div style="font-size:11px;color:#7c3aed;margin-top:2px;font-weight:600">' + j.sub + (j.start?' · starts '+j.start:'') + '</div>' : '')
-      + '</div>'
-      + '<div style="text-align:right">'
-      + (j.quote>0 ? '<div style="font-size:15px;font-weight:700;color:#111827">$' + j.quote.toLocaleString() + '</div>' : '')
-      + '<button onclick="deleteAJJob(' + j.id + ')" style="background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;display:block;margin-left:auto;margin-top:4px">×</button>'
-      + '</div>'
-      + '</div>';
-
-    var changeOrdersHtml = '';
-    if (j.changeOrders && j.changeOrders.length) {
-      changeOrdersHtml = '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:7px;padding:8px 12px;margin-bottom:10px"><div style="font-size:10px;font-weight:600;color:#6b7280;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em">Change Orders</div>'
-        + j.changeOrders.map(function(co){ return '<div style="font-size:11px;color:#374151;margin-bottom:2px">'+co.date+' — '+co.desc+(co.amount?' (+$'+co.amount.toLocaleString()+')':'')+'</div>'; }).join('')
-        + '</div>';
+          ? '<button onclick="closeAJJob('+j.id+')" style="width:100%;background:#15803d;color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Close Job & Request Review →</button>'
+          : '<button onclick="closeAJJob('+j.id+')" style="width:100%;background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;padding:9px;border-radius:7px;font-size:12px;cursor:pointer">Close Anyway</button>'
+        );
     }
-    return '<div class="card" style="padding:14px 16px;border-left:3px solid ' + borderColor + '">'
-      + header
-      + changeOrdersHtml
-      + '<div style="text-align:right;margin-bottom:10px"><button onclick="showChangeOrder('+j.id+')" style="background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">Change Order</button></div>'
-      + s1 + s2 + s3 + s4
-      + '</div>';
+
+    expandHtml += '</div>'; // close expand div
+    card += expandHtml + '</div>'; // close card
+    return card;
   }).join('');
+}
+
+function toggleAJCard(id) {
+  var expand  = document.getElementById('aj-expand-' + id);
+  var chevron = document.getElementById('aj-chevron-' + id);
+  if (!expand) return;
+  var open = expand.style.display !== 'none';
+  expand.style.display  = open ? 'none' : 'block';
+  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 
@@ -6796,6 +7221,39 @@ function saveLead() {
   buildLeads();
 }
 
+function markLeadLost(id) {
+  var reasons = ['Price too high','Went with competitor','No response','Not ready yet','Budget cut','Other'];
+  var modal = document.createElement('div');
+  modal.id = 'lost-reason-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:2000;display:flex;align-items:flex-end;justify-content:center';
+  modal.innerHTML = '<div style="background:white;border-radius:14px 14px 0 0;padding:20px;width:100%;max-width:500px">'
+    + '<div style="font-size:14px;font-weight:600;color:#111827;margin-bottom:3px">Why did we lose it?</div>'
+    + '<div style="font-size:11px;color:#9ca3af;margin-bottom:14px">Pick one — helps track patterns over time</div>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">'
+    + reasons.map(function(r) {
+        return '<button onclick="confirmLeadLost('+id+',\''+r+'\')" '
+          + 'style="text-align:left;background:#f9fafb;border:1px solid #e5e7eb;border-radius:7px;padding:10px 14px;font-size:13px;font-weight:500;color:#374151;cursor:pointer">'
+          + r + '</button>';
+      }).join('')
+    + '</div>'
+    + '<button onclick="document.getElementById(\'lost-reason-modal\').remove()" '
+      + 'style="width:100%;background:transparent;border:none;color:#9ca3af;font-size:12px;padding:8px;cursor:pointer">Cancel</button>'
+    + '</div>';
+  document.body.appendChild(modal);
+}
+
+function confirmLeadLost(id, reason) {
+  var el = document.getElementById('lost-reason-modal');
+  if (el) el.remove();
+  leads = leads.map(function(l) {
+    return l.id === id ? Object.assign({}, l, { status: 'Lost', lostReason: reason }) : l;
+  });
+  saveLeads();
+  ghlTrigger('job_lost', { name: (leads.find(function(l){ return l.id===id; })||{}).name||'', phone: '', email: '', reason: reason });
+  buildLeads();
+  showToast('Marked lost — ' + reason);
+}
+
 function updateLeadStatus(id, status) {
   leads = leads.map(function(l){ return l.id===id ? Object.assign({},l,{status:status}) : l; });
   saveLeads();
@@ -6974,8 +7432,27 @@ function loadLeadIntoWorkOrder(id) {
   setWO('wo-client-jobtype', jobtypeMap[lead.jobtype] || lead.jobtype || '');
   setWO('wo-client-quote',   lead.quoteAmt ? '$' + Number(lead.quoteAmt).toLocaleString() : '');
   window._woLeadId = id;
+  _woLeadId = id;
 
   showPage('wo');
+  buildWOWonList();
+
+  // Populate banner
+  var bannerName  = document.getElementById('wo-banner-name');
+  var bannerQuote = document.getElementById('wo-banner-quote');
+  var bannerAddr  = document.getElementById('wo-banner-addr');
+  var bannerMeta  = document.getElementById('wo-banner-meta');
+  if (bannerName)  bannerName.textContent  = lead.name;
+  if (bannerQuote) bannerQuote.textContent = lead.quoteAmt ? '$' + Number(lead.quoteAmt).toLocaleString() : '';
+  if (bannerAddr)  bannerAddr.textContent  = (lead.address||'') + (lead.city ? ', '+lead.city : '');
+  if (bannerMeta)  bannerMeta.textContent  = (jobtypeMap[lead.jobtype] || lead.jobtype || '') + (lead.phone ? ' · ' + lead.phone : '');
+
+  var flow = document.getElementById('wo-main-flow');
+  if (flow) flow.style.display = 'block';
+
+  genJobDesc(lead);
+  woRenderSubPills();
+  buildFeelerSubList();
 
   // Flash a confirmation toast
   var msg = document.getElementById('float-save-msg');
@@ -7008,14 +7485,15 @@ function buildWOWonList() {
   };
 
   list.innerHTML = won.map(function(l) {
-    var jt = jobtypeMap[l.jobtype] || l.jobtype || '';
+    var jt  = jobtypeMap[l.jobtype] || l.jobtype || '';
     var amt = l.quoteAmt ? '$' + Number(l.quoteAmt).toLocaleString() : '';
-    return '<div style="display:flex;align-items:center;justify-content:space-between;background:white;border:1px solid #e5e7eb;border-radius:7px;padding:9px 13px;gap:10px">'
+    var isLoaded = (_woLeadId === l.id);
+    return '<div id="wo-card-' + l.id + '" style="display:flex;align-items:center;justify-content:space-between;background:' + (isLoaded ? '#f0fdf4' : 'white') + ';border:1px solid ' + (isLoaded ? '#16a34a' : '#e5e7eb') + ';border-radius:7px;padding:9px 13px;gap:10px">'
       + '<div>'
         + '<div style="font-size:13px;font-weight:600;color:#111827">' + l.name + '</div>'
         + '<div style="font-size:11px;color:#9ca3af">' + (l.address||'') + (l.city ? ', '+l.city : '') + (jt ? ' · '+jt : '') + (amt ? ' · <span style="color:#059669;font-weight:600">'+amt+'</span>' : '') + '</div>'
       + '</div>'
-      + '<button onclick="loadWOJob(' + l.id + ')" style="background:#2563eb;color:white;border:none;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Load →</button>'
+      + '<button onclick="loadWOJob(' + l.id + ')" style="background:' + (isLoaded ? '#059669' : '#2563eb') + ';color:white;border:none;padding:6px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">' + (isLoaded ? '✓ Loaded' : 'Load →') + '</button>'
       + '</div>';
   }).join('');
 }
@@ -7033,6 +7511,8 @@ function loadWOJob(id) {
     'interior-exterior':'Interior + Exterior','interior-deck':'Interior + Deck',
     'exterior-deck':'Exterior + Deck','full':'Full (Int + Ext + Deck)'
   };
+
+  // Set hidden fields for downstream functions
   var setWO = function(elId, val) { var el = document.getElementById(elId); if (el !== null) el.value = val || ''; };
   setWO('wo-client-name',    lead.name);
   setWO('wo-client-phone',   lead.phone || '');
@@ -7040,28 +7520,93 @@ function loadWOJob(id) {
   setWO('wo-client-jobtype', jobtypeMap[lead.jobtype] || lead.jobtype || '');
   setWO('wo-client-quote',   lead.quoteAmt ? '$' + Number(lead.quoteAmt).toLocaleString() : '');
 
-  // Generate job description from quote data
-  genJobDesc(lead);
+  // Update dark navy banner
+  var bannerName  = document.getElementById('wo-banner-name');
+  var bannerQuote = document.getElementById('wo-banner-quote');
+  var bannerAddr  = document.getElementById('wo-banner-addr');
+  var bannerMeta  = document.getElementById('wo-banner-meta');
+  if (bannerName)  bannerName.textContent  = lead.name;
+  if (bannerQuote) bannerQuote.textContent = lead.quoteAmt ? '$' + Number(lead.quoteAmt).toLocaleString() : '';
+  if (bannerAddr)  bannerAddr.textContent  = (lead.address||'') + (lead.city ? ', '+lead.city : '');
+  if (bannerMeta)  bannerMeta.textContent  = (jobtypeMap[lead.jobtype] || lead.jobtype || '') + (lead.phone ? ' · ' + lead.phone : '');
 
-  // Highlight selected card
-  document.querySelectorAll('#wo-won-list > div').forEach(function(c){ c.style.borderColor = '#bbf7d0'; c.style.background = 'white'; });
-  document.querySelectorAll('#wo-won-list button').forEach(function(b){
-    if (b.getAttribute('onclick') === 'loadWOJob('+id+')') {
-      b.closest('div').style.borderColor = '#16a34a';
-      b.closest('div').style.background  = '#f0fdf4';
-      b.textContent = '✓ Loaded';
-    }
+  // Reset all subs to fresh pending state for this new job
+  feelerSubs = feelerSubs.map(function(s) {
+    return Object.assign({}, s, { status: 'pending', selected: true });
+  });
+  saveFeelerSubs();
+
+  // Reset scoreboard / winner banner / contract badge
+  var board = document.getElementById('feeler-scoreboard');
+  if (board) board.style.display = 'none';
+  var winner = document.getElementById('sb-winner-banner');
+  if (winner) winner.style.display = 'none';
+  var contractBadge = document.getElementById('wo-contract-badge');
+  if (contractBadge) contractBadge.style.display = 'none';
+  var contractBody = document.getElementById('wo-contract-body');
+  if (contractBody) contractBody.style.display = 'none';
+  var contractChev = document.getElementById('wo-contract-chevron');
+  if (contractChev) contractChev.textContent = '▼';
+  // Clear start date
+  var startEl = document.getElementById('wo-start-date');
+  if (startEl) startEl.value = '';
+  // Clear sub fields
+  ['wo-sub-name','wo-sub-phone','wo-sub-email'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
   });
 
-  // Show Stage 1, hide 2 & 3
-  document.getElementById('wo-stage1').style.display = 'block';
-  document.getElementById('wo-stage2').style.display = 'none';
-  document.getElementById('wo-stage3').style.display = 'none';
+  // Generate feeler message
+  genJobDesc(lead);
 
-  // Scroll to stage 1
+  // Show main flow
+  var flow = document.getElementById('wo-main-flow');
+  if (flow) flow.style.display = 'block';
+
+  // Rebuild won list to update card highlight
+  buildWOWonList();
+
+  // Rebuild sub pills
+  woRenderSubPills();
+
+  // Init feeler sub list
+  buildFeelerSubList();
+
+  // Scroll to flow
   setTimeout(function(){
-    document.getElementById('wo-stage1').scrollIntoView({ behavior:'smooth', block:'start' });
+    if (flow) flow.scrollIntoView({ behavior:'smooth', block:'start' });
   }, 100);
+}
+
+// Toggle Add Sub form
+function woToggleAddSub() {
+  var f = document.getElementById('wo-add-sub-form');
+  if (f) f.style.display = (f.style.display === 'none' ? 'block' : 'none');
+}
+
+// woRenderSubPills — kept for compatibility, sub selection now in feeler-sub-list
+function woRenderSubPills() {
+  // Sub management is handled entirely in buildFeelerSubList now
+  buildFeelerSubList();
+}
+
+// Toggle feeler texts panel — starts OPEN
+function woToggleFeeler() {
+  var body = document.getElementById('wo-feeler-body');
+  var chev = document.getElementById('wo-feeler-chevron');
+  if (!body) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (chev) chev.textContent = open ? '▼' : '▲';
+}
+
+// Toggle contract panel
+function woToggleContract() {
+  var body = document.getElementById('wo-contract-body');
+  var chev = document.getElementById('wo-contract-chevron');
+  if (!body) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  if (chev) chev.textContent = open ? '▼' : '▲';
 }
 
 function genJobDesc(lead) {
@@ -7121,7 +7666,14 @@ function genJobDesc(lead) {
   }
 
   // Line 4: CTA
-  lines.push('You available? Lmk ASAP — Thomas / Gould Painting (716) 221-6418');
+  var startEl = document.getElementById('wo-start-date');
+  var startVal = startEl ? startEl.value : '';
+  if (startVal) {
+    var d = new Date(startVal + 'T12:00:00');
+    var dateStr = d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    lines.push('Tentative start: ' + dateStr + ' — confirm ASAP if you can take it.');
+  }
+  lines.push('— Thomas / Gould Painting (716) 221-6418');
 
   var el = document.getElementById('wo-job-desc');
   if (el) el.value = lines.join('\n');
@@ -7134,15 +7686,16 @@ function regenJobDesc() {
 }
 
 function woUnlockStage2() {
-  var s2 = document.getElementById('wo-stage2');
-  var s2num = document.getElementById('wo-stage2-num');
-  s2.style.display = 'block';
-  if (s2num) { s2num.style.background = '#0f9d58'; s2num.style.color = 'white'; }
+  // New flow: feeler panel is always accessible — just open it
+  var body = document.getElementById('wo-feeler-body');
+  var chev = document.getElementById('wo-feeler-chevron');
+  if (body && body.style.display === 'none') {
+    body.style.display = 'block';
+    if (chev) chev.style.transform = 'rotate(180deg)';
+  }
   buildFeelerSubList();
-  // Use the job desc as the feeler message base
   var desc = document.getElementById('wo-job-desc');
   if (desc) window._woFeelerMsg = desc.value;
-  setTimeout(function(){ s2.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
 }
 
 function woUnlockStage3() {
@@ -7151,31 +7704,43 @@ function woUnlockStage3() {
     var nameEl  = document.getElementById('wo-sub-name');
     var phoneEl = document.getElementById('wo-sub-phone');
     var emailEl = document.getElementById('wo-sub-email');
-    if (nameEl)  { nameEl.value  = confirmedSub.name;  nameEl.style.background='#f0fdf4'; nameEl.style.borderColor='#16a34a'; }
-    if (phoneEl) { phoneEl.value = confirmedSub.phone; phoneEl.style.background='#f0fdf4'; phoneEl.style.borderColor='#16a34a'; }
-    if (emailEl && confirmedSub.email) { emailEl.value = confirmedSub.email; emailEl.style.background='#f0fdf4'; emailEl.style.borderColor='#16a34a'; }
+    if (nameEl)  nameEl.value  = confirmedSub.name;
+    if (phoneEl) phoneEl.value = confirmedSub.phone;
+    if (emailEl && confirmedSub.email) emailEl.value = confirmedSub.email;
   }
-  var s3 = document.getElementById('wo-stage3');
-  var s3num = document.getElementById('wo-stage3-num');
-  if (s3) { s3.style.display = 'block'; }
-  if (s3num) { s3num.style.background = '#1a3a8a'; s3num.style.color = 'white'; }
-  setTimeout(function(){ if(s3) s3.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
+  woRenderSubPills();
 }
 
 function woUnlockStage3WithSub(subId) {
   var sub = feelerSubs.find(function(s){ return s.id === subId; });
   if (!sub) { woUnlockStage3(); return; }
+  var subs = JSON.parse(localStorage.getItem('hb_feelersubs') || '[]');
+  subs = subs.map(function(s){ s.status = (s.id === subId) ? 'yes' : (s.status === 'yes' ? '' : s.status); return s; });
+  localStorage.setItem('hb_feelersubs', JSON.stringify(subs));
+  feelerSubs = subs;
   var nameEl  = document.getElementById('wo-sub-name');
   var phoneEl = document.getElementById('wo-sub-phone');
   var emailEl = document.getElementById('wo-sub-email');
-  if (nameEl)  { nameEl.value  = sub.name;  nameEl.style.background='#f0fdf4'; nameEl.style.borderColor='#16a34a'; }
-  if (phoneEl) { phoneEl.value = sub.phone; phoneEl.style.background='#f0fdf4'; phoneEl.style.borderColor='#16a34a'; }
-  if (emailEl) { emailEl.value = sub.email||''; if(sub.email){ emailEl.style.background='#f0fdf4'; emailEl.style.borderColor='#16a34a'; } }
-  var s3 = document.getElementById('wo-stage3');
-  var s3num = document.getElementById('wo-stage3-num');
-  if (s3) { s3.style.display = 'block'; }
-  if (s3num) { s3num.style.background = '#1a3a8a'; s3num.style.color = 'white'; }
-  setTimeout(function(){ if(s3) s3.scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
+  if (nameEl)  nameEl.value  = sub.name;
+  if (phoneEl) phoneEl.value = sub.phone;
+  if (emailEl) emailEl.value = sub.email || '';
+  woRenderSubPills();
+  // Show winner banner
+  var banner = document.getElementById('sb-winner-banner');
+  var winnerText = document.getElementById('sb-winner-text');
+  if (banner) banner.style.display = 'block';
+  if (winnerText) winnerText.textContent = '🎉 ' + sub.name + ' confirmed! Send them the contract below.';
+  var badge = document.getElementById('wo-contract-badge');
+  if (badge) badge.style.display = '';
+  // Auto-open contract panel
+  var contractBody = document.getElementById('wo-contract-body');
+  var contractChev = document.getElementById('wo-contract-chevron');
+  if (contractBody) contractBody.style.display = 'block';
+  if (contractChev) contractChev.textContent = '▲';
+  setTimeout(function(){
+    var cb = document.getElementById('wo-contract-body');
+    if (cb) cb.scrollIntoView({ behavior:'smooth', block:'start' });
+  }, 200);
 }
 
 function buildLeads() {
@@ -7257,10 +7822,22 @@ function buildLeads() {
     var isApptToday = false;
     var apptStr = '';
     if (l.appt) {
-      var apptDate = new Date(l.appt + 'T12:00:00');
-      var todayD   = new Date(); todayD.setHours(0,0,0,0);
-      apptStr      = apptDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-      isApptToday  = apptDate <= todayD && l.status === 'Appt Set';
+      // Handle both date-only (2026-03-18) and datetime-local (2026-03-18T14:30) formats
+      var apptRaw = l.appt;
+      var apptDate;
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(apptRaw)) {
+        // datetime-local format — parse directly
+        apptDate = new Date(apptRaw);
+        apptStr  = apptDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})
+                 + ' ' + apptDate.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      } else {
+        // date-only — add noon to avoid timezone shifting
+        apptDate = new Date(apptRaw + 'T12:00:00');
+        apptStr  = apptDate.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      }
+      if (isNaN(apptDate.getTime())) { apptStr = ''; apptDate = null; }
+      var todayD = new Date(); todayD.setHours(0,0,0,0);
+      isApptToday = apptDate && apptDate <= todayD && l.status === 'Appt Set';
     }
 
     // Primary action button — plain text, no emoji
@@ -7347,6 +7924,7 @@ function buildLeads() {
         + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
           + (primaryBtn || '')
           + (l.status === 'New' ? '<button onclick="logNoAnswer('+l.id+')" title="No Answer" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;color:#9ca3af">—</button>' : '')
+          + (l.status === 'Quoted' ? '<button onclick="markLeadLost('+l.id+')" style="padding:5px 9px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Lost</button>' : '')
           + '<button onclick="editLead('+l.id+')" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer">✏</button>'
           + '<button onclick="deleteLead('+l.id+')" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;color:#9ca3af">×</button>'
         + '</div>'
