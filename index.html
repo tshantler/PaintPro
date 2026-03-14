@@ -792,6 +792,7 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
   <button onclick="showPage('commission')">Commission</button>
   <button onclick="showPage('onboard')">Onboarding</button>
   <button onclick="showPage('sales');salesTab('process')">Sales Training</button>
+  <button onclick="showPage('setup')">⚙️ Setup</button>
 </nav>
 
 <!-- Toast message (used for confirmations throughout app) -->
@@ -1028,6 +1029,16 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
 <!-- END LEAD PIPELINE PAGE -->
 
 <div class="page" id="page-setup">
+
+  <!-- Demo Data -->
+  <div class="card" style="padding:14px 16px;border:1.5px solid #fde68a;background:#fffbeb">
+    <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:2px">🧪 Demo / Test Data</div>
+    <div style="font-size:11px;color:#92400e;opacity:0.8;margin-bottom:12px">Loads fake leads at every pipeline stage so you can test the full workflow. <strong>Clears existing leads.</strong></div>
+    <div style="display:flex;gap:8px">
+      <button onclick="loadDemoData()" style="flex:1;background:#d97706;color:white;border:none;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Load Demo Data</button>
+      <button onclick="clearAllLeads()" style="flex:1;background:#f3f4f6;color:#dc2626;border:1px solid #fecaca;padding:9px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Clear All Leads</button>
+    </div>
+  </div>
 
   <!-- Data Backup -->
   <div class="card" style="padding:14px 16px">
@@ -2506,7 +2517,7 @@ function showPage(p) {
   if (overlay) overlay.style.display = 'none';
 
   document.querySelectorAll('.page').forEach(function(x){ x.classList.remove('active'); });
-  var pages=['dash','leads','fu','wo','active','history','commission','onboard','sales'];
+  var pages=['dash','leads','fu','wo','active','history','commission','onboard','sales','setup'];
   document.querySelectorAll('nav button').forEach(function(b,i){ b.classList.toggle('active',pages[i]===p); });
   var pageEl = document.getElementById('page-'+p);
   if (pageEl) pageEl.classList.add('active');
@@ -8794,6 +8805,87 @@ function getCommSettings() {
   try { return JSON.parse(localStorage.getItem('hb_comm_settings') || '{"name":"Partner","rate":15}'); }
   catch(e) { return {name:'Partner', rate:15}; }
 }
+function clearAllLeads() {
+  if (!confirm('Clear all leads? This cannot be undone.')) return;
+  leads = [];
+  saveLeads();
+  buildLeads();
+  showToast('Leads cleared');
+}
+
+function loadDemoData() {
+  if (!confirm('This will replace all current leads with demo data. Continue?')) return;
+  var now = Date.now();
+  leads = [
+    {
+      id: now + 1, name: 'Sarah Mitchell', phone: '7165550101', email: 'sarah@email.com',
+      address: '42 Elmwood Ave', city: 'Buffalo', jobtype: 'interior', status: 'New',
+      ballpark: '3500', notes: 'Wants whole first floor done. Has a dog.', source: 'Google',
+      appt: '', quoteAmt: '', depositPaid: false, preCallDone: false, repeat: false,
+      created: new Date(now - 86400000).toISOString()
+    },
+    {
+      id: now + 2, name: 'James Kowalski', phone: '7165550202', email: 'jkowalski@email.com',
+      address: '118 Hertel Ave', city: 'Buffalo', jobtype: 'exterior', status: 'Appt Set',
+      ballpark: '4800', notes: 'Two-story colonial. Needs full scrape and prime.', source: 'Referral',
+      appt: new Date(Date.now() + 2 * 86400000).toISOString().slice(0,10) + ' 10:00',
+      quoteAmt: '', depositPaid: false, preCallDone: true, repeat: false,
+      created: new Date(now - 2 * 86400000).toISOString()
+    },
+    {
+      id: now + 3, name: 'Linda Greco', phone: '7165550303', email: 'lgreco@email.com',
+      address: '77 Maple Dr', city: 'Amherst', jobtype: 'interior', status: 'Ready to Bid',
+      ballpark: '2800', notes: 'LR, DR, kitchen, hallway. Neutral colors.', source: 'Facebook',
+      appt: new Date(Date.now() - 86400000).toISOString().slice(0,10) + ' 14:00',
+      quoteAmt: '', depositPaid: false, preCallDone: true, repeat: false,
+      created: new Date(now - 3 * 86400000).toISOString()
+    },
+    {
+      id: now + 4, name: 'Derek Fontaine', phone: '7165550404', email: 'derek@email.com',
+      address: '9 Thornberry Ct', city: 'Amherst', jobtype: 'interior-exterior', status: 'Quoted',
+      ballpark: '7200', notes: 'Full interior + exterior. Really motivated buyer.', source: 'Google',
+      appt: new Date(now - 4 * 86400000).toISOString().slice(0,10) + ' 11:00',
+      quoteAmt: '6850', depositPaid: false, preCallDone: true, repeat: false,
+      created: new Date(now - 5 * 86400000).toISOString()
+    },
+    {
+      id: now + 5, name: 'Patricia Dunn', phone: '7165550505', email: 'pdunn@email.com',
+      address: '230 Kenmore Ave', city: 'Buffalo', jobtype: 'interior', status: 'Won',
+      ballpark: '3200', notes: 'Master BR, 2 kids rooms, hallway. Deposit collected.', source: 'Referral',
+      appt: new Date(now - 6 * 86400000).toISOString().slice(0,10) + ' 09:00',
+      quoteAmt: '3400', depositPaid: true, preCallDone: true, repeat: false,
+      created: new Date(now - 7 * 86400000).toISOString()
+    },
+    {
+      id: now + 6, name: 'Tom Brewer', phone: '7165550606', email: 'tbrewer@email.com',
+      address: '55 Park Ave', city: 'Buffalo', jobtype: 'deck', status: 'Lost',
+      ballpark: '1800', notes: 'Went with another contractor — too slow to follow up.', source: 'Google',
+      lostReason: 'Price / went elsewhere', quoteAmt: '1650', depositPaid: false,
+      preCallDone: true, repeat: false,
+      created: new Date(now - 10 * 86400000).toISOString()
+    }
+  ];
+  saveLeads();
+
+  // Add one demo active job
+  activeJobs.unshift({
+    id: now + 100, client: 'Mike Antonelli', address: '14 Rosewood Ln, Amherst',
+    type: 'interior', sub: 'Dennis', subPhone: '7163817221',
+    phone: '7165550707', start: new Date(Date.now() + 3 * 86400000).toISOString().slice(0,10),
+    quote: 2800, subpay: 1260, bidHours: 28, actualHours: 0, materialsCost: 0,
+    notes: '', colors: '', status: 'Scheduled',
+    deposit: true, invoiced: false, subPaid: false, finalPaid: false,
+    checkIns: [], punchList: [], created: new Date().toISOString()
+  });
+  saveActiveJobs();
+
+  showPage('leads');
+  setLeadFilter('all');
+  buildLeads();
+  buildActiveJobs();
+  showToast('🧪 Demo data loaded — 6 leads + 1 active job');
+}
+
 function saveSetupCommission() {
   var name = (document.getElementById('setup-comm-name') && document.getElementById('setup-comm-name').value.trim()) || 'Partner';
   var rate = parseFloat((document.getElementById('setup-comm-rate') && document.getElementById('setup-comm-rate').value) || 15);
