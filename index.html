@@ -1119,6 +1119,24 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
     </div>
   </div>
 
+  <!-- Commission Settings -->
+  <div class="card" style="padding:14px 16px">
+    <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:2px">Commission Settings</div>
+    <div style="font-size:11px;color:#9ca3af;margin-bottom:12px">Set the rate and partner name used on the Commission tab. Applies to all closed job GP calculations.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div>
+        <label class="lbl">Partner Name</label>
+        <input id="setup-comm-name" placeholder="e.g. Mike" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px">
+      </div>
+      <div>
+        <label class="lbl">Commission Rate (%)</label>
+        <input id="setup-comm-rate" type="number" min="1" max="50" placeholder="e.g. 10" style="width:100%;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px">
+      </div>
+    </div>
+    <button onclick="saveSetupCommission()" style="background:#2563eb;color:white;border:none;padding:9px 20px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Save Commission Settings</button>
+    <span id="setup-comm-saved" style="display:none;font-size:12px;color:#059669;margin-left:10px;font-weight:600">Saved ✓</span>
+  </div>
+
   <!-- Labor Rate (shared) -->
   <div class="card">
     <div class="card-title">Labor Rate</div>
@@ -2139,7 +2157,7 @@ Select all paint colors prior to start date</textarea>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
     <div>
       <div style="font-size:14px;font-weight:700;color:#111827">Commission Tracker</div>
-      <div style="font-size:12px;color:#64748b;margin-top:2px">15% of Gross Profit per closed job — tracks what your partner is owed</div>
+      <div style="font-size:12px;color:#64748b;margin-top:2px">Configurable % of Gross Profit per closed job — tracks what your partner is owed</div>
     </div>
     <div style="display:flex;gap:8px">
       <button onclick="exportCommissionCSV()" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Export CSV</button>
@@ -2232,7 +2250,7 @@ Select all paint colors prior to start date</textarea>
         Target GP margin: <strong>40%+</strong><br>
         Standard deposit: <strong>30%</strong><br>
         Labor rate to subs: <strong>$45/hr</strong><br>
-        Partner commission: <strong>15% of GP</strong><br>
+        Partner commission: <strong>% of GP (set in ⚙️ Setup)</strong><br>
         Follow up window: <strong>next day, then 3 days</strong>
       </div>
     </div>
@@ -2497,6 +2515,7 @@ function showPage(p) {
   if(p==='fu')         { buildFollowUps(); }
   if(p==='history')    buildHistory();
   if(p==='commission') buildCommission();
+  if(p==='setup' || p==='page-setup') { buildGHLLink(); loadSetupCommission(); }
   var floatSave = document.getElementById('float-save');
   if (floatSave) floatSave.style.display = 'none';
   if(p==='active')  buildActiveJobs();
@@ -5989,10 +6008,10 @@ function buildFeelerSubList() {
 function updateFeelerSendBtn() {
   var btn = document.getElementById('feeler-send-btn');
   if (!btn) return;
-  var n = feelerSubs.filter(function(s){ return s.selected !== false; }).length;
-  btn.textContent = n > 0 ? ('Send Feeler to ' + n + ' Sub' + (n !== 1 ? 's' : '') + ' via GHL') : 'Select subs above to send';
-  btn.style.opacity = n > 0 ? '1' : '0.5';
-  btn.style.cursor  = n > 0 ? 'pointer' : 'default';
+  var n = feelerSubs.filter(function(s){ return s.selected !== false && s.status !== 'yes' && s.status !== 'no'; }).length;
+  btn.textContent = n > 0 ? ('📲 Send Feeler to ' + n + ' Sub' + (n !== 1 ? 's' : '')) : '📲 Send Feeler Texts';
+  btn.style.opacity = '1';
+  btn.style.cursor  = 'pointer';
   updateScoreboard();
 }
 
@@ -6402,39 +6421,20 @@ async function sendFinalInvoice(id) {
   var finalAmt   = job.quote > 0 ? job.quote - depositAmt : 0;
   if (finalAmt <= 0) { alert('No quote amount on file — set the quote amount first.'); return; }
 
-  try {
-    // Find GHL contact
-    var contactId = await findOrCreateContact(job.client, '', job.phone || '');
-    if (!contactId) { alert('Could not find GHL contact for ' + job.client); return; }
-
-    // Create invoice via GHL
-    var invoiceRes = await fetch(GHL_BASE + '/invoices/', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + GHL_API_KEY, 'Content-Type': 'application/json', 'Version': '2021-07-28' },
-      body: JSON.stringify({
-        altId: GHL_LOCATION_ID,
-        altType: 'location',
-        name: 'Final Payment — ' + job.client,
-        contactDetails: { id: contactId },
-        currency: 'USD',
-        items: [{ name: 'Final Payment — Painting Services (70%)', qty: 1, unitPrice: finalAmt, description: 'Remaining balance after 30% deposit' }],
-        sentTo: { email: true, sms: true },
-        dueDate: new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0]
-      })
-    });
-    if (invoiceRes.ok) {
-      // Mark invoiced
-      activeJobs = activeJobs.map(function(j){ return j.id===id ? Object.assign({},j,{invoiced:true}) : j; });
-      saveActiveJobs();
-      buildActiveJobs();
-      var floatEl = document.getElementById('float-save-msg');
-      if (floatEl) { floatEl.textContent='📤 Final invoice sent — $'+finalAmt.toLocaleString(); floatEl.style.background='#0369a1'; floatEl.style.display='block'; setTimeout(function(){floatEl.style.display='none';},4000); }
-    } else {
-      alert('Invoice send failed — go to GHL → Payments to send manually. Amount: $' + finalAmt.toLocaleString());
-    }
-  } catch(e) {
-    alert('Could not send via GHL. Go to GHL → Payments manually. Amount: $' + finalAmt.toLocaleString());
+  // SMS-based invoice (GHL invoice will replace this when connected)
+  var firstName = (job.client||'there').split(' ')[0];
+  var msg = 'Hi ' + firstName + '! Your painting project is wrapping up. Your final balance is $' + finalAmt.toLocaleString() + '. Please send payment to complete the job. Questions? Call/text (716) 221-6418. Thanks! — Thomas, Gould Painting WNY';
+  var phone = (job.phone||'').replace(/\D/g,'');
+  if (phone) {
+    window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
+  } else {
+    navigator.clipboard && navigator.clipboard.writeText(msg);
+    showToast('No phone on file — invoice text copied to clipboard');
   }
+  activeJobs = activeJobs.map(function(j){ return j.id===id ? Object.assign({},j,{invoiced:true}) : j; });
+  saveActiveJobs();
+  buildActiveJobs();
+  showToast('📤 Invoice text sent — $' + finalAmt.toLocaleString());
 }
 
 function addAJCheckIn(id) {
@@ -6541,15 +6541,17 @@ function closeAJJob(id) {
 
   // ── 5. Review request ──
   setTimeout(function(){
-    var reviewLink = 'https://g.page/r/YOUR_GOOGLE_REVIEW_LINK';
+    var reviewLink = 'https://g.page/r/CXxPRF4sj4KWEAE/review';
     var firstName = (aj.client||'there').split(' ')[0];
-    var msg = 'Hi ' + firstName + ', it was great working with you! If you have 30 seconds, a Google review would mean a lot to us. ' + reviewLink + ' — Thomas, Gould Painting WNY';
-    if (aj.phone) {
-      if (confirm('Send ' + aj.client + ' a review request?\n\n' + msg)) {
-        ghlTrigger('review_request', { name: aj.client, phone: aj.phone, email: '', message: msg });
-        navigator.clipboard && navigator.clipboard.writeText(msg);
-        showToast('Review text copied to clipboard');
+    var msg = 'Hi ' + firstName + ', it was great working with you! If you have 30 seconds, a Google review would mean a lot to us 🙏 ' + reviewLink + ' — Thomas, Gould Painting WNY';
+    var phone = (aj.phone||'').replace(/\D/g,'');
+    if (phone) {
+      if (confirm('Send ' + aj.client + ' a review request?')) {
+        window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
       }
+    } else {
+      navigator.clipboard && navigator.clipboard.writeText(msg);
+      showToast('No phone — review text copied to clipboard');
     }
   }, 500);
 }
@@ -8792,12 +8794,27 @@ function getCommSettings() {
   try { return JSON.parse(localStorage.getItem('hb_comm_settings') || '{"name":"Partner","rate":15}'); }
   catch(e) { return {name:'Partner', rate:15}; }
 }
-function saveCommSettings() {
-  var name = (document.getElementById('comm-partner-name') && document.getElementById('comm-partner-name').value.trim()) || 'Partner';
-  var rate = parseFloat((document.getElementById('comm-rate') && document.getElementById('comm-rate').value) || 15);
-  localStorage.setItem('hb_comm_settings', JSON.stringify({name:name, rate:rate}));
-  buildCommission();
-  showToast('✅ Commission settings saved');
+function saveSetupCommission() {
+  var name = (document.getElementById('setup-comm-name') && document.getElementById('setup-comm-name').value.trim()) || 'Partner';
+  var rate = parseFloat((document.getElementById('setup-comm-rate') && document.getElementById('setup-comm-rate').value) || 15);
+  if (isNaN(rate) || rate <= 0) { rate = 15; }
+  localStorage.setItem('hb_comm_settings', JSON.stringify({ name: name, rate: rate }));
+  // Also sync to old comm-rate / comm-partner-name inputs on commission page
+  var rateEl = document.getElementById('comm-rate');
+  var nameEl = document.getElementById('comm-partner-name');
+  if (rateEl) rateEl.value = rate;
+  if (nameEl) nameEl.value = name;
+  var saved = document.getElementById('setup-comm-saved');
+  if (saved) { saved.style.display = 'inline'; setTimeout(function(){ saved.style.display = 'none'; }, 2000); }
+  showToast('Commission rate set to ' + rate + '%');
+}
+
+function loadSetupCommission() {
+  var cfg = getCommSettings();
+  var nameEl = document.getElementById('setup-comm-name');
+  var rateEl = document.getElementById('setup-comm-rate');
+  if (nameEl) nameEl.value = cfg.name || 'Partner';
+  if (rateEl) rateEl.value = cfg.rate || 15;
 }
 
 function buildCommission() {
@@ -9338,7 +9355,7 @@ var _demoSteps=[
   },
   {
     title:"💰 Commission",
-    body:"Every job you close earns 15% of gross profit. Commission tab tracks earnings per job and your running total.",
+    body:"Every job you close earns commission (set in ⚙️ Setup) of gross profit. Commission tab tracks earnings per job and your running total.",
     page:'commission',
     highlight:'#comm-stats',
     action:function(){showPage('commission');}
