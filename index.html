@@ -1845,13 +1845,6 @@ Select all paint colors prior to start date</textarea>
         <button onclick="buildFollowUps()" style="background:white;color:#6b7280;border:1px solid #e5e7eb;padding:5px 9px;border-radius:6px;font-size:12px;cursor:pointer" title="Refresh">↺</button>
       </div>
     </div>
-    <!-- Filter tabs -->
-    <div style="display:flex;gap:0;border-bottom:1px solid #e5e7eb">
-      <button id="fu-f-all"     onclick="setFUFilter('all')"     style="padding:8px 16px;border:none;background:#f9fafb;color:#2563eb;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid #2563eb">All</button>
-      <button id="fu-f-hot"     onclick="setFUFilter('hot')"     style="padding:8px 16px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Hot (3d+)</button>
-      <button id="fu-f-today"   onclick="setFUFilter('today')"   style="padding:8px 16px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Today</button>
-      <button id="fu-f-snoozed" onclick="setFUFilter('snoozed')" style="padding:8px 16px;border:none;background:none;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent">Snoozed</button>
-    </div>
     <div id="followup-empty" style="text-align:center;padding:28px;color:#9ca3af;font-size:13px;display:none">No follow ups in this view.</div>
     <div id="followup-list"></div>
   </div>
@@ -9082,7 +9075,22 @@ function logFUContact(fuId, method) {
     f.lastContact = new Date().toISOString().slice(0,10);
   }
   try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
-  showToast('📝 Contact logged — ' + method);
+  showToast('Logged — next follow up in 3 days');
+  buildFollowUps();
+}
+
+function fuLoggedUp(fuId) {
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  var f = fuList.find(function(x){ return String(x.id) === String(fuId); });
+  if (f) {
+    if (!f.contactLog) f.contactLog = [];
+    f.contactLog.push({ method: 'manual', date: new Date().toISOString().slice(0,10) });
+    f.lastContact = new Date().toISOString().slice(0,10);
+  }
+  try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+  showToast('✓ Followed up — next reminder in 3 days');
+  buildFollowUps();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -9180,27 +9188,29 @@ function buildDashSources() {
 function buildFUStats() {
   var fuList = [];
   try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
-  var quotedLeads = leads.filter(function(l){ return l.status === 'Quoted'; });
+  var quotedLeads = (leads || []).filter(function(l){ return l.status === 'Quoted'; });
   var el = document.getElementById('fu-stats');
   if (!el) return;
-  var active   = fuList.filter(function(f){ return !f.done; }).length + quotedLeads.length;
-  var hot      = quotedLeads.filter(function(l){
-    var d = l.proposalDate || l.created;
-    if (!d) return false;
-    var days = Math.round((new Date() - new Date(d)) / 86400000);
-    return days >= 3;
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var active = fuList.filter(function(f){ return !f.done && !f.noAnswer; });
+  var dueNow = active.filter(function(f){
+    var d = Math.round((today - new Date(fuSafeDate(f.sent) + 'T12:00:00')) / 86400000);
+    return isNaN(d) ? false : d > 0 && (d % 3 === 0);
   }).length;
-  var pipeVal  = quotedLeads.reduce(function(s,l){ return s+(l.quoteAmt||0); },0);
+  var pipeVal = quotedLeads.reduce(function(s,l){ return s + (l.quoteAmt||0); }, 0);
+  var wonThis = fuList.filter(function(f){ return f.outcome === 'Won'; }).length;
+
   var stats = [
-    { val: quotedLeads.length, label:'Quotes Out', color:'#2563eb' },
-    { val: hot, label:'Hot (3+ days)', color:'#dc2626' },
-    { val: pipeVal > 0 ? '$' + Math.round(pipeVal).toLocaleString() : '—', label:'Revenue at Stake', color:'#059669' },
-    { val: fuList.filter(function(f){ return !f.done && f.snoozedUntil && new Date(f.snoozedUntil) > new Date(); }).length, label:'Snoozed', color:'#9ca3af' },
+    { val: active.length,                                           label: 'Following Up',   color: '#2563eb' },
+    { val: dueNow,                                                  label: 'Due Today',      color: dueNow > 0 ? '#dc2626' : '#9ca3af' },
+    { val: pipeVal > 0 ? '$' + Math.round(pipeVal/1000) + 'k' : '—', label: 'Revenue at Stake', color: '#059669' },
+    { val: wonThis,                                                 label: 'Closed Won',     color: '#7c3aed' },
   ];
   el.innerHTML = stats.map(function(s) {
-    return '<div style="background:white;border-radius:10px;padding:12px 14px;border:1px solid #e5e7eb;box-shadow:0 1px 2px rgba(0,0,0,0.04)">'
-      + '<div style="font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px">' + s.label + '</div>'
-      + '<div style="font-size:22px;font-weight:700;color:' + s.color + ';font-variant-numeric:tabular-nums">' + s.val + '</div>'
+    return '<div style="background:white;border-radius:10px;padding:10px 12px;border:1px solid #e5e7eb;box-shadow:0 1px 2px rgba(0,0,0,0.04)">'
+      + '<div style="font-size:9px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px">' + s.label + '</div>'
+      + '<div style="font-size:20px;font-weight:700;color:' + s.color + ';font-variant-numeric:tabular-nums">' + s.val + '</div>'
       + '</div>';
   }).join('');
 }
@@ -9230,108 +9240,121 @@ function buildFollowUps() {
   var emptyEl = document.getElementById('followup-empty');
   if (!listEl) return;
 
+  // Load stored list
   var fuList = [];
   try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
 
-  // Pull Quoted leads not already in fuList
-  var quotedLeads = leads.filter(function(l){ return l.status === 'Quoted'; });
+  // Sync all Quoted leads in
+  var quotedLeads = (leads || []).filter(function(l){ return l.status === 'Quoted'; });
   quotedLeads.forEach(function(l) {
-    var already = fuList.find(function(f){ return f.leadId === l.id; });
-    if (!already) {
-      // Use proposalDate if set, else created date, else today
+    var existing = fuList.find(function(f){ return f.leadId === l.id || f.id === 'lead-' + l.id; });
+    if (existing) {
+      if (l.quoteAmt > 0) existing.amount = l.quoteAmt;
+      if (l.name) existing.name = l.name;
+      if (l.phone && !existing.phone) existing.phone = l.phone;
+    } else {
       var sentRaw = l.proposalDate || l.created || new Date().toISOString();
-      fuList.push({
-        id:     'lead-' + l.id,
-        leadId: l.id,
-        name:   l.name,
-        phone:  l.phone || '',
-        amount: l.quoteAmt || 0,
-        sent:   fuSafeDate(sentRaw),
-        notes:  l.ballpark ? 'Ballpark: ' + l.ballpark : '',
-        done:   false,
-        auto:   true
-      });
+      fuList.push({ id: 'lead-' + l.id, leadId: l.id, name: l.name || 'Unknown', phone: l.phone || '', amount: l.quoteAmt || 0, sent: fuSafeDate(sentRaw), done: false, auto: true });
     }
   });
 
+  // Auto-close entries where lead is no longer Quoted
+  fuList = fuList.map(function(f) {
+    if (!f.auto || f.done) return f;
+    var lead = (leads || []).find(function(l){ return l.id === f.leadId; });
+    if (lead && lead.status !== 'Quoted') return Object.assign({}, f, { done: true, outcome: lead.status });
+    return f;
+  });
+  try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+
   buildFUStats();
 
-  // Apply filter
+  // Only show active (not done) entries
   var today = new Date(); today.setHours(0,0,0,0);
-  var active = fuList.filter(function(f) {
-    if (f.done) return false;
-    if (f.noAnswer) return false; // No Answer lives in its own section
-    var safeDate = fuSafeDate(f.sent);
-    var sentDate = new Date(safeDate + 'T12:00:00');
-    var days = Math.round((today - sentDate) / 86400000);
-    if (isNaN(days)) days = 0;
-    var isSnoozed = f.snoozedUntil && new Date(f.snoozedUntil + 'T23:59:00') >= today;
-    if (_fuFilter === 'snoozed') return isSnoozed;
-    if (isSnoozed) return false; // hide snoozed from other views
-    if (_fuFilter === 'hot') return days >= 3;
-    if (_fuFilter === 'today') return days === 0;
-    return true;
-  });
-  active.sort(function(a,b){ return fuSafeDate(a.sent).localeCompare(fuSafeDate(b.sent)); });
+  var active = fuList.filter(function(f){ return !f.done && !f.noAnswer; });
+
+  // Sort: most overdue first (oldest sent date first)
+  active.sort(function(a, b){ return fuSafeDate(a.sent).localeCompare(fuSafeDate(b.sent)); });
 
   var badge = document.getElementById('fu-count-badge');
   if (badge) badge.textContent = active.length || '';
+
   if (active.length === 0) {
     listEl.innerHTML = '';
-    if (emptyEl) emptyEl.style.display = '';
+    if (emptyEl) {
+      emptyEl.style.display = '';
+      emptyEl.textContent = quotedLeads.length === 0 ? 'No quoted leads yet — send a quote from the Pipeline first.' : 'All caught up!';
+    }
     return;
   }
   if (emptyEl) emptyEl.style.display = 'none';
 
-  // Wrap all in a single clean container
-  var fuRows = active.map(function(f) {
-    var safeDate = fuSafeDate(f.sent);
-    var sentDate = new Date(safeDate + 'T12:00:00');
-    var days = Math.round((today - sentDate) / 86400000);
-    if (isNaN(days)) days = 0;
-    var isSnoozed = f.snoozedUntil && new Date(f.snoozedUntil + 'T23:59:00') >= today;
-    var isHot = days >= 3;
-    var accentColor = isSnoozed ? '#9ca3af' : (isHot ? '#dc2626' : days >= 1 ? '#d97706' : '#059669');
-    var daysLabel = isSnoozed ? f.snoozedUntil : (days === 0 ? 'Today' : days === 1 ? '1d ago' : days + 'd ago');
-    var statusDot = isSnoozed ? '#9ca3af' : (isHot ? '#dc2626' : days >= 1 ? '#d97706' : '#059669');
-    var sentDisplay = sentDate.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-    var firstName = f.name ? f.name.split(' ')[0] : 'there';
-    var textScript = 'Hey ' + firstName + ', just wanted to follow up on the painting quote I sent. Any questions? Ready to move forward when you are! — Thomas / Gould Painting';
-    var contactCount = f.contactLog ? f.contactLog.length : 0;
+  listEl.innerHTML = active.map(function(f) {
+    var safeDate   = fuSafeDate(f.sent);
+    var sentDate   = new Date(safeDate + 'T12:00:00');
 
-    var html = '<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid #f3f4f6">';
+    // Clock runs from last contact, falls back to sent date
+    var clockDate  = f.lastContact ? new Date(f.lastContact + 'T12:00:00') : sentDate;
+    var daysSince  = Math.round((today - clockDate) / 86400000);
+    if (isNaN(daysSince) || daysSince < 0) daysSince = 0;
+    var totalDays  = Math.round((today - sentDate) / 86400000);
+    if (isNaN(totalDays) || totalDays < 0) totalDays = 0;
 
-    // Status indicator
-    html += '<div style="flex-shrink:0;width:32px;text-align:center">';
-    html += '<div style="width:8px;height:8px;border-radius:50%;background:' + statusDot + ';margin:0 auto 3px"></div>';
-    html += '<div style="font-size:10px;font-weight:600;color:' + accentColor + ';white-space:nowrap">' + daysLabel + '</div>';
-    html += '</div>';
+    // Due every 3 days from last contact
+    var daysLeft   = Math.max(0, 3 - daysSince);
+    var isDue      = daysSince >= 3;
 
-    // Name + meta
+    var dueColor   = isDue ? '#dc2626' : '#059669';
+    var dueLabel   = isDue ? 'Follow up now' : ('In ' + daysLeft + 'd');
+    var bgColor    = isDue ? '#fff8f8' : 'white';
+    var sentStr    = sentDate.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    var lastStr    = f.lastContact ? new Date(f.lastContact + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'}) : null;
+    var firstName  = (f.name || 'there').split(' ')[0];
+    var textMsg    = 'Hey ' + firstName + ', just checking in on the painting estimate I sent. Any questions? — Thomas, Gould Painting (716) 221-6418';
+    var contacts   = f.contactLog ? f.contactLog.length : 0;
+
+    var html = '<div style="padding:12px 16px;border-bottom:1px solid #f3f4f6;background:' + bgColor + '">';
+
+    // Top row: name + due badge + actions
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">';
+
     html += '<div style="flex:1;min-width:0">';
-    html += '<div style="font-size:13px;font-weight:600;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (f.name||'Unknown') + '</div>';
-    html += '<div style="font-size:11px;color:#9ca3af;margin-top:1px">';
-    if (f.amount > 0) html += '<span style="color:#059669;font-weight:600">$' + Number(f.amount).toLocaleString() + '</span> &middot; ';
-    html += sentDisplay;
-    if (f.phone) html += ' &middot; ' + f.phone;
-    if (contactCount > 0) html += ' &middot; <span style="color:#7c3aed;font-weight:600">' + contactCount + ' contact' + (contactCount>1?'s':'') + '</span>';
+    html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">';
+    html += '<span style="font-size:13px;font-weight:700;color:#111827">' + (f.name || 'Unknown') + '</span>';
+    if (f.amount > 0) html += '<span style="font-size:11px;font-weight:700;color:#059669">$' + Number(f.amount).toLocaleString() + '</span>';
+    html += '<span style="font-size:10px;font-weight:700;color:' + dueColor + ';background:' + (isDue ? '#fef2f2' : '#f0fdf4') + ';padding:2px 8px;border-radius:10px">' + dueLabel + '</span>';
     html += '</div>';
     html += '</div>';
 
-    // Action buttons — text labels, no emoji, compact
-    html += '<div style="display:flex;gap:4px;flex-shrink:0;align-items:center">';
-    if (f.phone) html += '<a href="sms:' + f.phone + '?body=' + encodeURIComponent(textScript) + '" onclick="logFUContact(' + f.id + ',&quot;text&quot;)" style="background:#f3f4f6;color:#374151;border-radius:5px;padding:4px 9px;font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap">Text</a>';
-    if (f.phone) html += '<a href="tel:' + f.phone + '" onclick="logFUContact(' + f.id + ',&quot;call&quot;)" style="background:#f3f4f6;color:#374151;border-radius:5px;padding:4px 9px;font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap">Call</a>';
-    if (!isSnoozed) html += '<button onclick="snoozeFU(' + f.id + ',3)" style="background:#f3f4f6;color:#6b7280;border:none;border-radius:5px;padding:4px 9px;font-size:11px;font-weight:600;cursor:pointer" title="Snooze 3 days">Snooze</button>';
-    html += '<button onclick="markFUWon(\'' + f.id + '\')" style="background:#059669;color:white;border:none;border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer">Won</button>';
-    html += '<button onclick="showFUOutcomeLog(\'' + f.id + '\')" style="background:#f3f4f6;color:#6b7280;border:none;border-radius:5px;padding:4px 8px;font-size:11px;cursor:pointer" title="Log outcome">Note</button>';
-    html += '<button onclick="markFULost(\'' + f.id + '\')" style="background:none;border:none;color:#d1d5db;font-size:14px;cursor:pointer;padding:0 2px;line-height:1" title="Remove">&times;</button>';
+    // Won / Lost
+    html += '<div style="display:flex;gap:4px;flex-shrink:0">';
+    html += '<button onclick="markFUWon(\'' + f.id + '\')" style="background:#059669;color:white;border:none;border-radius:6px;padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer">Won</button>';
+    html += '<button onclick="markFULost(\'' + f.id + '\')" style="background:none;border:none;color:#d1d5db;font-size:20px;cursor:pointer;padding:0 4px;line-height:1" title="Lost">&times;</button>';
     html += '</div>';
+
+    html += '</div>'; // end top row
+
+    // Contact info row — always visible
+    html += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">';
+    if (f.phone) {
+      html += '<span style="font-size:12px;color:#374151;font-weight:600">' + f.phone + '</span>';
+    }
+    html += '<span style="font-size:11px;color:#9ca3af">Sent ' + sentStr + ' · ' + totalDays + 'd ago</span>';
+    if (lastStr) html += '<span style="font-size:11px;color:#7c3aed">Last contact ' + lastStr + (contacts > 1 ? ' (' + contacts + 'x)' : '') + '</span>';
+    html += '</div>';
+
+    // Action buttons row
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+    if (f.phone) {
+      html += '<a href="sms:' + f.phone + '?body=' + encodeURIComponent(textMsg) + '" onclick="logFUContact(\'' + f.id + '\',\'text\');setTimeout(buildFollowUps,500)" style="background:#2563eb;color:white;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap">📲 Text</a>';
+      html += '<a href="tel:' + f.phone + '" onclick="logFUContact(\'' + f.id + '\',\'call\');setTimeout(buildFollowUps,500)" style="background:#f3f4f6;color:#374151;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap">📞 Call</a>';
+    }
+    html += '<button onclick="fuLoggedUp(\'' + f.id + '\')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">✓ Followed Up</button>';
+    html += '</div>';
+
     html += '</div>';
     return html;
   }).join('');
-
-  listEl.innerHTML = fuRows;
 }
 
 function addFollowUp() {
@@ -10305,15 +10328,6 @@ confirmLeadLost = function(id, reason) {
     localStorage.setItem('hb_followups', JSON.stringify(fuList));
   } catch(e) {}
   _orig_confirmLeadLost(id, reason);
-};
-
-// ── PATCH 6: buildFollowUps — sync all Quoted leads first ────
-var _orig_buildFollowUps = buildFollowUps;
-buildFollowUps = function() {
-  leads.filter(function(l){ return l.status === 'Quoted'; }).forEach(function(l) {
-    _ensureFollowUp(l.id);
-  });
-  _orig_buildFollowUps();
 };
 
 // ── PATCH 7: saveLead — FU when manually set to Quoted ───────
