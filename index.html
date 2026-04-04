@@ -1005,6 +1005,14 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
     </div>
   </div>
 
+  <!-- Search -->
+  <div style="position:relative;margin-bottom:10px">
+    <input id="lead-search" type="text" placeholder="Search by name, phone, address..." oninput="buildLeads()"
+      style="width:100%;padding:9px 12px 9px 36px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;background:white;box-sizing:border-box">
+    <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none">🔍</span>
+    <button id="lead-search-clear" onclick="document.getElementById('lead-search').value='';buildLeads()" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:16px;color:#9ca3af;cursor:pointer;padding:0;line-height:1">×</button>
+  </div>
+
   <!-- Filter tabs -->
   <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
     <button onclick="setLeadFilter('New')"       id="lf-New"       style="padding:7px 16px;border:1px solid #2563eb;background:#2563eb;color:white;font-size:12px;font-weight:700;cursor:pointer;border-radius:20px">New</button>
@@ -1279,7 +1287,7 @@ button[style*="box-shadow:0 6px"],button[style*="box-shadow: 0 6px"] { box-shado
   </div>
 
   <!-- Scrollable content area -->
-  <div style="flex:1;overflow-y:auto;padding:12px 12px 100px">
+  <div style="flex:1;overflow-y:auto;padding:12px 12px 72px">
 
 <!-- ROOMS -->
 <div id="page-rooms" style="display:none">
@@ -1466,6 +1474,9 @@ Select all paint colors prior to start date</textarea>
     <input type="hidden" id="job-cover">
   </div>
 
+  <!-- GP Warning — live while building quote, actionable here -->
+  <div id="gp-warning-banner" style="display:none;border-radius:8px;padding:12px 16px;margin-bottom:10px;align-items:center;gap:10px"></div>
+
   <!-- Close Tools -->
   <div class="card no-print" style="border-left:4px solid #f59e0b;padding:14px 16px">
     <div class="card-title" style="color:#92400e;margin-bottom:12px">🤝 Close Tools</div>
@@ -1568,18 +1579,11 @@ Select all paint colors prior to start date</textarea>
     </table>
   </div>
 
-  <div class="card" style="background:#f0fdf4;border-color:#22c55e;padding:14px 16px;text-align:center">
-    <div style="font-size:13px;color:#166534;font-weight:600">✅ Saving is automatic — just hit <b>Close &amp; Send</b> on the Quote tab</div>
-    <div style="font-size:12px;color:#94a3b8;margin-top:4px">Job gets saved to the log and synced to Sheets when you send the estimate</div>
-    <div id="save-log-msg" style="font-size:13px;color:#16a34a;margin-top:8px;min-height:18px;font-weight:600"></div>
-  </div>
+  <div id="save-log-msg" style="font-size:12px;color:#16a34a;text-align:center;min-height:16px;font-weight:600;padding:4px 0"></div>
 
-  <div class="card" style="background:#fef9c3;border-color:#fde047">
-    <div style="font-size:12px;color:#854d0e;font-weight:600">📋 How to use this</div>
-    <div style="font-size:13px;color:#713f12;margin-top:6px;line-height:1.6">
-      When the job is sold, buy your materials first, then show your sub the scope and offer them the <b>Pay Sub</b> amount.
-      Whatever they come in under is extra GP for you. Your target is always 50% GP.
-    </div>
+  <div style="padding:0 0 16px">
+    <button onclick="showEstStep('quote')" style="width:100%;background:#2563eb;color:white;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(37,99,235,0.3)">← Back to Quote &amp; Send</button>
+    <div style="text-align:center;font-size:11px;color:#9ca3af;margin-top:8px">Numbers good? Head back to Quote tab to present and send the estimate.</div>
   </div>
 </div>
 
@@ -1916,20 +1920,20 @@ Select all paint colors prior to start date</textarea>
     <div id="wo-won-empty" style="font-size:12px;color:#9ca3af;text-align:center;padding:12px 0;display:none">No won jobs yet — close a quote from the Lead Pipeline first.</div>
   </div>
 
-  <!-- COMPACT SINGLE FLOW — shown after Load → tapped -->
+  <!-- MAIN FLOW — shown after job loaded -->
   <div id="wo-main-flow" style="display:none">
 
-    <!-- Dark navy client banner -->
-    <div id="wo-client-banner" style="background:#0a1628;border-radius:10px;padding:16px 18px;margin-bottom:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <div id="wo-banner-name" style="font-size:17px;font-weight:800;color:#fff;font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-0.3px"></div>
-        <div id="wo-banner-quote" style="font-size:16px;font-weight:700;color:#4ade80"></div>
+    <!-- Client banner -->
+    <div id="wo-client-banner" style="background:#0a1628;border-radius:10px;padding:14px 18px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+        <div id="wo-banner-name" style="font-size:16px;font-weight:700;color:#fff"></div>
+        <div id="wo-banner-quote" style="font-size:15px;font-weight:700;color:#4ade80"></div>
       </div>
-      <div id="wo-banner-addr" style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:2px"></div>
-      <div id="wo-banner-meta" style="font-size:11px;color:rgba(255,255,255,0.35)"></div>
+      <div id="wo-banner-addr" style="font-size:12px;color:rgba(255,255,255,0.5)"></div>
+      <div id="wo-banner-meta" style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px"></div>
     </div>
 
-    <!-- Hidden fields for downstream functions -->
+    <!-- Hidden fields -->
     <input type="hidden" id="wo-client-name">
     <input type="hidden" id="wo-client-phone">
     <input type="hidden" id="wo-client-address">
@@ -1938,138 +1942,123 @@ Select all paint colors prior to start date</textarea>
     <input type="hidden" id="wo-wall-color" value="">
     <input type="hidden" id="wo-trim-color" value="">
     <input type="hidden" id="wo-color-notes" value="">
+    <input type="hidden" id="wo-sub-name">
+    <input type="hidden" id="wo-sub-phone">
+    <input type="hidden" id="wo-sub-email">
 
-    <!-- Start Date — shown first, feeds into feeler message -->
-    <div class="card" style="padding:14px 16px;margin-bottom:12px">
-      <label class="lbl">Tentative Start Date</label>
-      <input id="wo-start-date" type="date" oninput="regenJobDesc()" style="width:100%;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:15px;font-weight:500">
-    </div>
-
-    <!-- Feeler Texts — expanded by default, this is the core action -->
-    <div class="card" style="padding:0;margin-bottom:12px;overflow:hidden;border:1.5px solid #e5e7eb">
-      <!-- Header -->
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid #f3f4f6">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:13px;font-weight:700;color:#111827">📲 Send Feeler Texts</span>
-          <span id="wo-feeler-badge" style="font-size:10px;font-weight:700;color:#059669;background:#f0fdf4;border:1px solid #bbf7d0;padding:1px 7px;border-radius:8px;display:none">SENT</span>
+    <!-- ── STEP 1: Feeler texts ─────────────────────────────── -->
+    <div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#111827">1 — Send feeler texts</div>
+          <div style="font-size:11px;color:#9ca3af;margin-top:2px">Check who's available before committing</div>
         </div>
-        <button onclick="woToggleFeeler()" style="background:none;border:none;cursor:pointer;color:#9ca3af;font-size:12px;padding:2px 6px" id="wo-feeler-chevron">▲</button>
+        <button onclick="woToggleAddSub()" style="background:none;border:none;color:#2563eb;font-size:12px;font-weight:600;cursor:pointer;padding:0">+ Add Sub</button>
       </div>
 
-      <div id="wo-feeler-body" style="padding:14px 16px">
+      <!-- Sub list — tap to select/deselect -->
+      <div id="feeler-sub-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
 
-        <!-- Scoreboard — hidden until feelers sent -->
-        <div id="feeler-scoreboard" style="display:none;margin-bottom:14px">
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">
-            <div style="text-align:center;background:#fffbeb;border-radius:7px;padding:8px 4px;border:1px solid #fde68a">
-              <div id="sb-count-sent" style="font-size:18px;font-weight:700;color:#d97706">0</div>
-              <div style="font-size:10px;font-weight:600;color:#6b7280">Waiting</div>
-            </div>
-            <div style="text-align:center;background:#eff6ff;border-radius:7px;padding:8px 4px;border:1px solid #bfdbfe">
-              <div id="sb-count-interested" style="font-size:18px;font-weight:700;color:#2563eb">0</div>
-              <div style="font-size:10px;font-weight:600;color:#6b7280">Interested</div>
-            </div>
-            <div style="text-align:center;background:#f0fdf4;border-radius:7px;padding:8px 4px;border:1px solid #bbf7d0">
-              <div id="sb-count-yes" style="font-size:18px;font-weight:700;color:#059669">0</div>
-              <div style="font-size:10px;font-weight:600;color:#6b7280">Confirmed</div>
-            </div>
-            <div style="text-align:center;background:#fef2f2;border-radius:7px;padding:8px 4px;border:1px solid #fecaca">
-              <div id="sb-count-no" style="font-size:18px;font-weight:700;color:#dc2626">0</div>
-              <div style="font-size:10px;font-weight:600;color:#6b7280">Passed</div>
-            </div>
-          </div>
-          <div id="sb-quick-response" style="display:none">
-            <div style="font-size:10px;font-weight:700;color:#64748b;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">Tap as they respond</div>
-            <div id="sb-quick-list" style="display:flex;flex-direction:column;gap:5px"></div>
-          </div>
-          <div id="sb-winner-banner" style="display:none;background:#f0fdf4;border:2px solid #16a34a;border-radius:8px;padding:12px 14px;margin-top:4px">
-            <div style="font-size:13px;font-weight:700;color:#059669" id="sb-winner-text"></div>
-            <div style="font-size:11px;color:#166534;margin-top:4px">✓ Now send them the contract below, then Move to Active Jobs.</div>
-          </div>
+      <!-- Add sub form -->
+      <div id="wo-add-sub-form" style="display:none;padding:12px;background:#f9fafb;border-radius:8px;margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div><label class="lbl">Name</label><input id="feeler-sub-name" placeholder="Carlos" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px"></div>
+          <div><label class="lbl">Phone</label><input id="feeler-sub-phone" placeholder="716-555-0000" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px"></div>
         </div>
-
-        <!-- Sub list with checkboxes + feeler send per sub -->
-        <div id="feeler-sub-list" style="display:flex;flex-direction:column;gap:0;margin-bottom:12px"></div>
-
-        <!-- Add sub inline -->
-        <div style="margin-bottom:14px">
-          <button onclick="woToggleAddSub()" style="background:none;border:none;color:#2563eb;font-size:12px;font-weight:600;cursor:pointer;padding:0">+ Add Sub to Crew</button>
-          <div id="wo-add-sub-form" style="display:none;margin-top:10px">
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <input id="feeler-sub-name" placeholder="Name" style="flex:1;min-width:90px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-              <input id="feeler-sub-phone" placeholder="Phone" style="flex:1;min-width:110px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-              <select id="feeler-sub-rating" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-                <option value="">Rating</option>
-                <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐ A-List</option>
-                <option value="⭐⭐⭐⭐">⭐⭐⭐⭐ Solid</option>
-                <option value="⭐⭐⭐">⭐⭐⭐ OK</option>
-                <option value="⭐⭐">⭐⭐ Use if needed</option>
-                <option value="⭐">⭐ Last resort</option>
-              </select>
-              <input id="feeler-sub-notes" placeholder="Notes" style="flex:2;min-width:130px;padding:7px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
-              <button onclick="addFeelerSub()" style="background:#0f9d58;color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer">+ Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Feeler message text -->
-        <div style="margin-bottom:12px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em">Feeler Message</div>
-            <button onclick="regenJobDesc()" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer">↺ Regen</button>
-          </div>
-          <textarea id="wo-job-desc" rows="4" style="width:100%;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;resize:none;background:#f9fafb;line-height:1.6" oninput="buildFeelerPreview()"></textarea>
-        </div>
-
-        <!-- Send button — prominent -->
-        <button id="feeler-send-btn" onclick="sendAllFeelers()" style="width:100%;background:#0a1628;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">📲 Send Feeler Texts</button>
-        <div id="feeler-status" style="font-size:12px;color:#059669;margin-top:8px;text-align:center;display:none"></div>
-        <div id="feeler-preview" style="display:none"></div>
-      </div>
-    </div>
-
-    <!-- Sub pills hidden — kept for woRenderSubPills compat but not shown -->
-    <div id="wo-sub-pills" style="display:none"></div>
-    <div id="wo-sub-none" style="display:none"></div>
-
-    <!-- Sub Contract (collapsed until someone confirms) -->
-    <div class="card" style="padding:0;margin-bottom:12px;overflow:hidden">
-      <button onclick="woToggleContract()" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:none;border:none;cursor:pointer;font-family:inherit">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:13px;font-weight:600;color:#111827">📄 Sub Contract</span>
-          <span id="wo-contract-badge" style="font-size:10px;font-weight:700;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;padding:1px 7px;border-radius:8px;display:none">SENT</span>
-        </div>
-        <span id="wo-contract-chevron" style="font-size:12px;color:#9ca3af">▼</span>
-      </button>
-      <div id="wo-contract-body" style="display:none;border-top:1px solid #f3f4f6;padding:14px 16px">
-        <div id="wo-preview" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:14px;font-size:13px;white-space:pre-wrap;line-height:1.7;font-family:monospace;margin-bottom:12px"></div>
-        <div id="wo-contract-status" style="display:none;margin-bottom:12px;padding:10px 12px;border-radius:7px;font-size:13px;font-weight:600"></div>
         <div style="display:flex;gap:8px">
-          <button onclick="previewWorkOrder()" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Preview</button>
-          <button onclick="sendSubContract()" style="flex:1;background:#7c3aed;color:white;border:none;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Send Contract →</button>
+          <select id="feeler-sub-rating" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px">
+            <option value="">Rating (optional)</option>
+            <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐ A-List</option>
+            <option value="⭐⭐⭐⭐">⭐⭐⭐⭐ Solid</option>
+            <option value="⭐⭐⭐">⭐⭐⭐ OK</option>
+            <option value="⭐⭐">⭐⭐ Use if needed</option>
+            <option value="⭐">⭐ Last resort</option>
+          </select>
+          <input id="feeler-sub-notes" placeholder="Notes" style="flex:1;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px">
+          <button onclick="addFeelerSub()" style="background:#059669;color:white;border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Save</button>
         </div>
+      </div>
+
+      <!-- Feeler message -->
+      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:7px;padding:10px 12px;margin-bottom:8px;font-size:12px;color:#374151;line-height:1.6;min-height:48px" id="wo-feeler-preview-text"></div>
+      <div style="display:flex;gap:6px;margin-bottom:10px">
+        <button onclick="regenJobDesc()" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">↺ Regen</button>
+        <button onclick="woToggleFeelerEdit()" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Edit</button>
+      </div>
+      <textarea id="wo-job-desc" rows="3" style="display:none;width:100%;padding:9px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;resize:none;margin-bottom:8px;box-sizing:border-box" oninput="woSyncFeelerPreview()"></textarea>
+
+      <button id="feeler-send-btn" onclick="sendAllFeelers()" style="width:100%;background:#0a1628;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">📲 Send Feeler Texts</button>
+      <div id="feeler-status" style="display:none;font-size:12px;color:#059669;text-align:center;margin-top:8px"></div>
+    </div>
+
+    <!-- ── STEP 2: Who said yes? ────────────────────────────── -->
+    <div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:12px">2 — Who said yes?</div>
+      <div id="wo-response-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+        <div style="font-size:12px;color:#9ca3af">Send feelers first — subs will appear here to tap yes/no</div>
+      </div>
+      <div id="sb-winner-banner" style="display:none;background:#f0fdf4;border:1.5px solid #16a34a;border-radius:8px;padding:12px 14px">
+        <div style="font-size:13px;font-weight:700;color:#059669" id="sb-winner-text"></div>
       </div>
     </div>
 
-    <!-- Move to Active Jobs CTA -->
-    <button onclick="sendWOAndActivate()" style="width:100%;background:#059669;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:-0.2px;box-shadow:0 2px 8px rgba(5,150,105,0.35)">Move to Active Jobs →</button>
+    <!-- ── STEP 3: Start date ───────────────────────────────── -->
+    <div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:10px">3 — Set start date</div>
+      <input id="wo-start-date" type="date" oninput="regenJobDesc();woSyncFeelerPreview()" style="width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:6px;font-size:15px;font-weight:600;box-sizing:border-box">
+    </div>
 
-    <!-- Hidden stage divs kept for compatibility with existing JS -->
+    <!-- ── STEP 4: Send work order to confirmed sub ─────────── -->
+    <div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:4px">4 — Send work order to sub</div>
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:12px">Address, start date, scope, and pay rate via text or email</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="sendWorkOrderText()" style="flex:1;background:#0a1628;color:white;border:none;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">📲 Text Work Order</button>
+        <button onclick="sendWorkOrderEmail()" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">📧 Email Work Order</button>
+      </div>
+      <div id="wo-contract-status" style="display:none;margin-top:10px;padding:10px 12px;border-radius:7px;font-size:12px;font-weight:600"></div>
+    </div>
+
+    <!-- ── STEP 5: Send contract ────────────────────────────── -->
+    <div class="card" style="padding:14px 16px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;color:#111827;margin-bottom:4px">5 — Send contract</div>
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:12px">GHL sub agreement — they sign digitally</div>
+      <div style="display:flex;gap:8px">
+        <button onclick="previewWorkOrder()" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Preview</button>
+        <button onclick="sendSubContract()" style="flex:1;background:#7c3aed;color:white;border:none;padding:10px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer">Send Contract →</button>
+      </div>
+      <div id="wo-preview" style="display:none;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;font-size:12px;white-space:pre-wrap;line-height:1.7;font-family:monospace;margin-top:10px"></div>
+      <span id="wo-contract-badge" style="display:none"></span>
+      <span id="wo-contract-chevron" style="display:none"></span>
+      <div id="wo-contract-body" style="display:none"></div>
+    </div>
+
+    <!-- ── STEP 6: Move to Active Jobs ─────────────────────── -->
+    <button onclick="sendWOAndActivate()" style="width:100%;background:#059669;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 2px 8px rgba(5,150,105,0.35);margin-bottom:24px">Move to Active Jobs →</button>
+
+    <!-- Compat hidden divs -->
     <div id="wo-stage1" style="display:none"></div>
     <div id="wo-stage2" style="display:none"></div>
     <div id="wo-stage3" style="display:none"></div>
     <div id="wo-stage2-num" style="display:none"></div>
     <div id="wo-stage3-num" style="display:none"></div>
-    <!-- Hidden sub name/phone/email for sendWOAndActivate -->
-    <input type="hidden" id="wo-sub-name">
-    <input type="hidden" id="wo-sub-phone">
-    <input type="hidden" id="wo-sub-email">
+    <div id="wo-sub-pills" style="display:none"></div>
+    <div id="wo-sub-none" style="display:none"></div>
+    <div id="feeler-scoreboard" style="display:none">
+      <div id="sb-count-sent" style="display:none"></div>
+      <div id="sb-count-interested" style="display:none"></div>
+      <div id="sb-count-yes" style="display:none"></div>
+      <div id="sb-count-no" style="display:none"></div>
+      <div id="sb-quick-response" style="display:none"><div id="sb-quick-list"></div></div>
+    </div>
+    <div id="feeler-preview" style="display:none"></div>
+    <div id="wo-feeler-badge" style="display:none"></div>
+    <div id="wo-feeler-chevron" style="display:none"></div>
+    <div id="wo-feeler-body" style="display:none"></div>
 
   </div>
 
 </div>
-
-<!-- ACTIVE JOBS PAGE -->
 <div class="page" id="page-active">
   <div id="sub-perf-section" class="card" style="display:none;padding:14px 16px;margin-bottom:12px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
@@ -2095,6 +2084,18 @@ Select all paint colors prior to start date</textarea>
   </div>
 
   <div id="active-jobs-list" style="display:flex;flex-direction:column;gap:12px"></div>
+
+  <!-- Finished Jobs Section -->
+  <div id="finished-jobs-section" style="display:none;margin-top:20px">
+    <button onclick="toggleFinishedJobs()" style="width:100%;display:flex;align-items:center;justify-content:space-between;background:white;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;cursor:pointer;font-family:inherit">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:13px;font-weight:600;color:#374151">✅ Finished Jobs</span>
+        <span id="finished-jobs-count" style="font-size:11px;font-weight:600;color:#6b7280;background:#f3f4f6;padding:1px 8px;border-radius:10px"></span>
+      </div>
+      <span id="finished-jobs-chevron" style="font-size:12px;color:#9ca3af">▼</span>
+    </button>
+    <div id="finished-jobs-list" style="display:none;margin-top:6px;flex-direction:column;gap:8px"></div>
+  </div>
 
   <!-- Add Job Modal -->
   <div id="active-job-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px">
@@ -2295,6 +2296,30 @@ Select all paint colors prior to start date</textarea>
 
   <!-- Win/Loss by Type -->
   <div id="dash-winloss-type" class="card" style="padding:14px 16px;margin-bottom:14px;display:none"></div>
+
+  <!-- Weekly Revenue Target -->
+  <div id="dash-target-card" class="card" style="padding:14px 16px;margin-bottom:12px;display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:12px;font-weight:600;color:#374151">Weekly Revenue Target</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:11px;color:#9ca3af">Goal: $</span>
+        <input id="dash-weekly-target" type="number" placeholder="5000" min="0" step="500"
+          oninput="saveWeeklyTarget();buildDashTarget()"
+          style="width:80px;padding:4px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;font-weight:700;text-align:right">
+        <span style="font-size:11px;color:#9ca3af">/wk</span>
+      </div>
+    </div>
+    <div id="dash-target-bar-wrap">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span id="dash-target-actual" style="font-size:13px;font-weight:700;color:#111827"></span>
+        <span id="dash-target-pct" style="font-size:13px;font-weight:700;color:#059669"></span>
+      </div>
+      <div style="background:#e5e7eb;border-radius:99px;height:8px;overflow:hidden">
+        <div id="dash-target-bar" style="height:100%;border-radius:99px;background:#059669;transition:width 0.4s;width:0%"></div>
+      </div>
+      <div id="dash-target-sub" style="font-size:11px;color:#9ca3af;margin-top:5px"></div>
+    </div>
+  </div>
 
   <!-- MTD Financial Strip -->
   <div id="dash-mtd" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px"></div>
@@ -3295,6 +3320,36 @@ function buildQuote() {
   window._lastGrandTotal = Math.round(total * 100) / 100;
   window._lastSubPay     = Math.round(_totalHrsAll * _laborRate * 100) / 100;
   window._lastBidHours   = Math.round(_totalHrsAll * 10) / 10;
+
+  // ── GP Warning — shown on Quote tab while price is still adjustable ──
+  (function() {
+    var banner = document.getElementById('gp-warning-banner');
+    if (!banner) return;
+    if (total <= 0) { banner.style.display = 'none'; return; }
+    var marginPct = R('r-margin') || 50;
+    var gp = sub * (marginPct / 100);
+    var gpPct = Math.round(gp / total * 100);
+    var subPay = _totalHrsAll * _laborRate;
+    var gpAfterSub = total - subPay - calcs.reduce(function(s,x){return s+(x.calc.materials||0);},0);
+    var gpAfterSubPct = Math.round(gpAfterSub / total * 100);
+    if (gpAfterSubPct < 30) {
+      banner.style.cssText = 'display:flex;align-items:center;gap:10px;border-radius:8px;padding:12px 16px;margin-bottom:10px;background:#fef2f2;border:1.5px solid #fecaca';
+      banner.innerHTML = '<span style="font-size:20px;flex-shrink:0">🚨</span>'
+        + '<div style="flex:1"><div style="font-size:13px;font-weight:700;color:#dc2626">GP is ' + gpAfterSubPct + '% — below your 30% floor</div>'
+        + '<div style="font-size:11px;color:#dc2626;margin-top:2px;opacity:0.85">Raise your price or cut scope before you send this. You need at least 30%.</div></div>'
+        + '<button onclick="showPage(\'setup\')" style="background:#dc2626;color:white;border:none;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">Adjust →</button>';
+    } else if (gpAfterSubPct < 40) {
+      banner.style.cssText = 'display:flex;align-items:center;gap:10px;border-radius:8px;padding:12px 16px;margin-bottom:10px;background:#fffbeb;border:1.5px solid #fde68a';
+      banner.innerHTML = '<span style="font-size:20px;flex-shrink:0">⚠️</span>'
+        + '<div><div style="font-size:13px;font-weight:700;color:#d97706">GP is ' + gpAfterSubPct + '% — below 40% target</div>'
+        + '<div style="font-size:11px;color:#d97706;margin-top:2px;opacity:0.85">Profitable, but thin. Consider your margin slider before sending.</div></div>';
+    } else {
+      banner.style.cssText = 'display:flex;align-items:center;gap:10px;border-radius:8px;padding:12px 16px;margin-bottom:10px;background:#f0fdf4;border:1.5px solid #bbf7d0';
+      banner.innerHTML = '<span style="font-size:20px;flex-shrink:0">✅</span>'
+        + '<div><div style="font-size:13px;font-weight:700;color:#16a34a">GP is ' + gpAfterSubPct + '% — solid, ready to send</div>'
+        + '<div style="font-size:11px;color:#16a34a;margin-top:2px;opacity:0.8">Sub pay: $' + Math.round(subPay).toLocaleString() + ' · Your GP: $' + Math.round(gpAfterSub).toLocaleString() + '</div></div>';
+    }
+  })();
   var totalHrs=calcs.reduce(function(s,x){return s+x.calc.hours;},0);
   var totalWallGals=calcs.reduce(function(s,x){return s+x.calc.wallGals;},0);
   var totalTrimGals=calcs.reduce(function(s,x){return s+x.calc.trimGals;},0);
@@ -3536,6 +3591,7 @@ function buildNumbers() {
   var marginPct=R('r-margin')||50;
   var gp=sub*(marginPct/100);
   var txAmt=sub*(txPct/100);
+  var gpPctActual = grandTotal > 0 ? Math.round(gp/grandTotal*100) : 0;
 
   var nsg = document.getElementById('num-summary-grid'); if (!nsg) return;
   nsg.innerHTML=
@@ -6539,16 +6595,25 @@ function closeAJJob(id) {
     }
   } catch(e) { console.warn('Job log update failed', e); }
 
-  // ── 3. Remove from active jobs ──
+  // ── 3. Archive to finished jobs store ──
+  try {
+    var finished = JSON.parse(localStorage.getItem('hb_finished_jobs') || '[]');
+    var finEntry = Object.assign({}, aj, {
+      closedDate:  new Date().toLocaleDateString(),
+      closedTs:    Date.now()
+    });
+    finished.unshift(finEntry);
+    localStorage.setItem('hb_finished_jobs', JSON.stringify(finished));
+  } catch(e) {}
+
+  // ── 4. Remove from active jobs ──
   activeJobs = activeJobs.filter(function(j){ return j.id !== id; });
   saveActiveJobs();
   buildActiveJobs();
   buildDashboard();
 
-  // ── 4. Navigate to History → Won so they see the closed record immediately ──
-  showPage('history');
-  setHistoryFilter('Won');
-  showToast('✅ ' + aj.client + ' closed — view in History');
+  // ── 5. Stay on Active Jobs page — finished section shows below ──
+  showToast('✅ ' + aj.client + ' closed — see Finished Jobs below');
 
   // ── 5. Review request ──
   setTimeout(function(){
@@ -6619,242 +6684,151 @@ function buildActiveJobs() {
   var empty = document.getElementById('active-jobs-empty');
   if (!list) return;
 
-  var open   = activeJobs.filter(function(j){ return j.status !== 'Complete'; });
-  var closed = activeJobs.filter(function(j){ return j.status === 'Complete'; });
-  var sorted = open.concat(closed);
+  var jobs = activeJobs.filter(function(j){ return j.status !== 'Complete'; })
+    .concat(activeJobs.filter(function(j){ return j.status === 'Complete'; }));
 
-  if (sorted.length === 0) { list.innerHTML = ''; empty.style.display = ''; return; }
+  if (!jobs.length) { list.innerHTML = ''; empty.style.display = ''; buildFinishedJobs(); return; }
   empty.style.display = 'none';
 
-  var STATUS_COLOR = { 'Scheduled':'#f59e0b', 'In Progress':'#2563eb', 'Punch List':'#7c3aed', 'Final Payment':'#059669', 'Complete':'#16a34a' };
-  var STAGES = ['Scheduled','In Progress','Punch List','Final Payment'];
+  list.innerHTML = jobs.map(function(j) {
+    var laborRate  = 45;
+    var depositAmt = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
+    var finalAmt   = j.quote > 0 ? j.quote - depositAmt : 0;
+    var laborCost  = j.actualHours ? j.actualHours * laborRate : 0;
+    var gp         = j.quote > 0 && laborCost > 0 ? j.quote - laborCost - (j.materialsCost||0) : null;
+    var gpPct      = gp !== null && j.quote > 0 ? Math.round(gp/j.quote*100) : null;
+    var punchItems = j.punchList || [];
+    var punchDone  = punchItems.filter(function(x){ return x.done; }).length;
+    var allDone    = punchItems.length > 0 && punchDone === punchItems.length;
 
-  list.innerHTML = sorted.map(function(j) {
-    var sc = STATUS_COLOR[j.status] || '#9ca3af';
-    var depositAmt  = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
-    var finalAmt    = j.quote > 0 ? j.quote - depositAmt : 0;
-    var laborCost   = j.actualHours ? j.actualHours*45 : (j.bidHours ? j.bidHours*45 : 0);
-    var gp          = j.quote > 0 && laborCost > 0 ? j.quote - laborCost - (j.materialsCost||0) : null;
-    var gpPct       = gp !== null && j.quote > 0 ? Math.round(gp/j.quote*100) : null;
-    var punchItems  = j.punchList || [];
-    var punchDone   = punchItems.filter(function(x){ return x.done; }).length;
-    var allPunchDone = punchItems.length === 0 || punchDone === punchItems.length;
-    var stageIdx    = STAGES.indexOf(j.status); if (stageIdx < 0) stageIdx = 0;
-
-    // ── COLLAPSED HEADER (always visible) ──
-    var progressDots = STAGES.map(function(s, i) {
-      var done    = i < stageIdx;
-      var current = i === stageIdx;
-      var bg = done ? '#059669' : current ? sc : '#e5e7eb';
-      return '<div style="flex:1;height:4px;border-radius:2px;background:'+bg+'"></div>';
-    }).join('');
-
-    // Quick status hint
-    var hint = '';
-    if (j.status === 'Scheduled') {
-      var daysHint = '';
-      if (j.start) {
-        var sd = new Date(j.start+'T12:00:00'), td = new Date(); td.setHours(0,0,0,0);
-        var du = Math.round((sd-td)/86400000);
-        daysHint = du <= 0 ? 'Today' : du === 1 ? 'Tomorrow' : 'In '+du+'d';
-      }
-      hint = j.colorsConfirmed ? (daysHint ? daysHint+' · Colors ✓' : 'Colors ✓')
-           : j.start && (function(){ var sd=new Date(j.start+'T12:00:00'),td=new Date();td.setHours(0,0,0,0); return Math.round((sd-td)/86400000)<=7; }())
-               ? (daysHint ? daysHint+' · Get colors' : 'Get colors from client')
-               : (daysHint || 'Set start date');
+    // Days running
+    var daysLabel = '';
+    if (j.start) {
+      var sd = new Date(j.start+'T12:00:00'), td = new Date(); td.setHours(0,0,0,0);
+      var diff = Math.round((td - sd) / 86400000);
+      daysLabel = diff <= 0 ? (diff === 0 ? 'Starts today' : 'In ' + Math.abs(diff) + 'd') : 'Day ' + (diff+1);
     }
-    if (j.status === 'In Progress')   hint = (j.checkIns||[]).length + ' check-in' + ((j.checkIns||[]).length!==1?'s':'');
-    if (j.status === 'Punch List')    hint = punchDone + '/' + punchItems.length + ' items done';
-    if (j.status === 'Final Payment') hint = (!j.finalPaid ? 'Awaiting payment' : (!j.subPaid ? 'Pay sub' : 'Ready to close'));
-    var card = '<div id="aj-card-'+j.id+'" style="background:white;border-radius:10px;border:1px solid #e5e7eb;border-left:4px solid '+sc+';overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04)">'
-      // Tappable header row
-      + '<div onclick="toggleAJCard('+j.id+')" style="padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none">'
+
+    // Status color
+    var paid = j.finalPaid && j.subPaid;
+    var sc = paid ? '#16a34a' : j.actualHours ? '#2563eb' : '#f59e0b';
+    var statusLabel = paid ? 'Ready to close' : j.actualHours ? 'In progress' : 'Scheduled';
+
+    return '<div id="aj-card-'+j.id+'" style="background:white;border-radius:10px;border:1px solid #e5e7eb;border-left:4px solid '+sc+';overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04);margin-bottom:12px">'
+
+      // ── Header — always visible, tap to expand ──
+      + '<div onclick="toggleAJCard('+j.id+')" style="padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px">'
         + '<div style="flex:1;min-width:0">'
           + '<div style="display:flex;align-items:center;gap:7px;margin-bottom:3px">'
-            + '<span style="font-size:14px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + j.client + '</span>'
-            + '<span style="font-size:10px;font-weight:700;color:'+sc+';background:'+sc+'18;padding:2px 8px;border-radius:8px;white-space:nowrap;flex-shrink:0">' + j.status + '</span>'
+            + '<span style="font-size:14px;font-weight:700;color:#111827">' + j.client + '</span>'
+            + '<span style="font-size:10px;font-weight:700;color:'+sc+';background:'+sc+'18;padding:2px 8px;border-radius:8px">' + statusLabel + '</span>'
           + '</div>'
-          + '<div style="display:flex;align-items:center;gap:6px">'
-            + '<span style="font-size:11px;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (j.sub ? j.sub + (j.type?' · '+j.type:'') : (j.address||'')) + '</span>'
-            + (hint ? '<span style="font-size:10px;color:'+sc+';font-weight:600;flex-shrink:0">· '+hint+'</span>' : '')
+          + '<div style="font-size:11px;color:#9ca3af">'
+            + (j.sub ? j.sub + ' · ' : '') + (j.type || '') + (daysLabel ? ' · ' + daysLabel : '')
+            + (j.actualHours ? ' · ' + j.actualHours + 'h logged' + (j.bidHours ? '/' + j.bidHours + 'h bid' : '') : '')
           + '</div>'
         + '</div>'
-        + '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">'
-          + (j.quote>0 ? '<div style="text-align:right"><div style="font-size:13px;font-weight:700;color:#111827">$'+j.quote.toLocaleString()+'</div>'+(gpPct!==null?'<div style="font-size:10px;font-weight:600;color:'+(gp>=0?'#059669':'#dc2626')+'">GP '+gpPct+'%</div>':'')+'</div>' : '')
-          + '<div id="aj-chevron-'+j.id+'" style="color:#d1d5db;font-size:16px;transition:transform 0.2s">▼</div>'
+        + '<div style="text-align:right;flex-shrink:0">'
+          + (j.quote > 0 ? '<div style="font-size:13px;font-weight:700;color:#111827">$'+j.quote.toLocaleString()+'</div>' : '')
+          + (gpPct !== null ? '<div style="font-size:10px;font-weight:600;color:'+(gp>=0?'#059669':'#dc2626')+'">GP '+gpPct+'%</div>' : '')
         + '</div>'
+        + '<div id="aj-chevron-'+j.id+'" style="color:#d1d5db;font-size:14px;transition:transform 0.2s;flex-shrink:0">▼</div>'
       + '</div>'
-      // Progress bar (always visible, below header)
-      + '<div style="display:flex;gap:3px;padding:0 14px 10px">' + progressDots + '</div>';
 
-    // ── EXPANDED CONTENT (hidden by default) ──
-    var expandHtml = '<div id="aj-expand-'+j.id+'" style="display:none;border-top:1px solid #f3f4f6;padding:14px">';
+      // ── Expanded body ──
+      + '<div id="aj-expand-'+j.id+'" style="display:none;border-top:1px solid #f3f4f6;padding:14px">'
 
-    // SCHEDULED
-    if (j.status === 'Scheduled') {
-      // Days until start
-      var daysUntil = null;
-      if (j.start) {
-        var startD = new Date(j.start + 'T12:00:00');
-        var todayD = new Date(); todayD.setHours(0,0,0,0);
-        daysUntil = Math.round((startD - todayD) / 86400000);
-      }
+        // Colors banner if confirmed
+        + (j.colors ? '<div style="background:#f9fafb;border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:#374151;white-space:pre-line;line-height:1.6"><span style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:3px">Colors</span>' + j.colors + '</div>' : '')
 
-      expandHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">'
-        + '<div><label style="font-size:10px;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px">START DATE</label>'
-          + '<input id="aj-start-'+j.id+'" type="date" value="'+(j.start||'')+'" onchange="ajSaveStart('+j.id+')" style="width:100%;padding:8px;border:1px solid #e5e7eb;border-radius:7px;font-size:13px"></div>'
-        + '<div style="display:flex;flex-direction:column;gap:5px;justify-content:flex-end">'
-          + (!j.clientConfirmed
-              ? '<button onclick="ajConfirmClient('+j.id+')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Text Client</button>'
-              : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px;font-size:11px;font-weight:600;color:#059669;text-align:center">Client ✓</div>')
-          + (!j.subConfirmedDate
-              ? '<button onclick="ajConfirmSub('+j.id+')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Text Sub</button>'
-              : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:7px;font-size:11px;font-weight:600;color:#059669;text-align:center">Sub ✓</div>')
+        // ── BIG 3 ACTIONS ──────────────────────────────────
+        + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">'
+
+          // 1. Log Hours
+          + '<div style="background:#eff6ff;border-radius:8px;padding:10px;text-align:center">'
+            + '<div style="font-size:10px;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Hours</div>'
+            + '<input id="aj-actual-hrs-'+j.id+'" type="number" min="0" step="0.5" value="'+(j.actualHours||'')+'" placeholder="0" oninput="ajSaveActual('+j.id+')" style="width:100%;padding:6px;border:1.5px solid #bfdbfe;border-radius:6px;font-size:16px;font-weight:700;text-align:center;box-sizing:border-box;background:white">'
+            + (j.bidHours ? '<div style="font-size:10px;color:#9ca3af;margin-top:3px">of '+j.bidHours+'h bid</div>' : '')
+          + '</div>'
+
+          // 2. Materials
+          + '<div style="background:#fff7ed;border-radius:8px;padding:10px;text-align:center">'
+            + '<div style="font-size:10px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Materials $</div>'
+            + '<input id="aj-materials-'+j.id+'" type="number" min="0" step="1" value="'+(j.materialsCost||'')+'" placeholder="0" oninput="ajSaveActual('+j.id+')" style="width:100%;padding:6px;border:1.5px solid #fed7aa;border-radius:6px;font-size:16px;font-weight:700;text-align:center;box-sizing:border-box;background:white">'
+            + '<div style="font-size:10px;color:#9ca3af;margin-top:3px">spent</div>'
+          + '</div>'
+
+          // 3. GP snapshot
+          + '<div style="background:'+(gp !== null ? (gp>=0?'#f0fdf4':'#fef2f2') : '#f9fafb')+';border-radius:8px;padding:10px;text-align:center">'
+            + '<div style="font-size:10px;font-weight:700;color:'+(gp!==null?(gp>=0?'#059669':'#dc2626'):'#9ca3af')+';text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Your GP</div>'
+            + '<div style="font-size:16px;font-weight:700;color:'+(gp!==null?(gp>=0?'#059669':'#dc2626'):'#9ca3af')+'">'+(gp!==null?'$'+Math.round(gp).toLocaleString():'—')+'</div>'
+            + '<div style="font-size:10px;color:#9ca3af;margin-top:3px">'+(gpPct!==null?gpPct+'%':'log hours')+'</div>'
+          + '</div>'
+
         + '</div>'
-      + '</div>';
 
-      // Colors section — show request button when within 7 days of start
-      var colorsSection = '';
-      if (j.colors && j.colorsConfirmed) {
-        // Colors already confirmed — show them
-        colorsSection = '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 12px;margin-bottom:10px">'
-          + '<div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px">Colors Confirmed ✓</div>'
-          + '<div style="font-size:12px;color:#374151;white-space:pre-line;line-height:1.7">'+j.colors+'</div>'
-        + '</div>';
-      } else if (daysUntil !== null && daysUntil <= 7) {
-        // Within 1 week — time to get colors
-        var urgencyColor = daysUntil <= 2 ? '#dc2626' : '#d97706';
-        var urgencyBg    = daysUntil <= 2 ? '#fef2f2' : '#fffbeb';
-        var urgencyBorder= daysUntil <= 2 ? '#fecaca' : '#fde68a';
-        var urgencyText  = daysUntil <= 0 ? 'Job starts today' : daysUntil === 1 ? 'Job starts tomorrow' : 'Job starts in ' + daysUntil + ' days';
-        colorsSection = '<div style="background:'+urgencyBg+';border:1.5px solid '+urgencyBorder+';border-radius:8px;padding:12px;margin-bottom:10px">'
+        // ── PUNCH LIST ──────────────────────────────────────
+        + '<div style="margin-bottom:12px">'
           + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-            + '<div>'
-              + '<div style="font-size:12px;font-weight:700;color:'+urgencyColor+'">Get paint colors from client</div>'
-              + '<div style="font-size:11px;color:#9ca3af;margin-top:1px">'+urgencyText+' — confirm before sub starts</div>'
-            + '</div>'
+            + '<div style="font-size:12px;font-weight:700;color:#374151">Punch List ' + (punchItems.length ? '('+punchDone+'/'+punchItems.length+')' : '') + '</div>'
+            + '<button onclick="event.stopPropagation();ajQuickAddPunch('+j.id+')" style="background:#7c3aed;color:white;border:none;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>'
           + '</div>'
-          + (j.colors
-              ? '<div style="font-size:12px;color:#374151;white-space:pre-line;line-height:1.6;margin-bottom:8px;background:white;border-radius:6px;padding:8px">'+j.colors+'</div>'
-              : '')
-          + '<div style="display:flex;gap:6px">'
-            + '<button onclick="ajRequestColors('+j.id+')" style="flex:2;background:'+urgencyColor+';color:white;border:none;padding:8px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Text Client for Colors</button>'
-            + '<button onclick="ajLogColors('+j.id+')" style="flex:1;background:white;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Log Colors</button>'
-          + '</div>'
-        + '</div>';
-      } else if (j.colors) {
-        // Has colors but not confirmed yet
-        colorsSection = '<div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:10px 12px;margin-bottom:10px">'
-          + '<div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px">Colors (unconfirmed)</div>'
-          + '<div style="font-size:12px;color:#374151;white-space:pre-line;line-height:1.6;margin-bottom:8px">'+j.colors+'</div>'
-          + '<button onclick="ajConfirmColors('+j.id+')" style="width:100%;background:#7c3aed;color:white;border:none;padding:7px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Mark Colors Confirmed</button>'
-        + '</div>';
-      } else if (daysUntil !== null && daysUntil <= 14) {
-        // 8–14 days out — soft reminder
-        colorsSection = '<div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">'
-          + '<div style="font-size:11px;color:#9ca3af">Colors needed in '+(daysUntil-7)+' days</div>'
-          + '<button onclick="ajLogColors('+j.id+')" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer">Log Colors</button>'
-        + '</div>';
-      }
-
-      expandHtml += colorsSection;
-      expandHtml += '<button onclick="ajSubOnSite('+j.id+')" style="width:100%;background:#2563eb;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Sub On Site — Start Job →</button>';
-    }
-
-    // IN PROGRESS
-    if (j.status === 'In Progress') {
-      var checkInHtml = (j.checkIns||[]).length > 0
-        ? '<div style="margin-bottom:10px;background:#f0f9ff;border-radius:7px;padding:9px">'
-            + (j.checkIns||[]).slice(-3).map(function(c){ return '<div style="font-size:11px;color:#0369a1;padding:2px 0">'+c.date+' — '+c.note+'</div>'; }).join('')
-          + '</div>' : '';
-      expandHtml += checkInHtml
-        + '<textarea id="aj-notes-'+j.id+'" placeholder="Notes — colors, issues, scope changes..." style="width:100%;padding:9px;border:1px solid #e5e7eb;border-radius:7px;font-size:12px;height:56px;resize:none;margin-bottom:8px;box-sizing:border-box">'+( j.jobNotes||'')+'</textarea>'
-        + '<div style="display:flex;gap:8px;margin-bottom:8px">'
-          + '<button onclick="ajSaveNotes('+j.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Save Note</button>'
-          + '<button onclick="addAJCheckIn('+j.id+')" style="flex:1;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:8px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Check-In</button>'
+          + (punchItems.length ? '<div style="background:#faf5ff;border-radius:8px;padding:8px 10px;margin-bottom:8px">'
+            + punchItems.map(function(item,i){
+                return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #ede9fe">'
+                  + '<input type="checkbox"'+(item.done?' checked':'')+' onchange="togglePunchItem('+j.id+','+i+')" style="accent-color:#7c3aed;width:16px;height:16px;flex-shrink:0">'
+                  + '<span style="font-size:12px;color:'+(item.done?'#a78bfa':'#374151')+';'+(item.done?'text-decoration:line-through':'')+'">' + item.text + '</span>'
+                + '</div>';
+              }).join('')
+            + '</div>' : '<div style="font-size:12px;color:#9ca3af;padding:6px 0">No items yet — add when you do the walk</div>')
         + '</div>'
-        + '<button onclick="ajMoveToPunchList('+j.id+')" style="width:100%;background:#7c3aed;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Work Done — Punch List →</button>';
-    }
 
-    // PUNCH LIST
-    if (j.status === 'Punch List') {
-      expandHtml += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
-        + '<span style="font-size:12px;font-weight:700;color:#7c3aed">'+punchDone+'/'+punchItems.length+' done</span>'
-        + '<button onclick="addPunchItem('+j.id+')" style="background:#7c3aed;color:white;border:none;padding:4px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">+ Add</button>'
-      + '</div>';
-      if (punchItems.length > 0) {
-        expandHtml += '<div style="background:#faf5ff;border-radius:8px;padding:10px;margin-bottom:10px">';
-        punchItems.forEach(function(item,i){
-          expandHtml += '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #ede9fe">'
-            + '<input type="checkbox"'+(item.done?' checked':'')+' onchange="togglePunchItem('+j.id+','+i+')" style="accent-color:#7c3aed;width:16px;height:16px;flex-shrink:0">'
-            + '<span style="font-size:13px;color:'+(item.done?'#a78bfa':'#374151')+';'+(item.done?'text-decoration:line-through':'')+'">' + item.text + '</span>'
-          + '</div>';
-        });
-        expandHtml += '</div>';
-      }
-      expandHtml += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">'
-        + '<div><label style="font-size:10px;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px">ACTUAL HRS'+(j.bidHours?' (bid: '+j.bidHours+'h)':'')+' </label>'
-          + '<input id="aj-actual-hrs-'+j.id+'" type="number" min="0" step="0.5" value="'+(j.actualHours||'')+'" placeholder="e.g. 14" oninput="ajSaveActual('+j.id+')" style="width:100%;padding:8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700"></div>'
-        + '<div><label style="font-size:10px;font-weight:600;color:#9ca3af;display:block;margin-bottom:4px">MATERIALS ($)</label>'
-          + '<input id="aj-materials-'+j.id+'" type="number" min="0" step="1" value="'+(j.materialsCost||'')+'" placeholder="e.g. 320" oninput="ajSaveActual('+j.id+')" style="width:100%;padding:8px;border:1.5px solid #e2e8f0;border-radius:7px;font-size:14px;font-weight:700"></div>'
-      + '</div>';
-      if (allPunchDone) {
-        expandHtml += '<button onclick="ajMoveToPayment('+j.id+')" style="width:100%;background:#059669;color:white;border:none;padding:11px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">'+(punchItems.length===0?'No Punch List — Collect Payment →':'All Clear — Collect Payment →')+'</button>';
-      }
-    }
-
-    // FINAL PAYMENT
-    if (j.status === 'Final Payment') {
-      if (gp !== null) {
-        var hrsOver = j.actualHours && j.bidHours && j.actualHours > j.bidHours;
-        expandHtml += '<div style="background:#f8fafc;border-radius:8px;padding:11px;margin-bottom:11px">'
-          + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;text-align:center;margin-bottom:8px">'
-          + (j.bidHours?'<div><div style="font-size:9px;color:#9ca3af;font-weight:600">BID</div><div style="font-size:14px;font-weight:700;color:#6b7280">'+j.bidHours+'h</div></div>':'<div></div>')
-          + (j.actualHours?'<div><div style="font-size:9px;color:#9ca3af;font-weight:600">ACTUAL</div><div style="font-size:14px;font-weight:700;color:'+(hrsOver?'#dc2626':'#059669')+'">'+j.actualHours+'h'+(hrsOver?' ⚠':'')+'</div></div>':'<div></div>')
-          + (j.materialsCost?'<div><div style="font-size:9px;color:#9ca3af;font-weight:600">MATS</div><div style="font-size:14px;font-weight:700;color:#111827">$'+j.materialsCost.toLocaleString()+'</div></div>':'<div></div>')
+        // ── PAYMENT ─────────────────────────────────────────
+        + '<div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px">'
+          + '<div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:10px">Payment</div>'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">'
+            + '<span style="font-size:12px;color:#6b7280">Deposit (30%) — $'+(depositAmt>0?depositAmt.toLocaleString():'—')+'</span>'
+            + (j.deposit
+                ? '<span style="font-size:11px;font-weight:700;color:#059669">✓ Received</span>'
+                : '<button onclick="event.stopPropagation();toggleAJPay('+j.id+',\'deposit\')" style="background:#059669;color:white;border:none;padding:4px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Mark Received</button>')
+          + '</div>'
+          + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+            + '<span style="font-size:12px;color:#6b7280">Final — $'+(finalAmt>0?finalAmt.toLocaleString():'—')+'</span>'
+            + (j.finalPaid
+                ? '<span style="font-size:11px;font-weight:700;color:#059669">✓ Received</span>'
+                : '<button onclick="event.stopPropagation();toggleAJPay('+j.id+',\'finalPaid\')" style="background:#059669;color:white;border:none;padding:4px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Mark Received</button>')
           + '</div>'
           + '<div style="border-top:1px solid #e2e8f0;padding-top:8px;display:flex;justify-content:space-between;align-items:center">'
-            + '<span style="font-size:11px;color:#64748b;font-weight:600">Gross Profit</span>'
-            + '<span style="font-size:16px;font-weight:800;color:'+(gp>=0?'#059669':'#dc2626')+';font-variant-numeric:tabular-nums">$'+Math.round(gp).toLocaleString()+'<span style="font-size:11px;font-weight:500"> ('+gpPct+'%)</span></span>'
+            + '<span style="font-size:12px;color:#6b7280">Sub pay — '+(j.actualHours?j.actualHours+'h × $'+laborRate:'')+' $'+(j.subpay||Math.round(laborCost)||0).toLocaleString()+'</span>'
+            + (j.subPaid
+                ? '<span style="font-size:11px;font-weight:700;color:#7c3aed">✓ Paid</span>'
+                : '<button onclick="event.stopPropagation();toggleAJPay('+j.id+',\'subPaid\')" style="background:#7c3aed;color:white;border:none;padding:4px 12px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer">Mark Paid</button>')
           + '</div>'
-        + '</div>';
-      }
-      expandHtml += '<div style="background:#f8fafc;border-radius:8px;padding:11px;margin-bottom:10px">'
-        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">'
-          + '<span style="font-size:12px;color:#6b7280">30% Deposit</span>'
-          + '<span style="font-size:13px;font-weight:700;color:'+(j.deposit?'#059669':'#d97706')+'">'+(depositAmt>0?'$'+depositAmt.toLocaleString():'—')+(j.deposit?' ✓':' pending')+'</span>'
         + '</div>'
-        + '<div style="display:flex;justify-content:space-between;align-items:center">'
-          + '<span style="font-size:12px;color:#6b7280">Final Balance</span>'
-          + '<span style="font-size:16px;font-weight:800;color:#059669;font-variant-numeric:tabular-nums">'+(finalAmt>0?'$'+finalAmt.toLocaleString():'—')+'</span>'
-        + '</div>'
-      + '</div>'
-      + (!j.invoiced
-          ? '<button onclick="sendFinalInvoice('+j.id+')" style="width:100%;background:#2563eb;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:7px">Send Final Invoice via GHL</button>'
-          : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#059669;margin-bottom:7px">Invoice sent ✓</div>'
-        )
-      + (!j.finalPaid
-          ? '<button onclick="toggleAJPay('+j.id+',\'finalPaid\')" style="width:100%;background:#059669;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:7px">Mark Final Payment Received</button>'
-          : '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#059669;margin-bottom:7px">Final payment ✓</div>'
-        )
-      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #e5e7eb;margin-bottom:10px">'
-        + '<span style="font-size:12px;font-weight:600;color:#374151">Sub — '+j.sub+'</span>'
-        + '<span style="font-size:13px;font-weight:700;color:#7c3aed">'+(j.actualHours?j.actualHours+'h × $45 = ':'')+'$'+(j.subpay||0).toLocaleString()+'</span>'
-      + '</div>'
-      + (!j.subPaid
-          ? '<button onclick="toggleAJPay('+j.id+',\'subPaid\')" style="width:100%;background:#7c3aed;color:white;border:none;padding:9px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-bottom:10px">Mark Sub Paid</button>'
-          : '<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#7c3aed;margin-bottom:10px">Sub paid ✓</div>'
-        )
-      + (j.finalPaid && j.subPaid
-          ? '<button onclick="closeAJJob('+j.id+')" style="width:100%;background:#15803d;color:white;border:none;padding:12px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Close Job & Request Review →</button>'
-          : '<button onclick="closeAJJob('+j.id+')" style="width:100%;background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;padding:9px;border-radius:7px;font-size:12px;cursor:pointer">Close Anyway</button>'
-        );
-    }
 
-    expandHtml += '</div>'; // close expand div
-    card += expandHtml + '</div>'; // close card
-    return card;
+        // ── CLOSE JOB ───────────────────────────────────────
+        + (paid
+            ? '<button onclick="event.stopPropagation();closeAJJob('+j.id+')" style="width:100%;background:#15803d;color:white;border:none;padding:13px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Close Job &amp; Request Review →</button>'
+            : '<button onclick="event.stopPropagation();closeAJJob('+j.id+')" style="width:100%;background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;padding:10px;border-radius:7px;font-size:12px;cursor:pointer">Close Anyway</button>'
+          )
+
+      + '</div>' // end expand
+    + '</div>'; // end card
   }).join('');
+
+  buildFinishedJobs();
+}
+
+function ajQuickAddPunch(id) {
+  var text = prompt('Punch list item:');
+  if (!text || !text.trim()) return;
+  activeJobs = activeJobs.map(function(j) {
+    if (j.id !== id) return j;
+    var list = (j.punchList || []).concat([{ text: text.trim(), done: false }]);
+    return Object.assign({}, j, { punchList: list });
+  });
+  saveActiveJobs();
+  buildActiveJobs();
 }
 
 function toggleAJCard(id) {
@@ -6862,13 +6836,14 @@ function toggleAJCard(id) {
   var chevron = document.getElementById('aj-chevron-' + id);
   if (!expand) return;
   var open = expand.style.display !== 'none';
-  expand.style.display  = open ? 'none' : 'block';
+  expand.style.display = open ? 'none' : 'block';
   if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 
 
-// ── GHL Link Generator ────────────────────────────────────────
+
+
 function buildGHLLink() {
   var base = 'https://tshantler.github.io/PaintPro';
   var link = base + '?name={{contact.full_name}}&phone={{contact.phone}}&address={{contact.address1}}&city={{contact.city}}';
@@ -7761,11 +7736,28 @@ function buildLeads() {
   var empty = document.getElementById('leads-empty');
   if (!list) return;
 
+  // Search query
+  var searchEl = document.getElementById('lead-search');
+  var q = searchEl ? searchEl.value.trim().toLowerCase() : '';
+  var clearBtn = document.getElementById('lead-search-clear');
+  if (clearBtn) clearBtn.style.display = q ? 'block' : 'none';
+
   var filtered = _leadFilter === 'all'
     ? leads.filter(function(l){ return l.status !== 'No Answer'; })
     : _leadFilter === 'No Answer'
-      ? []  // NA section handles its own render
+      ? []
       : leads.filter(function(l){ return l.status === _leadFilter; });
+
+  // Apply search
+  if (q) {
+    filtered = leads.filter(function(l) {
+      return (l.name||'').toLowerCase().includes(q)
+          || (l.phone||'').replace(/\D/g,'').includes(q.replace(/\D/g,''))
+          || (l.address||'').toLowerCase().includes(q)
+          || (l.city||'').toLowerCase().includes(q)
+          || (l.email||'').toLowerCase().includes(q);
+    });
+  }
 
   var ORDER = {'New':0,'Appt Set':1,'Ready to Bid':2,'Quoted':3,'Won':4,'Lost':5};
   filtered.sort(function(a,b){
@@ -7779,11 +7771,17 @@ function buildLeads() {
   });
 
   if (filtered.length === 0) {
-    list.innerHTML = '';
-    if (_leadFilter === 'No Answer') {
-      empty.style.display = 'none';
+    list.innerHTML = q
+      ? '<div style="text-align:center;padding:32px;color:#94a3b8"><div style="font-size:24px;margin-bottom:8px">🔍</div><div style="font-weight:600;font-size:13px">No leads match "' + q + '"</div></div>'
+      : '';
+    if (!q) {
+      if (_leadFilter === 'No Answer') {
+        empty.style.display = 'none';
+      } else {
+        empty.style.display = '';
+      }
     } else {
-      empty.style.display = '';
+      empty.style.display = 'none';
     }
     return;
   }
@@ -7891,9 +7889,18 @@ function buildLeads() {
     progressBar += '</div>';
 
     // Key meta — phone as tap-to-call link
-    var phoneHtml = l.phone ? '<a href="tel:'+l.phone+'" style="color:#2563eb;text-decoration:none;font-weight:600">'+l.phone+'</a>' : '';
-    var metaParts = [jobtypeLabel, apptStr ? 'Appt ' + apptStr : '', l.ballpark ? l.ballpark : '', l.quoteAmt > 0 ? '$' + Number(l.quoteAmt).toLocaleString() : ''].filter(Boolean);
-    var metaHtml = (phoneHtml ? phoneHtml + (metaParts.length ? ' · ' + metaParts.join(' · ') : '') : metaParts.join(' · '));
+    var phoneHtml = l.phone ? '<a href="tel:'+l.phone+'" onclick="event.stopPropagation()" style="color:#2563eb;text-decoration:none;font-weight:600">'+l.phone+'</a>' : '';
+
+    // Line 1: address
+    var addrLine = l.address ? (l.address + (l.city ? ', ' + l.city : '')) : (l.city || '');
+
+    // Line 2: key job info — job type, ballpark, appt, quote
+    var infoChips = '';
+    if (jobtypeLabel) infoChips += '<span style="font-size:10px;font-weight:600;color:#6b7280;background:#f3f4f6;padding:1px 7px;border-radius:3px">' + jobtypeLabel + '</span> ';
+    if (l.ballpark)   infoChips += '<span style="font-size:10px;font-weight:700;color:#059669;background:#ecfdf5;padding:1px 7px;border-radius:3px">' + l.ballpark + '</span> ';
+    if (l.quoteAmt > 0) infoChips += '<span style="font-size:10px;font-weight:700;color:#2563eb;background:#eff6ff;padding:1px 7px;border-radius:3px">$' + Number(l.quoteAmt).toLocaleString() + '</span> ';
+    if (apptStr)      infoChips += '<span style="font-size:10px;font-weight:600;color:#7c3aed;background:#f5f3ff;padding:1px 7px;border-radius:3px">Appt ' + apptStr + '</span> ';
+    if (phoneHtml)    infoChips += phoneHtml;
 
     // Badges
     var badges = '';
@@ -7922,24 +7929,26 @@ function buildLeads() {
       ? '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:5px;padding:5px 10px;font-size:11px;color:#dc2626;margin-top:4px">Lost' + (l.lostReason ? ' — ' + l.lostReason : '') + '</div>'
       : '';
 
-    return header + '<div style="background:white;border-radius:8px;border:1px solid #e5e7eb;border-left:3px solid '+color+';padding:11px 13px;box-shadow:0 1px 2px rgba(0,0,0,0.04)">'
+    var sp = 'event.stopPropagation();';
+    var primaryBtnSP = (primaryBtn||'').replace(/onclick="/g, 'onclick="'+sp);
+
+    return header + '<div onclick="openLeadProfile('+l.id+')" style="background:white;border-radius:8px;border:1px solid #e5e7eb;border-left:3px solid '+color+';padding:11px 13px;box-shadow:0 1px 2px rgba(0,0,0,0.04);cursor:pointer;transition:box-shadow 0.15s" onmouseover="this.style.boxShadow=\'0 3px 10px rgba(0,0,0,0.09)\'" onmouseout="this.style.boxShadow=\'0 1px 2px rgba(0,0,0,0.04)\'">'
 
       + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
         + '<div style="flex:1;min-width:0">'
           + '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-            + '<span onclick="openLeadProfile('+l.id+')" style="font-size:13px;font-weight:600;color:#111827;cursor:pointer">' + l.name + '</span>'
+            + '<span style="font-size:13px;font-weight:600;color:#111827">' + l.name + '</span>'
             + badges
           + '</div>'
-          + '<div style="font-size:11px;color:#9ca3af;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'
-            + (l.address ? l.address + (l.city ? ', ' + l.city : '') + (metaParts.length || l.phone ? ' · ' + metaHtml : '') : metaHtml)
-          + '</div>'
+          + (addrLine ? '<div style="font-size:11px;color:#9ca3af;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + addrLine + '</div>' : '')
+          + (infoChips ? '<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">' + infoChips + '</div>' : '')
         + '</div>'
         + '<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">'
-          + (primaryBtn || '')
-          + (l.status === 'New' ? '<button onclick="logNoAnswer('+l.id+')" title="No Answer" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;color:#9ca3af">—</button>' : '')
-          + (l.status === 'Quoted' ? '<button onclick="markLeadLost('+l.id+')" style="padding:5px 9px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Lost</button>' : '')
-          + '<button onclick="editLead('+l.id+')" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer">✏</button>'
-          + '<button onclick="deleteLead('+l.id+')" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;color:#9ca3af">×</button>'
+          + primaryBtnSP
+          + (l.status === 'New' ? '<button onclick="'+sp+'logNoAnswer('+l.id+')" title="No Answer" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;color:#9ca3af">—</button>' : '')
+          + (l.status === 'Quoted' ? '<button onclick="'+sp+'markLeadLost('+l.id+')" style="padding:5px 9px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Lost</button>' : '')
+          + '<button onclick="'+sp+'editLead('+l.id+')" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer">✏</button>'
+          + '<button onclick="'+sp+'deleteLead('+l.id+')" style="width:26px;height:26px;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;cursor:pointer;color:#9ca3af">×</button>'
         + '</div>'
       + '</div>'
 
@@ -10216,6 +10225,596 @@ function cbLogAttemptById(el){ cbLogAttempt(el.dataset.id); }
 function cbBookedById(el){ cbBooked(el.dataset.id); }
 function cbNoAnswerById(el){ cbNoAnswer(el.dataset.id); }
 function cbDeadById(el){ cbDead(el.dataset.id); }
+</script>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// WORKFLOW PATCH v2.1 — Paint.io
+// Fixes: flow enforcement, Follow Ups auto-sync, Quote CTA,
+//        Pre-Call guard, date parsing, Won/Lost FU cleanup
+// ═══════════════════════════════════════════════════════════
+
+// ── PATCH 1: fuSafeDate — handle ISO datetime strings ────────
+var _orig_fuSafeDate = fuSafeDate;
+fuSafeDate = function(raw) {
+  if (!raw) return new Date().toISOString().slice(0,10);
+  if (/^\d{4}-\d{2}-\d{2}T/.test(raw)) return raw.slice(0,10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+  var d = new Date(raw);
+  if (!isNaN(d.getTime())) return d.toISOString().slice(0,10);
+  return new Date().toISOString().slice(0,10);
+};
+
+// ── PATCH 2: _ensureFollowUp — create FU entry for a Quoted lead ──
+function _ensureFollowUp(leadId) {
+  var lead = leads.find(function(l){ return l.id === leadId; });
+  if (!lead) return;
+  var fuList = [];
+  try { fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]'); } catch(e) {}
+  var already = fuList.find(function(f){ return f.leadId === leadId; });
+  if (already) {
+    // Update amount if quote changed
+    if (lead.quoteAmt && already.amount !== lead.quoteAmt) {
+      already.amount = lead.quoteAmt;
+      try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+    }
+    return;
+  }
+  fuList.unshift({
+    id:     'lead-' + lead.id,
+    leadId: lead.id,
+    name:   lead.name,
+    phone:  lead.phone || '',
+    amount: lead.quoteAmt || 0,
+    sent:   new Date().toISOString().slice(0,10),
+    notes:  'Quote sent' + (lead.quoteAmt > 0 ? ' — $' + Number(lead.quoteAmt).toLocaleString() : '') + ' · awaiting answer',
+    done:   false,
+    auto:   true
+  });
+  try { localStorage.setItem('hb_followups', JSON.stringify(fuList)); } catch(e) {}
+}
+
+// ── PATCH 3: Auto-create FU when lead status → Quoted ────────
+var _orig_updateLeadStatus = updateLeadStatus;
+updateLeadStatus = function(id, status) {
+  _orig_updateLeadStatus(id, status);
+  if (status === 'Quoted') { setTimeout(function(){ _ensureFollowUp(id); }, 100); }
+};
+
+// ── PATCH 4: acceptLead — mark FU done on Won ────────────────
+var _orig_acceptLead = acceptLead;
+acceptLead = function(id) {
+  try {
+    var fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]');
+    fuList = fuList.map(function(f) {
+      return (f.leadId === id) ? Object.assign({}, f, { done: true, outcome: 'Won' }) : f;
+    });
+    localStorage.setItem('hb_followups', JSON.stringify(fuList));
+  } catch(e) {}
+  _orig_acceptLead(id);
+};
+
+// ── PATCH 5: confirmLeadLost — mark FU done on Lost ──────────
+var _orig_confirmLeadLost = confirmLeadLost;
+confirmLeadLost = function(id, reason) {
+  try {
+    var fuList = JSON.parse(localStorage.getItem('hb_followups') || '[]');
+    fuList = fuList.map(function(f) {
+      return (f.leadId === id) ? Object.assign({}, f, { done: true, outcome: 'Lost — ' + reason }) : f;
+    });
+    localStorage.setItem('hb_followups', JSON.stringify(fuList));
+  } catch(e) {}
+  _orig_confirmLeadLost(id, reason);
+};
+
+// ── PATCH 6: buildFollowUps — sync all Quoted leads first ────
+var _orig_buildFollowUps = buildFollowUps;
+buildFollowUps = function() {
+  leads.filter(function(l){ return l.status === 'Quoted'; }).forEach(function(l) {
+    _ensureFollowUp(l.id);
+  });
+  _orig_buildFollowUps();
+};
+
+// ── PATCH 7: saveLead — FU when manually set to Quoted ───────
+var _orig_saveLead = saveLead;
+saveLead = function() {
+  var editId = (document.getElementById('ld-edit-id') || {}).value || '';
+  var newStatus = (document.getElementById('ld-status') || {}).value || '';
+  _orig_saveLead();
+  if (editId && newStatus === 'Quoted') {
+    setTimeout(function(){ _ensureFollowUp(parseInt(editId)); }, 300);
+  }
+};
+
+// ── PATCH 8: Quote tab sticky CTA bar ────────────────────────
+var _orig_showEstStep = showEstStep;
+showEstStep = function(step) {
+  _orig_showEstStep(step);
+  var footer = document.getElementById('quote-sticky-footer');
+  if (footer) footer.remove();
+  if (step === 'quote') { setTimeout(_injectQuoteFooter, 80); }
+};
+
+function _injectQuoteFooter() {
+  // Remove any stale footer first
+  var old = document.getElementById('quote-sticky-footer');
+  if (old) old.remove();
+
+  var overlay = document.getElementById('estimator-overlay');
+  if (!overlay || overlay.style.display === 'none') return;
+
+  var footer = document.createElement('div');
+  footer.id = 'quote-sticky-footer';
+  // Fixed to bottom of overlay (which is position:fixed itself), so this pins correctly
+  footer.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#0a1628;color:white;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:600;box-shadow:0 -4px 20px rgba(0,0,0,0.3);border-top:1px solid rgba(255,255,255,0.08);';
+
+  footer.innerHTML = '<div>'
+    + '<div style="font-size:10px;opacity:0.5;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:1px">Total Estimate</div>'
+    + '<div id="qsf-total" style="font-size:18px;font-weight:700;font-variant-numeric:tabular-nums">—</div>'
+    + '</div>'
+    + '<div style="display:flex;gap:8px">'
+    + '<button onclick="openPresentMode()" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);color:white;padding:9px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">Present →</button>'
+    + '<button onclick="openGHLModal()" style="background:#2563eb;border:none;color:white;padding:9px 16px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">Send Estimate →</button>'
+    + '</div>';
+
+  // Append directly to overlay (position:fixed), NOT inside scroll area
+  overlay.appendChild(footer);
+  _updateQSFTotal();
+}
+
+function _updateQSFTotal() {
+  var el = document.getElementById('qsf-total');
+  if (!el) return;
+  var total = 0;
+  try {
+    var calcs = rooms.map(function(r){ return calcRoom(r); });
+    var sub = calcs.reduce(function(s,c){ return s+c.total; },0)
+            + (lineItemsTotal ? lineItemsTotal() : 0)
+            + (getExtCalc ? getExtCalc().grandTotal : 0)
+            + (getDeckCalc ? getDeckCalc().grandTotal : 0);
+    // Apply discount
+    sub = sub - (closeDiscount || 0);
+    var tx = document.getElementById('r-tax') ? parseFloat(document.getElementById('r-tax').value)||0 : 0;
+    total = sub * (1 + tx/100);
+  } catch(e) {}
+
+  if (total > 0) {
+    el.textContent = '$' + Number(total).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    el.style.opacity = '1';
+  } else {
+    el.textContent = 'Add rooms to build quote';
+    el.style.fontSize = '12px';
+    el.style.opacity = '0.5';
+  }
+}
+
+// Keep footer total live as rooms are added
+var _orig_buildQuote = buildQuote;
+buildQuote = function() {
+  _orig_buildQuote();
+  _updateQSFTotal();
+};
+
+// Clean up footer when closing estimator
+var _orig_closeEstimator = closeEstimator;
+closeEstimator = function() {
+  var f = document.getElementById('quote-sticky-footer');
+  if (f) f.remove();
+  _orig_closeEstimator();
+};
+
+// ── PATCH 9: showPage('pre') guard — requires loaded lead ────
+var _orig_showPage = showPage;
+showPage = function(p) {
+  if (p === 'pre' && !_preCallLeadId) {
+    _orig_showPage('leads');
+    if (typeof showToast === 'function') showToast('Pick a lead and tap Pre-Call to start');
+    return;
+  }
+  _orig_showPage(p);
+};
+
+// ── PATCH 10: sendToGHL — ensure FU created after quote sent ─
+// sendToGHL already tries to add FU but uses a different id format.
+// We patch the FU creation to use our consistent leadId format.
+var _orig_sendToGHL = sendToGHL;
+sendToGHL = async function() {
+  await _orig_sendToGHL.apply(this, arguments);
+  // After send, ensure the active lead has a follow-up
+  if (_activeLeadId) {
+    setTimeout(function(){ _ensureFollowUp(_activeLeadId); }, 500);
+  }
+};
+
+// ── PATCH 11: Work Order helpers ─────────────────────────────
+
+function woToggleFeelerEdit() {
+  var ta = document.getElementById('wo-job-desc');
+  if (!ta) return;
+  var showing = ta.style.display !== 'none';
+  ta.style.display = showing ? 'none' : 'block';
+  if (!showing) ta.focus();
+}
+
+function woSyncFeelerPreview() {
+  var ta  = document.getElementById('wo-job-desc');
+  var pre = document.getElementById('wo-feeler-preview-text');
+  if (!pre) return;
+  var msg = (ta && ta.value.trim()) ? ta.value.trim() : (typeof getFeelerMessage === 'function' ? getFeelerMessage() : '');
+  pre.textContent = msg || 'Set a start date and the message will generate automatically';
+  pre.style.color = msg ? '#374151' : '#9ca3af';
+}
+
+function woTextJobDetails() {
+  var subName  = (document.getElementById('wo-sub-name')  || {}).value || '';
+  var subPhone = (document.getElementById('wo-sub-phone') || {}).value || '';
+  if (!subPhone) {
+    // Try confirmed sub from feeler list
+    var confirmed = feelerSubs.find(function(s){ return s.status === 'yes'; });
+    if (confirmed) { subName = confirmed.name; subPhone = confirmed.phone; }
+  }
+  if (!subPhone) { showToast('No sub confirmed yet — tap yes on who responded'); return; }
+
+  var client   = (document.getElementById('wo-client-name')    || {}).value || '';
+  var addr     = (document.getElementById('wo-client-address') || {}).value || '';
+  var jobType  = (document.getElementById('wo-client-jobtype') || {}).value || '';
+  var start    = (document.getElementById('wo-start-date')     || {}).value || '';
+  var laborRate = 45;
+  var totalHrs = window._lastBidHours || 0;
+  var subPay   = window._lastSubPay   || Math.round(totalHrs * laborRate);
+
+  var startStr = start ? new Date(start + 'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'}) : 'TBD';
+
+  var msg = 'Hey ' + (subName || 'there') + '! Here are the job details:\n\n'
+    + (client  ? 'Client: ' + client + '\n' : '')
+    + (addr    ? 'Address: ' + addr + '\n' : '')
+    + (jobType ? 'Job: ' + jobType + '\n' : '')
+    + 'Start: ' + startStr + '\n'
+    + (totalHrs > 0 ? 'Est. hours: ~' + totalHrs + 'h\n' : '')
+    + (subPay   > 0 ? 'Your pay: $' + subPay.toLocaleString() + ' ($' + laborRate + '/hr)\n' : '')
+    + '\nLet me know if you have questions. — Thomas / Gould Painting (716) 221-6418';
+
+  var phone = subPhone.replace(/\D/g, '');
+  window.open('sms:' + phone + '?body=' + encodeURIComponent(msg));
+}
+
+// Override buildFeelerSubList to use simplified yes/no UI
+var _orig_buildFeelerSubList = buildFeelerSubList;
+buildFeelerSubList = function() {
+  var pickerEl   = document.getElementById('feeler-sub-list');
+  var responseEl = document.getElementById('wo-response-list');
+  if (!pickerEl) { _orig_buildFeelerSubList(); return; }
+
+  // Sync preview text
+  woSyncFeelerPreview();
+
+  if (!feelerSubs.length) {
+    pickerEl.innerHTML = '<div style="font-size:12px;color:#9ca3af;text-align:center;padding:12px">No subs in your crew yet — add one above</div>';
+    if (responseEl) responseEl.innerHTML = '<div style="font-size:12px;color:#9ca3af">Send feelers first — subs will appear here</div>';
+    return;
+  }
+
+  // Step 1 — sub selector (checkboxes, tap to include in feeler)
+  pickerEl.innerHTML = feelerSubs.map(function(s) {
+    var selected = s.selected !== false;
+    var statusColor = { pending:'#9ca3af', sent:'#d97706', yes:'#059669', no:'#dc2626', interested:'#2563eb', wo_sent:'#7c3aed' }[s.status] || '#9ca3af';
+    var statusLabel = { pending:'Not sent', sent:'Feeler sent', yes:'✓ Available', no:'Passed', interested:'Interested', wo_sent:'WO sent' }[s.status] || 'Not sent';
+    return '<div onclick="toggleFeelerSubSelect(' + s.id + ')" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:' + (selected?'#f0f9ff':'#f9fafb') + ';border:1.5px solid ' + (selected?'#bfdbfe':'#e5e7eb') + ';border-radius:8px;cursor:pointer">'
+      + '<div style="width:20px;height:20px;border-radius:5px;background:' + (selected?'#2563eb':'white') + ';border:1.5px solid ' + (selected?'#2563eb':'#d1d5db') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        + (selected ? '<span style="color:white;font-size:13px;font-weight:700">✓</span>' : '')
+      + '</div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div style="font-size:13px;font-weight:600;color:#111827">' + s.name + (s.rating ? ' ' + s.rating : '') + '</div>'
+        + '<div style="font-size:11px;color:#9ca3af">' + s.phone + (s.notes ? ' · ' + s.notes : '') + '</div>'
+      + '</div>'
+      + '<span style="font-size:11px;font-weight:600;color:' + statusColor + ';white-space:nowrap">' + statusLabel + '</span>'
+      + '<button onclick="event.stopPropagation();removeFeelerSub(' + s.id + ')" style="background:none;border:none;color:#d1d5db;font-size:16px;cursor:pointer;padding:0;line-height:1;flex-shrink:0">&times;</button>'
+    + '</div>';
+  }).join('');
+
+  // Step 2 — response tracker (only show subs that had feeler sent)
+  var sentSubs = feelerSubs.filter(function(s){ return s.status !== 'pending'; });
+  if (responseEl) {
+    if (!sentSubs.length) {
+      responseEl.innerHTML = '<div style="font-size:12px;color:#9ca3af">Send feelers first — subs will appear here to tap yes/no</div>';
+    } else {
+      responseEl.innerHTML = sentSubs.map(function(s) {
+        var isYes = s.status === 'yes';
+        var isNo  = s.status === 'no';
+        return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:' + (isYes?'#f0fdf4':isNo?'#fef2f2':'white') + ';border:1px solid ' + (isYes?'#bbf7d0':isNo?'#fecaca':'#e5e7eb') + ';border-radius:8px">'
+          + '<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#111827">' + s.name + '</div><div style="font-size:11px;color:#9ca3af">' + s.phone + '</div></div>'
+          + (isYes
+            ? '<span style="font-size:12px;font-weight:700;color:#059669">✓ Available</span>'
+            : isNo
+              ? '<span style="font-size:12px;font-weight:700;color:#dc2626">Passed</span>'
+              : '<div style="display:flex;gap:6px">'
+                  + '<button onclick="woConfirmSub(' + s.id + ')" style="background:#059669;color:white;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer">Yes</button>'
+                  + '<button onclick="setFeelerStatus(' + s.id + ',\'no\')" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">No</button>'
+                + '</div>'
+          )
+        + '</div>';
+      }).join('');
+    }
+  }
+
+  // Winner banner
+  var winner = feelerSubs.find(function(s){ return s.status === 'yes'; });
+  var winnerBanner = document.getElementById('sb-winner-banner');
+  var winnerText   = document.getElementById('sb-winner-text');
+  if (winnerBanner && winner) {
+    winnerBanner.style.display = 'block';
+    if (winnerText) winnerText.textContent = '🎉 ' + winner.name + ' is in — set the start date and send the work order';
+    // Fill sub fields for sendWOAndActivate
+    var snEl = document.getElementById('wo-sub-name');
+    var spEl = document.getElementById('wo-sub-phone');
+    if (snEl) snEl.value = winner.name;
+    if (spEl) spEl.value = winner.phone;
+  } else if (winnerBanner) {
+    winnerBanner.style.display = 'none';
+  }
+};
+
+function woConfirmSub(subId) {
+  setFeelerStatus(subId, 'yes');
+  buildFeelerSubList();
+}
+
+// Hook refreshWOFeeler to also update new UI
+var _orig_refreshWOFeeler = refreshWOFeeler;
+refreshWOFeeler = function() {
+  buildFeelerSubList();
+  woSyncFeelerPreview();
+};
+
+// ═══════════════════════════════════════════════════════════
+// FINISHED JOBS — Active Jobs page section
+// ═══════════════════════════════════════════════════════════
+
+function buildFinishedJobs() {
+  var section   = document.getElementById('finished-jobs-section');
+  var listEl    = document.getElementById('finished-jobs-list');
+  var countEl   = document.getElementById('finished-jobs-count');
+  if (!section || !listEl) return;
+
+  var finished = [];
+  try { finished = JSON.parse(localStorage.getItem('hb_finished_jobs') || '[]'); } catch(e) {}
+
+  if (finished.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  if (countEl) countEl.textContent = finished.length;
+
+  var laborRate = 45;
+  listEl.innerHTML = finished.map(function(j) {
+    var laborCost  = j.actualHours ? j.actualHours * laborRate : (j.subpay || 0);
+    var mats       = j.materialsCost || 0;
+    var gp         = j.quote > 0 ? j.quote - laborCost - mats : 0;
+    var gpPct      = j.quote > 0 && gp !== 0 ? Math.round(gp / j.quote * 100) : null;
+    var gpColor    = gpPct !== null ? (gp >= 0 ? '#059669' : '#dc2626') : '#9ca3af';
+    var hrsOver    = j.actualHours && j.bidHours && j.actualHours > j.bidHours;
+    var closedStr  = j.closedDate || '';
+    var startStr   = j.start ? new Date(j.start + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '';
+
+    return '<div style="background:white;border-radius:8px;border:1px solid #e5e7eb;border-left:3px solid #16a34a;padding:12px 14px;cursor:pointer" onclick="openFinishedJobDetail(' + j.id + ')">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+        + '<div style="flex:1;min-width:0">'
+          + '<div style="font-size:13px;font-weight:600;color:#111827">' + (j.client||'—') + '</div>'
+          + '<div style="font-size:11px;color:#9ca3af;margin-top:2px">'
+            + (j.address||'') + (j.type ? ' · ' + j.type : '') + (startStr ? ' · ' + startStr : '')
+            + (closedStr ? ' · Closed ' + closedStr : '')
+          + '</div>'
+          + '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'
+            + (j.sub ? '<span style="font-size:10px;font-weight:600;color:#6b7280;background:#f3f4f6;padding:1px 7px;border-radius:3px">Sub: ' + j.sub + '</span>' : '')
+            + (j.actualHours ? '<span style="font-size:10px;font-weight:600;color:' + (hrsOver?'#dc2626':'#059669') + ';background:#f3f4f6;padding:1px 7px;border-radius:3px">' + j.actualHours + 'h actual' + (hrsOver ? ' ⚠' : '') + '</span>' : '')
+            + (mats > 0 ? '<span style="font-size:10px;color:#6b7280;background:#f3f4f6;padding:1px 7px;border-radius:3px">$' + mats.toLocaleString() + ' mats</span>' : '')
+          + '</div>'
+        + '</div>'
+        + '<div style="text-align:right;flex-shrink:0">'
+          + (j.quote > 0 ? '<div style="font-size:14px;font-weight:700;color:#111827;font-variant-numeric:tabular-nums">$' + j.quote.toLocaleString() + '</div>' : '')
+          + (gpPct !== null ? '<div style="font-size:11px;font-weight:600;color:' + gpColor + '">GP ' + (gp >= 0 ? '$' + Math.round(gp).toLocaleString() : '-$' + Math.round(Math.abs(gp)).toLocaleString()) + ' (' + gpPct + '%)</div>' : '')
+          + (j.subPaid && j.finalPaid ? '<div style="font-size:10px;color:#059669;font-weight:600;margin-top:2px">All paid ✓</div>' : '<div style="font-size:10px;color:#d97706;margin-top:2px">Check payments</div>')
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+}
+
+function toggleFinishedJobs() {
+  var listEl  = document.getElementById('finished-jobs-list');
+  var chevron = document.getElementById('finished-jobs-chevron');
+  if (!listEl) return;
+  var open = listEl.style.display !== 'none' && listEl.style.display !== '';
+  listEl.style.display = open ? 'none' : 'flex';
+  listEl.style.flexDirection = 'column';
+  listEl.style.gap = '8px';
+  if (chevron) chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function openFinishedJobDetail(id) {
+  var finished = [];
+  try { finished = JSON.parse(localStorage.getItem('hb_finished_jobs') || '[]'); } catch(e) {}
+  var j = finished.find(function(x){ return x.id === id; });
+  if (!j) return;
+
+  var laborRate = 45;
+  var laborCost = j.actualHours ? j.actualHours * laborRate : (j.subpay || 0);
+  var mats      = j.materialsCost || 0;
+  var gp        = j.quote > 0 ? j.quote - laborCost - mats : 0;
+  var gpPct     = j.quote > 0 && gp !== 0 ? Math.round(gp / j.quote * 100) : null;
+  var gpColor   = gp >= 0 ? '#059669' : '#dc2626';
+  var depositAmt = j.quote > 0 ? Math.round(j.quote * 0.30) : 0;
+  var finalAmt   = j.quote > 0 ? j.quote - depositAmt : 0;
+
+  var existing = document.getElementById('finished-job-detail-modal');
+  if (existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'finished-job-detail-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:2000;display:flex;align-items:flex-end;justify-content:center';
+  modal.onclick = function(e){ if(e.target===modal) modal.remove(); };
+
+  var row = function(label, val, color) {
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6">'
+      + '<span style="font-size:12px;color:#6b7280">' + label + '</span>'
+      + '<span style="font-size:13px;font-weight:600;color:' + (color||'#111827') + '">' + val + '</span>'
+      + '</div>';
+  };
+
+  var hrsOver = j.actualHours && j.bidHours && j.actualHours > j.bidHours;
+
+  modal.innerHTML = '<div style="background:white;border-radius:16px 16px 0 0;width:100%;max-width:540px;max-height:90vh;overflow-y:auto">'
+    + '<div style="background:#0a1628;padding:16px 18px;border-radius:16px 16px 0 0;display:flex;justify-content:space-between;align-items:flex-start">'
+      + '<div>'
+        + '<div style="font-size:16px;font-weight:700;color:white">' + (j.client||'—') + '</div>'
+        + '<div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:3px">' + (j.address||'') + (j.type?' · '+j.type:'') + '</div>'
+        + '<div style="margin-top:6px"><span style="background:#16a34a;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px">FINISHED</span></div>'
+      + '</div>'
+      + '<button onclick="document.getElementById(\'finished-job-detail-modal\').remove()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:white;width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer">×</button>'
+    + '</div>'
+    + '<div style="padding:16px 18px">'
+
+      // GP summary bar
+      + (j.quote > 0 ? '<div style="background:#f9fafb;border-radius:10px;padding:14px;margin-bottom:14px">'
+        + '<div style="display:flex;justify-content:space-between;margin-bottom:10px">'
+          + '<div style="text-align:center"><div style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;margin-bottom:3px">Quote</div><div style="font-size:16px;font-weight:700;color:#111827">$' + j.quote.toLocaleString() + '</div></div>'
+          + '<div style="text-align:center"><div style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;margin-bottom:3px">Sub Pay</div><div style="font-size:16px;font-weight:700;color:#7c3aed">$' + Math.round(laborCost).toLocaleString() + '</div></div>'
+          + (mats > 0 ? '<div style="text-align:center"><div style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;margin-bottom:3px">Materials</div><div style="font-size:16px;font-weight:700;color:#f97316">$' + mats.toLocaleString() + '</div></div>' : '')
+          + (gpPct !== null ? '<div style="text-align:center"><div style="font-size:10px;color:#9ca3af;font-weight:600;text-transform:uppercase;margin-bottom:3px">Your GP</div><div style="font-size:16px;font-weight:700;color:' + gpColor + '">' + (gp >= 0 ? '' : '-') + '$' + Math.abs(Math.round(gp)).toLocaleString() + '<span style="font-size:11px;font-weight:500"> (' + gpPct + '%)</span></div></div>' : '')
+        + '</div>'
+        + (j.actualHours ? '<div style="background:white;border-radius:7px;padding:8px 12px;font-size:12px;color:' + (hrsOver?'#dc2626':'#059669') + ';font-weight:600">'
+          + (hrsOver ? '⚠ Ran ' + (j.actualHours - (j.bidHours||0)).toFixed(1) + 'h over bid (' + (j.bidHours||0) + 'h bid vs ' + j.actualHours + 'h actual)'
+                     : '✓ ' + j.actualHours + 'h actual' + (j.bidHours ? ' — ' + (j.bidHours - j.actualHours).toFixed(1) + 'h under bid' : ''))
+          + '</div>' : '')
+      + '</div>' : '')
+
+      // Job details
+      + '<div style="margin-bottom:14px">'
+        + row('Sub', j.sub || '—')
+        + row('Started', j.start ? new Date(j.start+'T12:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) : '—')
+        + row('Closed', j.closedDate || '—')
+        + row('Bid hours', j.bidHours ? j.bidHours + 'h' : '—')
+        + row('Actual hours', j.actualHours ? j.actualHours + 'h' : '—', hrsOver ? '#dc2626' : '#059669')
+        + row('Deposit (30%)', '$' + depositAmt.toLocaleString(), j.deposit ? '#059669' : '#d97706')
+        + row('Final balance', '$' + finalAmt.toLocaleString(), j.finalPaid ? '#059669' : '#d97706')
+        + row('Sub paid', j.subPaid ? '✓ Paid' : 'Not yet', j.subPaid ? '#059669' : '#d97706')
+      + '</div>'
+
+      // Colors
+      + (j.colors ? '<div style="background:#f9fafb;border-radius:8px;padding:12px;margin-bottom:14px">'
+        + '<div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Paint Colors</div>'
+        + '<div style="font-size:13px;color:#374151;white-space:pre-line;line-height:1.7">' + j.colors + '</div>'
+        + '</div>' : '')
+
+      // Notes
+      + (j.jobNotes ? '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-bottom:14px">'
+        + '<div style="font-size:10px;font-weight:600;color:#d97706;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Job Notes</div>'
+        + '<div style="font-size:13px;color:#374151;white-space:pre-wrap;line-height:1.6">' + j.jobNotes + '</div>'
+        + '</div>' : '')
+
+      // Punch list
+      + (j.punchList && j.punchList.length ? '<div style="margin-bottom:14px">'
+        + '<div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px">Punch List</div>'
+        + j.punchList.map(function(item){ return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:' + (item.done?'#9ca3af':'#374151') + ';' + (item.done?'text-decoration:line-through':'') + '">'
+          + '<span>' + (item.done ? '✓' : '○') + '</span><span>' + item.text + '</span></div>'; }).join('')
+        + '</div>' : '')
+
+      // Actions
+      + '<div style="display:flex;gap:8px">'
+        + (j.phone ? '<a href="tel:' + j.phone + '" style="flex:1;background:#2563eb;color:white;padding:10px;border-radius:7px;font-size:12px;font-weight:600;text-align:center;text-decoration:none">Call Client</a>' : '')
+        + '<button onclick="deleteFinishedJob(' + j.id + ')" style="flex:1;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;padding:10px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Remove</button>'
+      + '</div>'
+
+    + '</div>'
+  + '</div>';
+
+  document.body.appendChild(modal);
+}
+
+function deleteFinishedJob(id) {
+  if (!confirm('Remove this finished job from the list?')) return;
+  var finished = [];
+  try { finished = JSON.parse(localStorage.getItem('hb_finished_jobs') || '[]'); } catch(e) {}
+  finished = finished.filter(function(j){ return j.id !== id; });
+  try { localStorage.setItem('hb_finished_jobs', JSON.stringify(finished)); } catch(e) {}
+  var modal = document.getElementById('finished-job-detail-modal');
+  if (modal) modal.remove();
+  buildFinishedJobs();
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEEKLY REVENUE TARGET
+// ═══════════════════════════════════════════════════════════
+
+function saveWeeklyTarget() {
+  var el = document.getElementById('dash-weekly-target');
+  if (el) localStorage.setItem('hb_weekly_target', el.value);
+}
+
+function buildDashTarget() {
+  var card = document.getElementById('dash-target-card');
+  if (!card) return;
+
+  var target = parseFloat(localStorage.getItem('hb_weekly_target') || '0');
+  var targetEl = document.getElementById('dash-weekly-target');
+  if (targetEl && !targetEl.value && target) targetEl.value = target;
+
+  // Calculate this week's won revenue from leads + active jobs closed this week
+  var now = new Date(); now.setHours(0,0,0,0);
+  var weekStart = new Date(now); weekStart.setDate(now.getDate() - now.getDay()); // Sunday
+  
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem('paintpro_job_log') || '[]'); } catch(e) {}
+  
+  var weekRev = log.filter(function(e) {
+    if (e.status !== 'Won' || !e.closedDate) return false;
+    var d = new Date(e.closedDate);
+    return d >= weekStart;
+  }).reduce(function(s, e) { return s + (e.quote || 0); }, 0);
+
+  // Also count from finished jobs this week
+  try {
+    var finished = JSON.parse(localStorage.getItem('hb_finished_jobs') || '[]');
+    finished.forEach(function(j) {
+      if (!j.closedTs) return;
+      if (new Date(j.closedTs) >= weekStart) weekRev += (j.quote || 0);
+    });
+  } catch(e) {}
+
+  card.style.display = '';
+
+  var actualEl  = document.getElementById('dash-target-actual');
+  var pctEl     = document.getElementById('dash-target-pct');
+  var barEl     = document.getElementById('dash-target-bar');
+  var subEl     = document.getElementById('dash-target-sub');
+
+  if (actualEl) actualEl.textContent = '$' + Math.round(weekRev).toLocaleString() + ' this week';
+
+  if (target > 0) {
+    var pct = Math.min(Math.round(weekRev / target * 100), 100);
+    var over = weekRev > target;
+    var color = over ? '#059669' : pct >= 70 ? '#2563eb' : pct >= 40 ? '#d97706' : '#dc2626';
+    if (pctEl) { pctEl.textContent = pct + '%'; pctEl.style.color = color; }
+    if (barEl) { barEl.style.width = pct + '%'; barEl.style.background = color; }
+    if (subEl) {
+      var remaining = target - weekRev;
+      subEl.textContent = over
+        ? '🎉 ' + '$' + Math.round(weekRev - target).toLocaleString() + ' over goal this week!'
+        : '$' + Math.round(remaining).toLocaleString() + ' to go · resets Sunday';
+      subEl.style.color = over ? '#059669' : '#9ca3af';
+    }
+  } else {
+    if (pctEl) pctEl.textContent = '';
+    if (barEl) barEl.style.width = '0%';
+    if (subEl) { subEl.textContent = 'Set a weekly goal above'; subEl.style.color = '#9ca3af'; }
+  }
+}
+
+// Hook into buildDashboard
+var _orig_buildDashboard = buildDashboard;
+buildDashboard = async function() {
+  await _orig_buildDashboard.apply(this, arguments);
+  buildDashTarget();
+};
 </script>
 
 
